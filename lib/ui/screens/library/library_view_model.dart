@@ -5,13 +5,13 @@ import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
 class LibraryViewModel extends ChangeNotifier {
-  LibraryViewModel() {
+  LibraryViewModel({required this._libraryRepository}) {
     addFolder = Command0(_addFolder);
     deleteFolder = Command1(_deleteFolder);
     loadFolders = Command0(_loadFolders)..execute();
   }
 
-  final LibraryRepository _libraryRepository = LibraryRepository();
+  final LibraryRepository _libraryRepository;
 
   List<String>? _folders;
   List<String>? get folders => _folders;

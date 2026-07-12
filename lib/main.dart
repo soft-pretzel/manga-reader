@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'ui/screens/home/home_view.dart';
+import 'data/services/shared_preferences_service.dart';
+import 'data/repositories/library_repository.dart';
+import 'ui/screens/library/library_view_model.dart';
 import 'ui/screens/library/library_view.dart';
+import 'ui/screens/home/home_view.dart';
 import 'ui/screens/settings/settings_view.dart';
 
+import 'data/services/file_picker_service.dart';
+
 void main() {
-  runApp(const MainApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (context) => FilePickerService()),
+        Provider(create: (context) => SharedPreferencesService()),
+        Provider(
+          create: (context) => LibraryRepository(
+            filePickerService: context.read(),
+            sharedPreferencesService: context.read(),
+          ),
+        ),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -56,7 +76,9 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
       body: <Widget>[
         HomeView(),
-        LibraryView(),
+        LibraryView(
+          viewModel: LibraryViewModel(libraryRepository: context.read()),
+        ),
         SettingsView(),
       ][currentPageIndex],
     );

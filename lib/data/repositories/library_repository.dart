@@ -5,11 +5,13 @@ import '../services/shared_preferences_service.dart';
 import '../../utils/result.dart';
 
 class LibraryRepository {
-  LibraryRepository();
+  LibraryRepository({
+    required this._filePickerService,
+    required this._sharedPreferencesService,
+  });
 
-  final FilePickerService _filePickerService = FilePickerService();
-  final SharedPreferencesService _sharedPreferencesService =
-      SharedPreferencesService();
+  final FilePickerService _filePickerService;
+  final SharedPreferencesService _sharedPreferencesService;
 
   Future<Result<List<String>>> addFolder() async {
     try {

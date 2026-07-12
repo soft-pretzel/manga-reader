@@ -192,6 +192,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   path:
     dependency: transitive
     description:
@@ -248,22 +256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
-  saf_stream:
+  provider:
     dependency: "direct main"
     description:
-      name: saf_stream
-      sha256: "0be813853004e4c3d2aca2dae1f3089cef8769059af4528e2e137471b8e3367e"
+      name: provider
+      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
-  saf_util:
-    dependency: "direct main"
-    description:
-      name: saf_util
-      sha256: "35cd99ec282f9fc68ec0fb35338315a7198250f8ff0d24006f8507a6aae3d344"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
+    version: "6.1.5+1"
   shared_preferences:
     dependency: "direct main"
     description:

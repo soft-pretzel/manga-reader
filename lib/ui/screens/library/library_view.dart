@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:manga_reader/ui/screens/library/library_view_model.dart';
 
 class LibraryView extends StatefulWidget {
-  LibraryView({super.key});
+  const LibraryView({super.key, required this.viewModel});
 
-  final LibraryViewModel viewModel = LibraryViewModel();
+  final LibraryViewModel viewModel;
 
   @override
   State<LibraryView> createState() => _LibraryViewState();
