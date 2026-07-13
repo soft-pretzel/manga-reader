@@ -1,27 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'data/services/file_picker_service.dart';
-import 'data/services/shared_preferences_service.dart';
-import 'data/repositories/library_repository.dart';
-import 'ui/screens/library/library_view_model.dart';
-import 'ui/screens/library/library_view.dart';
+import 'data/providers.dart';
 import 'ui/screens/home/home_view.dart';
+import 'ui/screens/library/library_view.dart';
+import 'ui/screens/library/library_view_model.dart';
 import 'ui/screens/settings/settings_view.dart';
 
 void main() {
   runApp(
     MultiProvider(
-      providers: [
-        Provider(create: (context) => FilePickerService()),
-        Provider(create: (context) => SharedPreferencesService()),
-        Provider(
-          create: (context) => LibraryRepository(
-            filePickerService: context.read(),
-            sharedPreferencesService: context.read(),
-          ),
-        ),
-      ],
+      providers: providers,
       child: MaterialApp(
         title: 'Manga Reader',
         theme: ThemeData(brightness: Brightness.light),
@@ -62,25 +51,6 @@ class _MainAppState extends State<MainApp> {
     });
   }
 
-  final List<NavigationDestination> _destinations = [
-    NavigationDestination(icon: Icon(Icons.menu_book), label: 'Home'),
-    NavigationDestination(icon: Icon(Icons.folder), label: 'Library'),
-    NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
-  ];
-
-  final List<Widget> _body = [
-    HomeView(),
-    LibraryView(
-      viewModel: LibraryViewModel(
-        libraryRepository: LibraryRepository(
-          filePickerService: FilePickerService(),
-          sharedPreferencesService: SharedPreferencesService(),
-        ),
-      ),
-    ),
-    SettingsView(),
-  ];
-
   @override
   void dispose() {
     _controller.dispose();
@@ -93,12 +63,22 @@ class _MainAppState extends State<MainApp> {
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: _onDestinationSelected,
         selectedIndex: _selectedIndex,
-        destinations: _destinations,
+        destinations: [
+          NavigationDestination(icon: Icon(Icons.menu_book), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.folder), label: 'Library'),
+          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
+        ],
       ),
       body: PageView(
         controller: _controller,
         onPageChanged: _onPageChanged,
-        children: _body,
+        children: [
+          HomeView(),
+          LibraryView(
+            viewModel: LibraryViewModel(libraryRepository: context.read()),
+          ),
+          SettingsView(),
+        ],
       ),
     );
   }
