@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'data/services/file_picker_service.dart';
 import 'data/services/shared_preferences_service.dart';
 import 'data/repositories/library_repository.dart';
 import 'ui/screens/library/library_view_model.dart';
 import 'ui/screens/library/library_view.dart';
 import 'ui/screens/home/home_view.dart';
 import 'ui/screens/settings/settings_view.dart';
-
-import 'data/services/file_picker_service.dart';
 
 void main() {
   runApp(
@@ -23,64 +22,84 @@ void main() {
           ),
         ),
       ],
-      child: const MainApp(),
+      child: MaterialApp(
+        title: 'Manga Reader',
+        theme: ThemeData(brightness: Brightness.light),
+        darkTheme: ThemeData(brightness: Brightness.dark),
+        themeMode: ThemeMode.system,
+        home: MainApp(),
+      ),
     ),
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Manga Reader',
-      theme: ThemeData(brightness: Brightness.light),
-      darkTheme: ThemeData(brightness: Brightness.dark),
-      themeMode: ThemeMode.system,
-      home: MainNavigation(),
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  int _selectedIndex = 0;
+  final PageController _controller = PageController();
+
+  void _onDestinationSelected(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    _controller.animateToPage(
+      index,
+      duration: Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
     );
   }
-}
 
-class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  void _onPageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  final List<NavigationDestination> _destinations = [
+    NavigationDestination(icon: Icon(Icons.menu_book), label: 'Home'),
+    NavigationDestination(icon: Icon(Icons.folder), label: 'Library'),
+    NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
+  ];
+
+  final List<Widget> _body = [
+    HomeView(),
+    LibraryView(
+      viewModel: LibraryViewModel(
+        libraryRepository: LibraryRepository(
+          filePickerService: FilePickerService(),
+          sharedPreferencesService: SharedPreferencesService(),
+        ),
+      ),
+    ),
+    SettingsView(),
+  ];
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
-}
-
-class _MainNavigationState extends State<MainNavigation> {
-  int currentPageIndex = 0;
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: <AppBar>[
-        AppBar(title: Text('Home')),
-        AppBar(title: Text('Library')),
-        AppBar(title: Text('Settings')),
-      ][currentPageIndex],
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(icon: Icon(Icons.menu_book), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.folder), label: 'Library'),
-          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
+        onDestinationSelected: _onDestinationSelected,
+        selectedIndex: _selectedIndex,
+        destinations: _destinations,
       ),
-      body: <Widget>[
-        HomeView(),
-        LibraryView(
-          viewModel: LibraryViewModel(libraryRepository: context.read()),
-        ),
-        SettingsView(),
-      ][currentPageIndex],
+      body: PageView(
+        controller: _controller,
+        onPageChanged: _onPageChanged,
+        children: _body,
+      ),
     );
   }
 }

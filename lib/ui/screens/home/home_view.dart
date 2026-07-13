@@ -15,7 +15,6 @@ class HomeView extends StatelessWidget {
           Text('Continue Reading'),
           GestureDetector(
             onTap: () {
-              print("test");
               Navigator.push(
                 context,
                 MaterialPageRoute<void>(

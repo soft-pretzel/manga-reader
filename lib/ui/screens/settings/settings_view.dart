@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // import 'settings_view_model.dart';
 
 class SettingsView extends StatelessWidget {
-  SettingsView({super.key});
+  const SettingsView({super.key});
 
   // final SettingsViewModel viewModel = SettingsViewModel();
 
