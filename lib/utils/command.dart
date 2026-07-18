@@ -13,6 +13,11 @@ typedef CommandAction0<T> = Future<Result<T>> Function();
 /// Used by [Command1] for actions with one argument.
 typedef CommandAction1<T, A> = Future<Result<T>> Function(A);
 
+/// Defines a command action that returns a [Result] of type [T].
+/// Takes arguments of type [A] and [B].
+/// Used by [Command2] for actions with two arguments.
+typedef CommandAction2<T, A, B> = Future<Result<T>> Function(A, B);
+
 /// Facilitates interaction with a view model.
 ///
 /// Encapsulates an action,
@@ -21,6 +26,7 @@ typedef CommandAction1<T, A> = Future<Result<T>> Function(A);
 ///
 /// Use [Command0] for actions without arguments.
 /// Use [Command1] for actions with one argument.
+/// Use [Command2] for actions with two arguments.
 ///
 /// Actions must return a [Result] of type [T].
 ///
@@ -96,5 +102,18 @@ final class Command1<T, A> extends Command<T> {
   /// Executes the action with the specified [argument].
   Future<void> execute(A argument) async {
     await _execute(() => _action(argument));
+  }
+}
+
+/// A [Command] that accepts two arguments.
+final class Command2<T, A, B> extends Command<T> {
+  /// Creates a [Command2] with the provided [CommandAction2].
+  Command2(this._action);
+
+  final CommandAction2<T, A, B> _action;
+
+  /// Executes the action with the specified [argument].
+  Future<void> execute(A argument1, B argument2) async {
+    await _execute(() => _action(argument1, argument2));
   }
 }

@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:manga_reader/ui/screens/library/library_view_model.dart';
+
+import '../reader/reader_view.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key, required this.viewModel});
@@ -19,64 +23,112 @@ class _LibraryViewState extends State<LibraryView> {
         Column(
           children: [
             AppBar(title: Text('Library')),
-            Padding(
-              padding: EdgeInsetsGeometry.all(24),
-              child: Column(
-                children: [
-                  ListenableBuilder(
-                    listenable: widget.viewModel,
-                    builder: (context, child) {
-                      if (widget.viewModel.loadFolders.running) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+            Expanded(
+              child: Padding(
+                padding: EdgeInsetsGeometry.all(24),
+                child: Column(
+                  children: [
+                    ListenableBuilder(
+                      listenable: widget.viewModel,
+                      builder: (context, child) {
+                        if (widget.viewModel.loadFolders.error) {
+                          return Center(
+                            child: ErrorWidget(
+                              widget.viewModel.loadFolders.error,
+                            ),
+                          );
+                        }
 
-                      if (widget.viewModel.loadFolders.error) {
-                        return Center(
-                          child: ErrorWidget(
-                            widget.viewModel.loadFolders.error,
-                          ),
-                        );
-                      }
+                        widget.viewModel.loadBooks.execute();
+                        final books = widget.viewModel.books;
+                        // final files = widget.viewModel.loadFiles;
 
-                      final folders = widget.viewModel.folders;
-                      if (folders != null) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final folder in folders)
-                              Card(
-                                child: Padding(
-                                  padding: EdgeInsetsGeometry.only(left: 16),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: Text(folder),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          widget.viewModel.deleteFolder.execute(
-                                            folder,
-                                          );
-                                        },
-                                        child: Icon(Icons.delete),
-                                      ),
-                                    ],
-                                  ),
+                        if (books != null) {
+                          if (books.isEmpty) {
+                            return Expanded(
+                              child: Center(
+                                child: Text(
+                                  'Add a folder with the button below',
                                 ),
                               ),
-                          ],
-                        );
-                      }
+                            );
+                          } else {
+                            return Expanded(
+                              child: GridView.count(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.5,
+                                children: [
+                                  for (final book in books)
+                                    GestureDetector(
+                                      onTap: () async {
+                                        await widget.viewModel.openBook.execute(
+                                          book.id,
+                                          book.uri!,
+                                        );
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (context) => ReaderView(
+                                              pages: widget.viewModel.pages!,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Card(
+                                            clipBehavior: Clip.antiAlias,
+                                            child: Image.file(
+                                              File(book.thumbnail!),
+                                            ),
+                                          ),
+                                          Text(book.name),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                            // return Column(
+                            //   crossAxisAlignment: CrossAxisAlignment.stretch,
+                            //   children: [
+                            //     for (final book in books)
+                            //       Card(
+                            //         child: Padding(
+                            //           padding: EdgeInsetsGeometry.only(
+                            //             left: 16,
+                            //           ),
+                            //           child: Row(
+                            //             mainAxisAlignment:
+                            //                 MainAxisAlignment.spaceBetween,
+                            //             children: [
+                            //               Expanded(
+                            //                 child: SingleChildScrollView(
+                            //                   scrollDirection: Axis.horizontal,
+                            //                   child: Text(folder),
+                            //                 ),
+                            //               ),
+                            //               TextButton(
+                            //                 onPressed: () {
+                            //                   widget.viewModel.deleteFolder
+                            //                       .execute(folder);
+                            //                 },
+                            //                 child: Icon(Icons.delete),
+                            //               ),
+                            //             ],
+                            //           ),
+                            //         ),
+                            //       ),
+                            //   ],
+                            // );
+                          }
+                        }
 
-                      return const SizedBox();
-                    },
-                  ),
-                ],
+                        return const SizedBox();
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

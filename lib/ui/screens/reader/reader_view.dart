@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'widgets/reader_menu.dart';
 
 class ReaderView extends StatefulWidget {
-  const ReaderView({super.key});
+  const ReaderView({super.key, required this.pages});
+
+  final List<String> pages;
 
   @override
   State<ReaderView> createState() => _ReaderViewState();
@@ -21,10 +25,7 @@ class _ReaderViewState extends State<ReaderView> {
       child: PageView(
         controller: _pageController,
         reverse: true,
-        children: [
-          for (int i = 0; i <= 4; i++)
-            Image(image: AssetImage('assets/images/test_page_00$i.jpg')),
-        ],
+        children: [for (final page in widget.pages) Image.file(File(page))],
       ),
     );
   }

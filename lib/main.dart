@@ -9,14 +9,15 @@ import 'ui/screens/settings/settings_view.dart';
 
 void main() {
   runApp(
-    MultiProvider(
-      providers: providers,
-      child: MaterialApp(
-        title: 'Manga Reader',
-        theme: ThemeData(brightness: Brightness.light),
-        darkTheme: ThemeData(brightness: Brightness.dark),
-        themeMode: ThemeMode.system,
-        home: MainApp(),
+    MaterialApp(
+      home: MultiProvider(
+        providers: providers,
+        child: MaterialApp(
+          title: 'Manga Reader',
+          theme: ThemeData(brightness: Brightness.light),
+          darkTheme: ThemeData(brightness: Brightness.dark),
+          home: MainApp(),
+        ),
       ),
     ),
   );

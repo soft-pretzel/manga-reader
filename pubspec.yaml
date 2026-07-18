@@ -7,11 +7,19 @@ environment:
   sdk: ^3.12.2
 
 dependencies:
+  archive: ^4.0.9
   file_picker: ^12.0.0-beta.7
   flutter:
     sdk: flutter
+  path: ^1.9.1
+  path_provider: ^2.1.6
   provider: ^6.1.5+1
+  saf_stream: ^3.1.0
+  saf_util: ^3.1.0
   shared_preferences: ^2.5.5
+  sqflite: ^2.4.3
+  uuid: ^4.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
