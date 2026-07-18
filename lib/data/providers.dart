@@ -1,4 +1,3 @@
-import 'package:manga_reader/data/services/sqflite_service.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -9,6 +8,7 @@ import 'services/path_provider_service.dart';
 import 'services/saf_stream_service.dart';
 import 'services/saf_util_service.dart';
 import 'services/shared_preferences_service.dart';
+import 'services/sqflite_service.dart';
 import 'services/uuid_service.dart';
 
 List<SingleChildWidget> get providers {

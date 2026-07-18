@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../reader/reader_view.dart';
-
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 

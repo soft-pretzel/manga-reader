@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:manga_reader/ui/screens/library/library_view_model.dart';
 
+import 'library_view_model.dart';
 import '../reader/reader_view.dart';
 
 class LibraryView extends StatefulWidget {

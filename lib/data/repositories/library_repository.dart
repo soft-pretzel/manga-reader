@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:manga_reader/data/models/book.dart';
-import 'package:manga_reader/data/services/path_provider_service.dart';
 import 'package:path/path.dart';
 
+import '../models/book.dart';
 import '../services/archive_service.dart';
 import '../services/file_picker_service.dart';
+import '../services/path_provider_service.dart';
 import '../services/saf_stream_service.dart';
 import '../services/saf_util_service.dart';
 import '../services/shared_preferences_service.dart';
