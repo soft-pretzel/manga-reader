@@ -123,9 +123,7 @@ class LibraryRepository {
       final fileStream = await _safStreamService.readFileStream(uri);
       List<int> bytesList = [];
       await for (final bytes in fileStream) {
-        for (final byte in bytes) {
-          bytesList.add(byte);
-        }
+        bytesList.addAll(bytes);
       }
       final archive = await _archiveService.extractZip(bytesList);
       for (final file in archive) {
@@ -158,9 +156,7 @@ class LibraryRepository {
       final fileStream = await _safStreamService.readFileStream(uri);
       List<int> bytesList = [];
       await for (final bytes in fileStream) {
-        for (final byte in bytes) {
-          bytesList.add(byte);
-        }
+        bytesList.addAll(bytes);
       }
       final archive = await _archiveService.extractZip(bytesList);
       for (final file in archive) {
