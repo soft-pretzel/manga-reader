@@ -41,7 +41,6 @@ class _LibraryViewState extends State<LibraryView> {
 
                         widget.viewModel.loadBooks.execute();
                         final books = widget.viewModel.books;
-                        // final files = widget.viewModel.loadFiles;
 
                         if (books != null) {
                           if (books.isEmpty) {

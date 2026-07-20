@@ -8,8 +8,8 @@ class SqfliteService {
     // await deleteDatabase(join(await getDatabasesPath(), 'manga_reader.db'));
     return openDatabase(
       join(await getDatabasesPath(), 'manga_reader.db'),
-      onCreate: (db, version) {
-        return db.execute('''
+      onCreate: (db, version) async {
+        await db.execute('''
 CREATE TABLE books (
 id TEXT PRIMARY KEY NOT NULL,
 date_added TEXT NOT NULL,
@@ -19,7 +19,7 @@ uri TEXT,
 series TEXT,
 last_read TEXT,
 thumbnail TEXT)
-          ''');
+''');
       },
       version: 1,
     );
@@ -63,5 +63,15 @@ thumbnail TEXT)
   Future<void> deleteBook(String id) async {
     final db = await _database();
     await db.delete('books', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<Set<String>> getSeries() async {
+    final db = await _database();
+    final seriesMap = await db.rawQuery('SELECT DISTINCT series FROM books');
+    Set<String> seriesSet = {};
+    for (final map in seriesMap) {
+      map.forEach((k, v) => seriesSet.add(v.toString()));
+    }
+    return seriesSet;
   }
 }
