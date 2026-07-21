@@ -12,13 +12,14 @@ class SqfliteService {
         await db.execute('''
 CREATE TABLE books (
 id TEXT PRIMARY KEY NOT NULL,
-date_added TEXT NOT NULL,
 name TEXT NOT NULL,
-path TEXT,
-uri TEXT,
+book_type TEXT NOT NULL,
+date_added TEXT NOT NULL,
+path TEXT NOT NULL,
+thumbnail TEXT,
 series TEXT,
 last_read TEXT,
-thumbnail TEXT)
+current_page INTEGER)
 ''');
       },
       version: 1,
@@ -30,7 +31,7 @@ thumbnail TEXT)
     await db.insert(
       'books',
       book.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.fail,
     );
   }
 

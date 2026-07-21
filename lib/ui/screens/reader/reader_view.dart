@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:manga_reader/ui/screens/reader/reader_view_model.dart';
 
 import 'widgets/reader_menu.dart';
 
 class ReaderView extends StatefulWidget {
-  const ReaderView({super.key, required this.pages});
+  const ReaderView({super.key, required this.viewModel});
 
-  final List<String> pages;
+  final ReaderViewModel viewModel;
 
   @override
   State<ReaderView> createState() => _ReaderViewState();
@@ -17,16 +18,42 @@ class _ReaderViewState extends State<ReaderView> {
   final PageController _pageController = PageController();
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(ReaderMenu());
+    return ListenableBuilder(
+      listenable: widget.viewModel,
+      builder: (context, child) {
+        if (widget.viewModel.openBook.running) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (widget.viewModel.openBook.error) {
+          return Center(child: Text('Error opening book'));
+        }
+
+        if (widget.viewModel.openBook.completed) {
+          final pages = widget.viewModel.pages;
+          if (pages != null) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(ReaderMenu());
+              },
+              child: PageView(
+                controller: _pageController,
+                reverse: true,
+                children: [for (final page in pages) Image.file(File(page))],
+              ),
+            );
+          }
+        }
+
+        return SizedBox();
       },
-      child: PageView(
-        controller: _pageController,
-        reverse: true,
-        children: [for (final page in widget.pages) Image.file(File(page))],
-      ),
     );
   }
 }

@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'library_view_model.dart';
-import '../reader/reader_view.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key, required this.viewModel});
@@ -60,18 +60,9 @@ class _LibraryViewState extends State<LibraryView> {
                                   for (final book in books)
                                     GestureDetector(
                                       onTap: () async {
-                                        await widget.viewModel.openBook.execute(
-                                          book.id,
-                                          book.uri!,
-                                        );
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute<void>(
-                                            builder: (context) => ReaderView(
-                                              pages: widget.viewModel.pages!,
-                                            ),
-                                          ),
-                                        );
+                                        await widget.viewModel.setCurrentBook
+                                            .execute(book.id);
+                                        context.push('/reader');
                                       },
                                       child: Column(
                                         children: [
@@ -88,38 +79,6 @@ class _LibraryViewState extends State<LibraryView> {
                                 ],
                               ),
                             );
-                            // return Column(
-                            //   crossAxisAlignment: CrossAxisAlignment.stretch,
-                            //   children: [
-                            //     for (final book in books)
-                            //       Card(
-                            //         child: Padding(
-                            //           padding: EdgeInsetsGeometry.only(
-                            //             left: 16,
-                            //           ),
-                            //           child: Row(
-                            //             mainAxisAlignment:
-                            //                 MainAxisAlignment.spaceBetween,
-                            //             children: [
-                            //               Expanded(
-                            //                 child: SingleChildScrollView(
-                            //                   scrollDirection: Axis.horizontal,
-                            //                   child: Text(folder),
-                            //                 ),
-                            //               ),
-                            //               TextButton(
-                            //                 onPressed: () {
-                            //                   widget.viewModel.deleteFolder
-                            //                       .execute(folder);
-                            //                 },
-                            //                 child: Icon(Icons.delete),
-                            //               ),
-                            //             ],
-                            //           ),
-                            //         ),
-                            //       ),
-                            //   ],
-                            // );
                           }
                         }
 

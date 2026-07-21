@@ -1,49 +1,57 @@
+enum BookType { book, comic, pdf }
+
 class Book {
   final String id;
+  final String name;
+  final BookType bookType;
   final DateTime dateAdded;
-  String name;
-  String? path;
-  String? uri;
+  String path;
+  String? thumbnail;
   String? series;
   DateTime? lastRead;
-  String? thumbnail;
+  int? currentPage;
 
   Book({
     required this.id,
-    required this.dateAdded,
     required this.name,
-    this.path,
-    this.uri,
+    required this.bookType,
+    required this.dateAdded,
+    required this.path,
+    this.thumbnail,
     this.series,
     this.lastRead,
-    this.thumbnail,
-  }) : assert(path != null || uri != null);
+    this.currentPage,
+  });
 
   Map<String, Object?> toMap() {
     return {
       'id': id,
-      'date_added': dateAdded.toString(),
       'name': name,
+      'book_type': bookType.toString(),
+      'date_added': dateAdded.toString(),
       'path': path,
-      'uri': uri,
+      'thumbnail': thumbnail,
       'series': series,
       'last_read': lastRead.toString(),
-      'thumbnail': thumbnail,
+      'current_page': currentPage,
     };
   }
 
   Book.fromMap(Map<String, Object?> map)
     : id = map['id'].toString(),
-      dateAdded = DateTime.parse(map['date_added'].toString()),
       name = map['name'].toString(),
+      bookType = BookType.values.byName(
+        map['book_type'].toString().split('.').last,
+      ),
+      dateAdded = DateTime.parse(map['date_added'].toString()),
       path = map['path'].toString(),
-      uri = map['uri'].toString(),
+      thumbnail = map['thumbnail'].toString(),
       series = map['series'].toString(),
       lastRead = DateTime.tryParse(map['last_read'].toString()),
-      thumbnail = map['thumbnail'].toString();
+      currentPage = int.tryParse(map['current_page'].toString());
 
   @override
   String toString() {
-    return 'Book{id: $id, date_added: $dateAdded, name: $name}';
+    return 'Book{id: $id, name: $name, book_type: $bookType, date_added: $dateAdded}';
   }
 }

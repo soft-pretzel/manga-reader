@@ -11,7 +11,8 @@ class LibraryViewModel extends ChangeNotifier {
     deleteFolder = Command1(_deleteFolder);
     loadFolders = Command0(_loadFolders)..execute();
     loadBooks = Command0(_loadBooks);
-    openBook = Command2(_openBook);
+    openBook = Command1(_openBook);
+    setCurrentBook = Command1(_setCurrentBook);
   }
 
   final LibraryRepository _libraryRepository;
@@ -27,7 +28,8 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command1<void, String> deleteFolder;
   late final Command0 loadFolders;
   late final Command0 loadBooks;
-  late final Command2<void, String, String> openBook;
+  late final Command1<void, String> openBook;
+  late final Command1<void, String> setCurrentBook;
 
   Future<Result<void>> _addFolder() async {
     final result = await _libraryRepository.addFolder();
@@ -56,14 +58,25 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _openBook(String id, String uri) async {
-    final result = await _libraryRepository.parseBook(id, uri);
+  Future<Result<void>> _openBook(String id) async {
+    final result = await _libraryRepository.openComic(id);
     switch (result) {
       case Ok<List<String>>():
         _pages = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error<List<String>>():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _setCurrentBook(String id) async {
+    final result = await _libraryRepository.setCurrentBook(id);
+    switch (result) {
+      case Ok<void>():
+        notifyListeners();
+        return Result.ok(null);
+      case Error<void>():
         return Result.error(result.error);
     }
   }

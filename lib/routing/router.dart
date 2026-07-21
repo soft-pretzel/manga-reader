@@ -6,6 +6,8 @@ import 'routes.dart';
 import '../ui/screens/home/home_view.dart';
 import '../ui/screens/library/library_view.dart';
 import '../ui/screens/library/library_view_model.dart';
+import '../ui/screens/reader/reader_view.dart';
+import '../ui/screens/reader/reader_view_model.dart';
 import '../ui/screens/settings/settings_view.dart';
 import '../ui/widgets/scaffold_with_nested_navigation.dart';
 
@@ -60,6 +62,13 @@ final router = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: Routes.reader,
+      builder: (context, state) {
+        final viewModel = ReaderViewModel(libraryRepository: context.read());
+        return ReaderView(viewModel: viewModel);
+      },
     ),
   ],
 );

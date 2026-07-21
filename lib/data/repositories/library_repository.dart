@@ -35,7 +35,11 @@ class LibraryRepository {
   final SqfliteService _sqfliteService;
   final UuidService _uuidService;
 
+  static List<String> bookTypes = ['epub'];
+  static List<String> comicTypes = ['tar', 'cbt', 'zip', 'cbz'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
+
+  String? _previousBook;
 
   Future<Result<List<String>>> addFolder() async {
     try {
@@ -94,14 +98,27 @@ class LibraryRepository {
           for (var file in files) {
             if (!file.isDir) {
               final id = _uuidService.generate();
+              BookType bookType;
+
+              final fileType = file.name.split('.').last;
+              if (bookTypes.contains(fileType)) {
+                bookType = BookType.book;
+              } else if (comicTypes.contains(fileType)) {
+                bookType = BookType.comic;
+              } else {
+                bookType = BookType.pdf;
+              }
+
               Book book = Book(
                 id: id,
-                dateAdded: DateTime.now(),
                 name: file.name.split('.').first,
-                uri: file.uri,
+                bookType: bookType,
+                dateAdded: DateTime.now(),
+                path: file.uri,
                 series: seriesName,
                 thumbnail: await _getThumbnail(id, file.uri),
               );
+
               await _sqfliteService.insertBook(book);
             }
           }
@@ -140,20 +157,28 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<String>>> parseBook(String id, String uri) async {
+  Future<Result<List<String>>> openComic(String id) async {
     try {
-      final cacheDir = await _pathProviderService.getCache();
-      final bookDir = Directory(join(cacheDir.path, 'reading', id));
-      List<String> files = [];
-      if (await bookDir.exists()) {
-        await for (final file in bookDir.list()) {
-          files.add(file.path);
-        }
-        return Result.ok(files);
-      } else {
-        await bookDir.create(recursive: true);
+      final book = await _sqfliteService.getBook(id);
+      final cache = await _pathProviderService.getCache();
+      final readingCache = Directory(join(cache.path, 'reading'));
+      List<String> pages = [];
+
+      if (!await readingCache.exists()) {
+        await readingCache.create(recursive: true);
       }
-      final fileStream = await _safStreamService.readFileStream(uri);
+
+      if (book.name == _previousBook) {
+        await for (final file in readingCache.list()) {
+          pages.add(file.path);
+        }
+        return Result.ok(pages);
+      } else {
+        await readingCache.delete(recursive: true);
+        await readingCache.create(recursive: true);
+      }
+
+      final fileStream = await _safStreamService.readFileStream(book.path);
       List<int> bytesList = [];
       await for (final bytes in fileStream) {
         bytesList.addAll(bytes);
@@ -161,12 +186,31 @@ class LibraryRepository {
       final archive = await _archiveService.extractZip(bytesList);
       for (final file in archive) {
         if (imgTypes.contains(file.name.split('.').last)) {
-          final filePath = join(bookDir.path, file.name);
+          final filePath = join(readingCache.path, file.name);
           await File(filePath).writeAsBytes(file.readBytes() as List<int>);
-          files.add(filePath);
+          pages.add(filePath);
         }
       }
-      return Result.ok(files);
+      _previousBook = book.name;
+      return Result.ok(pages);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setCurrentBook(String id) async {
+    try {
+      await _sharedPreferencesService.setCurrentBook(id);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<String?>> getCurrentBook() async {
+    try {
+      final currentBook = await _sharedPreferencesService.getCurrentBook();
+      return Result.ok(currentBook);
     } on Exception catch (e) {
       return Result.error(e);
     }
