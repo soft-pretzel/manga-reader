@@ -79,7 +79,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<Book>>> getBooks() async {
+  Future<Result<List<Book>?>> getBooks() async {
     try {
       final books = await _sqfliteService.getBooks();
       return Result.ok(books);
@@ -115,6 +115,7 @@ class LibraryRepository {
                 bookType: bookType,
                 dateAdded: DateTime.now(),
                 path: file.uri,
+                readingStatus: ReadingStatus.notStarted,
                 series: seriesName,
                 thumbnail: await _getThumbnail(id, file.uri),
               );
@@ -207,10 +208,20 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<String?>> getCurrentBook() async {
+  Future<Result<Book>> getCurrentBook() async {
     try {
-      final currentBook = await _sharedPreferencesService.getCurrentBook();
+      final id = await _sharedPreferencesService.getCurrentBook();
+      final currentBook = await _sqfliteService.getBook(id);
       return Result.ok(currentBook);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> updateBook(Book book) async {
+    try {
+      await _sqfliteService.updateBook(book);
+      return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }

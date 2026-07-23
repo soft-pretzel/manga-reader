@@ -1,11 +1,14 @@
 enum BookType { book, comic, pdf }
 
+enum ReadingStatus { notStarted, inProgress, finished }
+
 class Book {
   final String id;
   final String name;
   final BookType bookType;
   final DateTime dateAdded;
   String path;
+  ReadingStatus readingStatus;
   String? thumbnail;
   String? series;
   DateTime? lastRead;
@@ -17,6 +20,7 @@ class Book {
     required this.bookType,
     required this.dateAdded,
     required this.path,
+    required this.readingStatus,
     this.thumbnail,
     this.series,
     this.lastRead,
@@ -30,6 +34,7 @@ class Book {
       'book_type': bookType.toString(),
       'date_added': dateAdded.toString(),
       'path': path,
+      'reading_status': readingStatus.toString(),
       'thumbnail': thumbnail,
       'series': series,
       'last_read': lastRead.toString(),
@@ -45,6 +50,9 @@ class Book {
       ),
       dateAdded = DateTime.parse(map['date_added'].toString()),
       path = map['path'].toString(),
+      readingStatus = ReadingStatus.values.byName(
+        map['reading_status'].toString().split('.').last,
+      ),
       thumbnail = map['thumbnail'].toString(),
       series = map['series'].toString(),
       lastRead = DateTime.tryParse(map['last_read'].toString()),

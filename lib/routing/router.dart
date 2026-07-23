@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'routes.dart';
 import '../ui/screens/home/home_view.dart';
+import '../ui/screens/home/home_view_model.dart';
 import '../ui/screens/library/library_view.dart';
 import '../ui/screens/library/library_view_model.dart';
 import '../ui/screens/reader/reader_view.dart';
@@ -31,7 +32,10 @@ final router = GoRouter(
             GoRoute(
               path: Routes.home,
               builder: (context, state) {
-                return HomeView();
+                final viewModel = HomeViewModel(
+                  libraryRepository: context.read(),
+                );
+                return HomeView(viewModel: viewModel);
               },
             ),
           ],

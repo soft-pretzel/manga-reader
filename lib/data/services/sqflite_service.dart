@@ -16,6 +16,7 @@ name TEXT NOT NULL,
 book_type TEXT NOT NULL,
 date_added TEXT NOT NULL,
 path TEXT NOT NULL,
+reading_status TEXT NOT NULL,
 thumbnail TEXT,
 series TEXT,
 last_read TEXT,
@@ -48,7 +49,8 @@ current_page INTEGER)
       where: 'id = ?',
       whereArgs: [id],
     );
-    return [for (final map in booksMap) Book.fromMap(map)].first;
+    return Book.fromMap(booksMap.first);
+    // return [for (final map in booksMap) Book.fromMap(map)].first;
   }
 
   Future<void> updateBook(Book book) async {

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:manga_reader/ui/screens/reader/reader_view_model.dart';
 
+import 'reader_view_model.dart';
 import 'widgets/reader_menu.dart';
 
 class ReaderView extends StatefulWidget {
@@ -38,18 +38,16 @@ class _ReaderViewState extends State<ReaderView> {
 
         if (widget.viewModel.openBook.completed) {
           final pages = widget.viewModel.pages;
-          if (pages != null) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(ReaderMenu());
-              },
-              child: PageView(
-                controller: _pageController,
-                reverse: true,
-                children: [for (final page in pages) Image.file(File(page))],
-              ),
-            );
-          }
+          return GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(ReaderMenu());
+            },
+            child: PageView(
+              controller: _pageController,
+              reverse: true,
+              children: [for (final page in pages) Image.file(File(page))],
+            ),
+          );
         }
 
         return SizedBox();

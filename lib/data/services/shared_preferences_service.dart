@@ -28,11 +28,11 @@ class SharedPreferencesService {
     await prefs.setString(_currentBookKey, id);
   }
 
-  Future<String?> getCurrentBook() async {
+  Future<String> getCurrentBook() async {
     final SharedPreferencesWithCache prefs =
         await SharedPreferencesWithCache.create(
           cacheOptions: SharedPreferencesWithCacheOptions(),
         );
-    return prefs.getString(_currentBookKey);
+    return prefs.getString(_currentBookKey) ?? '';
   }
 }

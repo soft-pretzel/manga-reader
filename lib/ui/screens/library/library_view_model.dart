@@ -11,7 +11,7 @@ class LibraryViewModel extends ChangeNotifier {
     deleteFolder = Command1(_deleteFolder);
     loadFolders = Command0(_loadFolders)..execute();
     loadBooks = Command0(_loadBooks);
-    openBook = Command1(_openBook);
+    // openBook = Command1(_openBook);
     setCurrentBook = Command1(_setCurrentBook);
   }
 
@@ -19,10 +19,10 @@ class LibraryViewModel extends ChangeNotifier {
 
   List<String>? _folders;
   List<Book>? _books;
-  List<String>? _pages;
+  // List<String>? _pages;
   List<String>? get folders => _folders;
   List<Book>? get books => _books;
-  List<String>? get pages => _pages;
+  // List<String>? get pages => _pages;
 
   late final Command0 addFolder;
   late final Command1<void, String> deleteFolder;
@@ -49,26 +49,26 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _loadBooks() async {
     final result = await _libraryRepository.getBooks();
     switch (result) {
-      case Ok<List<Book>>():
+      case Ok<List<Book>?>():
         _books = result.value;
         notifyListeners();
         return Result.ok(null);
-      case Error<List<Book>>():
+      case Error():
         return Result.error(result.error);
     }
   }
 
-  Future<Result<void>> _openBook(String id) async {
-    final result = await _libraryRepository.openComic(id);
-    switch (result) {
-      case Ok<List<String>>():
-        _pages = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error<List<String>>():
-        return Result.error(result.error);
-    }
-  }
+  // Future<Result<void>> _openBook(String id) async {
+  //   final result = await _libraryRepository.openComic(id);
+  //   switch (result) {
+  //     case Ok<List<String>>():
+  //       _pages = result.value;
+  //       notifyListeners();
+  //       return Result.ok(null);
+  //     case Error():
+  //       return Result.error(result.error);
+  //   }
+  // }
 
   Future<Result<void>> _setCurrentBook(String id) async {
     final result = await _libraryRepository.setCurrentBook(id);
@@ -76,7 +76,7 @@ class LibraryViewModel extends ChangeNotifier {
       case Ok<void>():
         notifyListeners();
         return Result.ok(null);
-      case Error<void>():
+      case Error():
         return Result.error(result.error);
     }
   }
@@ -87,7 +87,7 @@ class LibraryViewModel extends ChangeNotifier {
         _folders = result.value;
         notifyListeners();
         return Result.ok(null);
-      case Error<List<String>>():
+      case Error():
         return Result.error(result.error);
     }
   }

@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:manga_reader/ui/screens/home/home_view_model.dart';
 
-class HomeView extends StatelessWidget {
-  const HomeView({super.key});
+class HomeView extends StatefulWidget {
+  const HomeView({super.key, required this.viewModel});
+
+  final HomeViewModel viewModel;
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  @override
+  void didChangeDependencies() {
+    widget.viewModel.load.execute();
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,37 +25,24 @@ class HomeView extends StatelessWidget {
         AppBar(title: Text('Home')),
         Padding(
           padding: EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Continue Reading'),
-              GestureDetector(
-                onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute<void>(
-                  //     builder: (context) => const ReaderView(),
-                  //   ),
-                  // );
-                },
-                child: SizedBox(
-                  height: 400,
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    color: Colors.grey[400],
-                    child: Column(
-                      children: [
-                        Image(
-                          height: 365,
-                          image: AssetImage('assets/images/test_cover.jpg'),
-                        ),
-                        Text('Manga Title'),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: ListenableBuilder(
+            listenable: widget.viewModel,
+            builder: (context, child) {
+              if (widget.viewModel.load.running) {
+                Center(child: CircularProgressIndicator());
+              }
+
+              final inProgressBooks = widget.viewModel.inProgressBooks;
+              if (inProgressBooks != null) {
+                return Column(
+                  children: [
+                    for (final book in inProgressBooks) Text(book.name),
+                  ],
+                );
+              }
+
+              return SizedBox();
+            },
           ),
         ),
       ],
