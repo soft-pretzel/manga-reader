@@ -55,7 +55,9 @@ class _LibraryViewState extends State<LibraryView> {
                             return Expanded(
                               child: GridView.count(
                                 crossAxisCount: 2,
-                                childAspectRatio: 0.5,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: 0.6,
                                 children: [
                                   for (final book in books)
                                     GestureDetector(

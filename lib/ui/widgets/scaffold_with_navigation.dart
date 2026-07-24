@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class ScaffoldWithNestedNavigation extends StatelessWidget {
-  const ScaffoldWithNestedNavigation({
-    super.key,
-    required this.navigationShell,
-  });
+class ScaffoldWithNavigation extends StatelessWidget {
+  const ScaffoldWithNavigation({Key? key, required this.navigationShell})
+    : super(key: key ?? const ValueKey('ScaffoldWithNestedNavigation'));
 
   final StatefulNavigationShell navigationShell;
 

@@ -30,6 +30,7 @@ class ReaderViewModel extends ChangeNotifier {
             _pages = openComicResult.value;
             currentBook.readingStatus = ReadingStatus.inProgress;
             await _libraryRepository.updateBook(currentBook);
+
             notifyListeners();
             return Result.ok(null);
           case Error():

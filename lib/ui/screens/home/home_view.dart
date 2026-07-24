@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:manga_reader/ui/screens/home/home_view_model.dart';
+import 'package:go_router/go_router.dart';
+
+import 'home_view_model.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key, required this.viewModel});
@@ -12,32 +16,58 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   @override
-  void didChangeDependencies() {
-    widget.viewModel.load.execute();
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppBar(title: Text('Home')),
-        Padding(
-          padding: EdgeInsets.all(24),
+        SafeArea(
           child: ListenableBuilder(
             listenable: widget.viewModel,
             builder: (context, child) {
               if (widget.viewModel.load.running) {
-                Center(child: CircularProgressIndicator());
+                return Center(child: CircularProgressIndicator());
               }
 
               final inProgressBooks = widget.viewModel.inProgressBooks;
-              if (inProgressBooks != null) {
-                return Column(
-                  children: [
-                    for (final book in inProgressBooks) Text(book.name),
-                  ],
+              if (inProgressBooks.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Continue Reading'),
+                      SizedBox(
+                        height: 400,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            for (final book in inProgressBooks)
+                              Column(
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        await widget.viewModel.setCurrentBook
+                                            .execute(book.id);
+                                        context.push('/reader');
+                                      },
+                                      child: Card(
+                                        clipBehavior: Clip.antiAlias,
+                                        child: Image.file(
+                                          File(book.thumbnail!),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Text(book.name),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }
 

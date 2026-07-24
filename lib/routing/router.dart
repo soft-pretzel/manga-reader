@@ -10,7 +10,7 @@ import '../ui/screens/library/library_view_model.dart';
 import '../ui/screens/reader/reader_view.dart';
 import '../ui/screens/reader/reader_view_model.dart';
 import '../ui/screens/settings/settings_view.dart';
-import '../ui/widgets/scaffold_with_nested_navigation.dart';
+import '../ui/widgets/scaffold_with_navigation.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -23,7 +23,7 @@ final router = GoRouter(
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
+        return ScaffoldWithNavigation(navigationShell: navigationShell);
       },
       branches: [
         StatefulShellBranch(
