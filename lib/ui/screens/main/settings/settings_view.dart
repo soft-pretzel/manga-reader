@@ -5,6 +5,6 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [AppBar(title: Text('Settings'))]);
+    return SafeArea(child: SizedBox());
   }
 }

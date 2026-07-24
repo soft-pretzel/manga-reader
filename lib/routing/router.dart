@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'routes.dart';
-import '../ui/screens/home/home_view.dart';
-import '../ui/screens/home/home_view_model.dart';
-import '../ui/screens/library/library_view.dart';
-import '../ui/screens/library/library_view_model.dart';
+import '../ui/screens/main/home/home_view.dart';
+import '../ui/screens/main/home/home_view_model.dart';
+import '../ui/screens/main/library/library_view.dart';
+import '../ui/screens/main/library/library_view_model.dart';
 import '../ui/screens/reader/reader_view.dart';
 import '../ui/screens/reader/reader_view_model.dart';
-import '../ui/screens/settings/settings_view.dart';
-import '../ui/widgets/scaffold_with_navigation.dart';
+import '../ui/screens/main/settings/settings_view.dart';
+import '../ui/screens/main/main_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -23,7 +23,15 @@ final router = GoRouter(
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        return ScaffoldWithNavigation(navigationShell: navigationShell);
+        final homeViewModel = HomeViewModel(libraryRepository: context.read());
+        final libraryViewModel = LibraryViewModel(
+          libraryRepository: context.read(),
+        );
+        return MainView(
+          navigationShell: navigationShell,
+          homeViewModel: homeViewModel,
+          libraryViewModel: libraryViewModel,
+        );
       },
       branches: [
         StatefulShellBranch(

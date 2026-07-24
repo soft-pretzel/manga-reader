@@ -79,7 +79,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<Book>?>> getBooks() async {
+  Future<Result<List<Book?>>> getBooks() async {
     try {
       final books = await _sqfliteService.getBooks();
       return Result.ok(books);

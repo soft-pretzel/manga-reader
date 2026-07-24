@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../data/models/book.dart';
-import '../../../data/repositories/library_repository.dart';
-import '../../../utils/command.dart';
-import '../../../utils/result.dart';
+import '../../../../data/models/book.dart';
+import '../../../../data/repositories/library_repository.dart';
+import '../../../../utils/command.dart';
+import '../../../../utils/result.dart';
 
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({required this._libraryRepository}) {
@@ -17,9 +17,9 @@ class LibraryViewModel extends ChangeNotifier {
   final LibraryRepository _libraryRepository;
 
   List<String>? _folders;
-  List<Book>? _books;
+  List<Book?> _books = [];
   List<String>? get folders => _folders;
-  List<Book>? get books => _books;
+  List<Book?> get books => _books;
 
   late final Command0 addFolder;
   late final Command1<void, String> deleteFolder;
@@ -46,7 +46,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _loadBooks() async {
     final result = await _libraryRepository.getBooks();
     switch (result) {
-      case Ok<List<Book>?>():
+      case Ok<List<Book?>>():
         _books = result.value;
         notifyListeners();
         return Result.ok(null);
