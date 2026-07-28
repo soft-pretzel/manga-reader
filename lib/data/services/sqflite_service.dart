@@ -5,6 +5,7 @@ import '../models/library_item.dart';
 
 class SqfliteService {
   Future<Database> _database() async {
+    // await deleteDatabase(join(await getDatabasesPath(), 'manga_reader.db'));
     return openDatabase(
       join(await getDatabasesPath(), 'manga_reader.db'),
       onCreate: (db, version) async {

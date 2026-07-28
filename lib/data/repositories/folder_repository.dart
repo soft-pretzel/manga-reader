@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import '../models/library_item.dart';
 import '../services/archive_service.dart';
@@ -121,8 +122,8 @@ class FolderRepository {
           var fileName = await _safUtilService.getName(path);
           final fileType = fileName.split('.').last;
           fileName = fileName.substring(
-            fileName.length - fileType.length,
-            fileName.length,
+            0,
+            fileName.length - (fileType.length + 1),
           );
 
           BookType bookType;
@@ -137,6 +138,7 @@ class FolderRepository {
           final newBook = BookItem(
             name: fileName,
             path: path,
+            thumbnail: await _getThumbnail(fileName, path),
             bookType: bookType,
             dateAdded: DateTime.now(),
             readingStatus: ReadingStatus.notStarted,
@@ -156,5 +158,31 @@ class FolderRepository {
       path: path,
     );
     _sqfliteService.insertFolder(folder);
+  }
+
+  Future<String> _getThumbnail(String fileName, String path) async {
+    try {
+      final cacheDir = await _pathProviderService.getCache();
+      String filePath = '${cacheDir.path}${Platform.pathSeparator}$fileName';
+      if (await File(filePath).exists()) return filePath;
+
+      final fileStream = await _safStreamService.readFileStream(path);
+      List<int> bytesList = [];
+      await for (final bytes in fileStream) {
+        bytesList.addAll(bytes);
+      }
+      final archive = await _archiveService.extractZip(bytesList);
+      for (final file in archive) {
+        if (imgTypes.contains(file.name.split('.').last)) {
+          final thumbnail = await File(
+            filePath,
+          ).writeAsBytes(file.readBytes() as List<int>);
+          return thumbnail.path;
+        }
+      }
+      return '';
+    } on Exception {
+      rethrow;
+    }
   }
 }

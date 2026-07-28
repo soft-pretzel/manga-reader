@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:manga_reader/routing/routes.dart';
@@ -117,13 +119,24 @@ class BookItem extends LibraryItem {
 
   @override
   Widget buildCard(BuildContext context) {
-    return Card(
-      child: InkWell(
-        child: Center(child: Text(name)),
-        onTap: () {
-          context.pushNamed(RouteNames.reader, pathParameters: {});
-        },
-      ),
+    return Column(
+      children: [
+        Card(
+          child: InkWell(
+            child: () {
+              if (thumbnail != null) {
+                return Image.file(File(thumbnail!));
+              } else {
+                return SizedBox();
+              }
+            }(),
+            onTap: () {
+              context.pushNamed(RouteNames.reader, pathParameters: {});
+            },
+          ),
+        ),
+        Text(name),
+      ],
     );
   }
 }
