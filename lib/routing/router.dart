@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:manga_reader/ui/screens/library/view_models/folder_view_model.dart';
+import 'package:manga_reader/ui/screens/library/widgets/folder_view.dart';
 import 'package:provider/provider.dart';
 
 import 'routes.dart';
-import '../ui/screens/main/home/home_view.dart';
-import '../ui/screens/main/home/home_view_model.dart';
-import '../ui/screens/main/library/library_view.dart';
-import '../ui/screens/main/library/library_view_model.dart';
+import '../ui/screens/home/home_view.dart';
+import '../ui/screens/home/home_view_model.dart';
+import '../ui/screens/library/widgets/library_view.dart';
+import '../ui/screens/library/view_models/library_view_model.dart';
 import '../ui/screens/reader/reader_view.dart';
 import '../ui/screens/reader/reader_view_model.dart';
-import '../ui/screens/main/settings/settings_view.dart';
-import '../ui/screens/main/main_view.dart';
+import '../ui/screens/settings/settings_view.dart';
+import '../ui/widgets/scaffold_with_navigation.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -18,27 +20,20 @@ final _libraryNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'library');
 final _settingsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'settings');
 
 final router = GoRouter(
-  initialLocation: Routes.home,
+  initialLocation: RoutePaths.home,
   navigatorKey: _rootNavigatorKey,
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        final homeViewModel = HomeViewModel(libraryRepository: context.read());
-        final libraryViewModel = LibraryViewModel(
-          libraryRepository: context.read(),
-        );
-        return MainView(
-          navigationShell: navigationShell,
-          homeViewModel: homeViewModel,
-          libraryViewModel: libraryViewModel,
-        );
+        return ScaffoldWithNavigation(navigationShell: navigationShell);
       },
       branches: [
         StatefulShellBranch(
           navigatorKey: _homeNavigatorKey,
           routes: [
             GoRoute(
-              path: Routes.home,
+              name: RouteNames.home,
+              path: RoutePaths.home,
               builder: (context, state) {
                 final viewModel = HomeViewModel(
                   libraryRepository: context.read(),
@@ -52,13 +47,28 @@ final router = GoRouter(
           navigatorKey: _libraryNavigatorKey,
           routes: [
             GoRoute(
-              path: Routes.library,
+              name: RouteNames.library,
+              path: RoutePaths.library,
               builder: (context, state) {
                 final viewModel = LibraryViewModel(
-                  libraryRepository: context.read(),
+                  // bookRepository: context.read(),
+                  folderRepository: context.read(),
                 );
                 return LibraryView(viewModel: viewModel);
               },
+              routes: [
+                GoRoute(
+                  name: RouteNames.folderContents,
+                  path: RoutePaths.folderContents,
+                  builder: (context, state) {
+                    final viewModel = FolderViewModel(
+                      folderRepository: context.read(),
+                      folderId: int.parse(state.pathParameters['folderId']!),
+                    );
+                    return FolderView(viewModel: viewModel);
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -66,7 +76,8 @@ final router = GoRouter(
           navigatorKey: _settingsNavigatorKey,
           routes: [
             GoRoute(
-              path: Routes.settings,
+              name: RouteNames.settings,
+              path: RoutePaths.settings,
               builder: (context, state) {
                 return SettingsView();
               },
@@ -76,7 +87,8 @@ final router = GoRouter(
       ],
     ),
     GoRoute(
-      path: Routes.reader,
+      name: RouteNames.reader,
+      path: RoutePaths.reader,
       builder: (context, state) {
         final viewModel = ReaderViewModel(libraryRepository: context.read());
         return ReaderView(viewModel: viewModel);

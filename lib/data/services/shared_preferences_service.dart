@@ -4,12 +4,32 @@ class SharedPreferencesService {
   static const String _foldersKey = 'folders';
   static const String _currentBookKey = 'current_book';
 
-  Future<void> setFolders(List<String> folders) async {
+  Future<bool> addFolder(String folder) async {
     final SharedPreferencesWithCache prefs =
         await SharedPreferencesWithCache.create(
           cacheOptions: SharedPreferencesWithCacheOptions(),
         );
-    await prefs.setStringList(_foldersKey, folders);
+    final folders = prefs.getStringList(_foldersKey) ?? [];
+    if (!folders.contains(folder)) {
+      folders.add(folder);
+      await prefs.setStringList(_foldersKey, folders);
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> deleteFolder(String folder) async {
+    final SharedPreferencesWithCache prefs =
+        await SharedPreferencesWithCache.create(
+          cacheOptions: SharedPreferencesWithCacheOptions(),
+        );
+    final folders = prefs.getStringList(_foldersKey) ?? [];
+    if (folders.remove(folder)) {
+      await prefs.setStringList(_foldersKey, folders);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   Future<List<String>> getFolders() async {
@@ -20,19 +40,19 @@ class SharedPreferencesService {
     return prefs.getStringList(_foldersKey) ?? [];
   }
 
-  Future<void> setCurrentBook(String id) async {
+  Future<void> setCurrentBook(int id) async {
     final SharedPreferencesWithCache prefs =
         await SharedPreferencesWithCache.create(
           cacheOptions: SharedPreferencesWithCacheOptions(),
         );
-    await prefs.setString(_currentBookKey, id);
+    await prefs.setInt(_currentBookKey, id);
   }
 
-  Future<String> getCurrentBook() async {
+  Future<int?> getCurrentBook() async {
     final SharedPreferencesWithCache prefs =
         await SharedPreferencesWithCache.create(
           cacheOptions: SharedPreferencesWithCacheOptions(),
         );
-    return prefs.getString(_currentBookKey) ?? '';
+    return prefs.getInt(_currentBookKey);
   }
 }

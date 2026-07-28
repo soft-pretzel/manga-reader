@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:saf_util/saf_util_platform_interface.dart';
 
 import '../models/book.dart';
+import '../models/library_item.dart';
 import '../services/archive_service.dart';
 import '../services/file_picker_service.dart';
 import '../services/path_provider_service.dart';
@@ -14,8 +16,8 @@ import '../services/sqflite_service.dart';
 import '../services/uuid_service.dart';
 import '../../utils/result.dart';
 
-class LibraryRepository {
-  LibraryRepository({
+class BookRepository {
+  BookRepository({
     required this._archiveService,
     required this._filePickerService,
     required this._pathProviderService,
@@ -35,101 +37,47 @@ class LibraryRepository {
   final SqfliteService _sqfliteService;
   final UuidService _uuidService;
 
+  String? _previousBook;
+
   static List<String> bookTypes = ['epub'];
   static List<String> comicTypes = ['tar', 'cbt', 'zip', 'cbz'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
 
-  String? _previousBook;
-
-  Future<Result<List<String>>> addFolder() async {
+  Future<Result<List<BookItem?>>> getBooks() async {
     try {
-      final foldersList = await _sharedPreferencesService.getFolders();
-      final foldersSet = foldersList.toSet();
-      final folder = await _safUtilService.selectFolder();
-      if (folder != null) {
-        if (foldersSet.add(folder.uri)) {
-          await _sharedPreferencesService.setFolders(foldersSet.toList());
-          await _parseFolder(folder.uri);
-        }
-      }
-      return Result.ok(foldersSet.toList());
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<List<String>>> deleteFolder(String folder) async {
-    try {
-      final folders = await _sharedPreferencesService.getFolders();
-      if (folders.remove(folder)) {
-        await _sharedPreferencesService.setFolders(folders);
-      }
-      return Result.ok(folders);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<List<String>>> getFolders() async {
-    try {
-      final folders = await _sharedPreferencesService.getFolders();
-      return Result.ok(folders);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<List<Book?>>> getBooks() async {
-    try {
-      final books = await _sqfliteService.getBooks();
+      final books = await _sqfliteService.getAllBooks();
       return Result.ok(books);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<void>> _parseFolder(String uri) async {
-    try {
-      final files = await _safUtilService.getFiles(uri);
-      for (var file in files) {
-        if (file.isDir) {
-          String seriesName = file.name;
-          final files = await _safUtilService.getFiles(file.uri);
-          for (var file in files) {
-            if (!file.isDir) {
-              final id = _uuidService.generate();
-              BookType bookType;
+  // Future<void> _saveBook(SafDocumentFile file) async {
+  //   final id = _uuidService.generate();
+  //   BookType bookType;
 
-              final fileType = file.name.split('.').last;
-              if (bookTypes.contains(fileType)) {
-                bookType = BookType.book;
-              } else if (comicTypes.contains(fileType)) {
-                bookType = BookType.comic;
-              } else {
-                bookType = BookType.pdf;
-              }
+  //   final fileType = file.name.split('.').last;
+  //   if (bookTypes.contains(fileType)) {
+  //     bookType = BookType.book;
+  //   } else if (comicTypes.contains(fileType)) {
+  //     bookType = BookType.comic;
+  //   } else {
+  //     bookType = BookType.pdf;
+  //   }
 
-              Book book = Book(
-                id: id,
-                name: file.name.split('.').first,
-                bookType: bookType,
-                dateAdded: DateTime.now(),
-                path: file.uri,
-                readingStatus: ReadingStatus.notStarted,
-                series: seriesName,
-                thumbnail: await _getThumbnail(id, file.uri),
-              );
+  //   Book book = Book(
+  //     id: id,
+  //     name: file.name.split('.').first,
+  //     bookType: bookType,
+  //     dateAdded: DateTime.now(),
+  //     path: file.uri,
+  //     readingStatus: ReadingStatus.notStarted,
+  //     series: seriesName,
+  //     thumbnail: await _getThumbnail(id, file.uri),
+  //   );
 
-              await _sqfliteService.insertBook(book);
-            }
-          }
-        }
-      }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
+  //   await _sqfliteService.insertBook(book);
+  // }
 
   Future<String> _getThumbnail(String id, String uri) async {
     try {
@@ -158,7 +106,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<String>>> openComic(String id) async {
+  Future<Result<List<String>>> openComic(int id) async {
     try {
       final book = await _sqfliteService.getBook(id);
       final cache = await _pathProviderService.getCache();
@@ -199,7 +147,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<void>> setCurrentBook(String id) async {
+  Future<Result<void>> setCurrentBook(int id) async {
     try {
       await _sharedPreferencesService.setCurrentBook(id);
       return Result.ok(null);
@@ -208,17 +156,17 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<Book>> getCurrentBook() async {
+  Future<Result<BookItem?>> getCurrentBook() async {
     try {
       final id = await _sharedPreferencesService.getCurrentBook();
-      final currentBook = await _sqfliteService.getBook(id);
-      return Result.ok(currentBook);
+      if (id != null) return Result.ok(await _sqfliteService.getBook(id));
+      return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<void>> updateBook(Book book) async {
+  Future<Result<void>> updateBook(BookItem book) async {
     try {
       await _sqfliteService.updateBook(book);
       return Result.ok(null);

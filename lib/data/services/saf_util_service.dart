@@ -1,17 +1,30 @@
 import 'package:saf_util/saf_util.dart';
-import 'package:saf_util/saf_util_platform_interface.dart';
 
 class SafUtilService {
-  Future<SafDocumentFile?> selectFolder() async {
+  Future<String?> selectFolder() async {
     final safUtil = SafUtil();
-    return await safUtil.pickDirectory(
+    final safDocumentFile = await safUtil.pickDirectory(
       persistablePermission: true,
       writePermission: true,
     );
+    return safDocumentFile?.uri;
   }
 
-  Future<List<SafDocumentFile>> getFiles(String uri) async {
+  Future<List<String>> getFiles(String uri) async {
     final safUtil = SafUtil();
-    return await safUtil.list(uri);
+    final safDocumentFiles = await safUtil.list(uri);
+    return safDocumentFiles.map((file) => file.uri).toList();
+  }
+
+  Future<bool> isDir(String uri) async {
+    final safUtil = SafUtil();
+    final safDocumentFile = await safUtil.documentFileFromUri(uri, null);
+    return safDocumentFile!.isDir;
+  }
+
+  Future<String> getName(String uri) async {
+    final safUtil = SafUtil();
+    final safDocumentFile = await safUtil.documentFileFromUri(uri, null);
+    return safDocumentFile!.name;
   }
 }

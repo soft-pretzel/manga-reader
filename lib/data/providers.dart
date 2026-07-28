@@ -1,7 +1,8 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
-import 'repositories/library_repository.dart';
+import 'repositories/book_repository.dart';
+import 'repositories/folder_repository.dart';
 import 'services/archive_service.dart';
 import 'services/file_picker_service.dart';
 import 'services/path_provider_service.dart';
@@ -22,7 +23,19 @@ List<SingleChildWidget> get providers {
     Provider(create: (context) => SqfliteService()),
     Provider(create: (context) => UuidService()),
     Provider(
-      create: (context) => LibraryRepository(
+      create: (context) => BookRepository(
+        archiveService: context.read(),
+        filePickerService: context.read(),
+        pathProviderService: context.read(),
+        safStreamService: context.read(),
+        safUtilService: context.read(),
+        sharedPreferencesService: context.read(),
+        sqfliteService: context.read(),
+        uuidService: context.read(),
+      ),
+    ),
+    Provider(
+      create: (context) => FolderRepository(
         archiveService: context.read(),
         filePickerService: context.read(),
         pathProviderService: context.read(),

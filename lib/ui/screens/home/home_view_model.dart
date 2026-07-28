@@ -1,28 +1,28 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../../data/models/book.dart';
-import '../../../../data/repositories/library_repository.dart';
-import '../../../../utils/command.dart';
-import '../../../../utils/result.dart';
+import '../../../data/models/library_item.dart';
+import '../../../data/repositories/book_repository.dart';
+import '../../../utils/command.dart';
+import '../../../utils/result.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({required this._libraryRepository}) {
-    load = Command0(_load);
+    load = Command0(_load)..execute();
     setCurrentBook = Command1(_setCurrentBook);
   }
 
-  final LibraryRepository _libraryRepository;
+  final BookRepository _libraryRepository;
   late final Command0 load;
-  late final Command1<void, String> setCurrentBook;
-  final List<Book> _inProgressBooks = [];
+  late final Command1<void, int> setCurrentBook;
+  final List<BookItem> _inProgressBooks = [];
 
-  List<Book> get inProgressBooks => _inProgressBooks;
+  List<BookItem> get inProgressBooks => _inProgressBooks;
 
   Future<Result<void>> _load() async {
-    print('test');
+    _inProgressBooks.clear();
     final booksResult = await _libraryRepository.getBooks();
     switch (booksResult) {
-      case Ok<List<Book?>>():
+      case Ok():
         final books = booksResult.value;
         if (books.isNotEmpty) {
           for (final book in books) {
@@ -39,7 +39,7 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _setCurrentBook(String id) async {
+  Future<Result<void>> _setCurrentBook(int id) async {
     final result = await _libraryRepository.setCurrentBook(id);
     switch (result) {
       case Ok<void>():
