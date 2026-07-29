@@ -1,6 +1,8 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/book_item.dart';
+import '../models/folder_item.dart';
 import '../models/library_item.dart';
 
 class SqfliteService {
@@ -11,16 +13,17 @@ class SqfliteService {
       onCreate: (db, version) async {
         await db.execute('''
 CREATE TABLE folders (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
+id TEXT PRIMARY KEY,
 name TEXT NOT NULL,
 path TEXT NOT NULL,
 thumbnail TEXT,
 parent_id TEXT,
-FOREIGN KEY (parent_id) REFERENCES folders(id))
+FOREIGN KEY (parent_id) REFERENCES folders(id)
+) WITHOUT ROWID;
 ''');
         await db.execute('''
 CREATE TABLE books (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
+id TEXT PRIMARY KEY,
 name TEXT NOT NULL,
 path TEXT NOT NULL,
 thumbnail TEXT,
@@ -30,7 +33,8 @@ date_added TEXT NOT NULL,
 reading_status TEXT NOT NULL,
 last_read TEXT,
 current_page INTEGER,
-FOREIGN KEY(parent_id) REFERENCES folders(id))
+FOREIGN KEY(parent_id) REFERENCES folders(id)
+) WITHOUT ROWID;
 ''');
       },
       version: 1,

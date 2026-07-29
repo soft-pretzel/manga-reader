@@ -24,18 +24,20 @@ class _LibraryViewState extends State<LibraryView> {
   void addFolder() async {
     await widget.viewModel.addFolder.execute();
     if (widget.viewModel.snackBar != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          action: SnackBarAction(
-            label: 'Dismiss',
-            onPressed: () =>
-                ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            action: SnackBarAction(
+              label: 'Dismiss',
+              onPressed: () =>
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            ),
+            content: Text(widget.viewModel.snackBar!),
+            duration: Duration(seconds: 2),
+            persist: false,
           ),
-          content: Text(widget.viewModel.snackBar!),
-          duration: Duration(seconds: 2),
-          persist: false,
-        ),
-      );
+        );
+      }
     }
   }
 

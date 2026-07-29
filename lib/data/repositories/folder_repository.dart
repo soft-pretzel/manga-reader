@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
-import '../models/library_item.dart';
+import '../models/book_item.dart';
+import '../models/folder_item.dart';
 import '../services/archive_service.dart';
 import '../services/file_picker_service.dart';
 import '../services/path_provider_service.dart';
@@ -40,30 +40,18 @@ class FolderRepository {
 
   Future<Result<FolderItem?>> addFolder() async {
     try {
-      FolderItem? folder;
+      String? path;
       if (Platform.isAndroid) {
-        final uri = await _safUtilService.selectFolder();
-        if (uri != null) {
-          final folders = await _sqfliteService.getAllFolders();
-          if (!folders.map((folder) => folder.path).contains(uri)) {
-            folder = FolderItem(
-              name: await _safUtilService.getName(uri),
-              path: uri,
-            );
-          }
-        }
+        path = await _safUtilService.selectFolder();
       } else {
-        final path = await _filePickerService.selectFolder();
+        path = await _filePickerService.selectFolder();
+      }
         if (path != null) {
           final folders = await _sqfliteService.getAllFolders();
           if (!folders.map((folder) => folder.path).contains(path)) {
-            folder = FolderItem(
-              name: path.split(Platform.pathSeparator).last,
-              path: path,
-            );
+            _saveFolder(path, null);
           }
         }
-      }
       if (folder != null) {
         final id = await _sqfliteService.insertFolder(folder);
         _parseFolder(await _sqfliteService.getFolder(id));
@@ -138,7 +126,7 @@ class FolderRepository {
           final newBook = BookItem(
             name: fileName,
             path: path,
-            thumbnail: await _getThumbnail(fileName, path),
+            thumbnail: await _getThumbnail(, path),
             bookType: bookType,
             dateAdded: DateTime.now(),
             readingStatus: ReadingStatus.notStarted,
@@ -152,37 +140,42 @@ class FolderRepository {
     }
   }
 
-  Future<void> _saveFolder(String path) async {
-    final folder = FolderItem(
-      name: await _safUtilService.getName(path),
-      path: path,
-    );
-    _sqfliteService.insertFolder(folder);
+  Future<void> _saveFolder(String path, String? parentId) async {
+    final folders = await _sqfliteService.getAllFolders();
+    if (!folders.map((folder) => folder.path).contains(path)) {
+      String name = '';
+      if (Platform.isAndroid) {
+        name = await _safUtilService.getName(path);
+      } else {
+        name = path.split(Platform.pathSeparator).last;
+      }
+      final id = _uuidService.generate();
+      final folder = FolderItem(id: id, name: name, path: path, parentId: parentId);
+      _sqfliteService.insertFolder(folder);
+    }
   }
 
-  Future<String> _getThumbnail(String fileName, String path) async {
-    try {
-      final cacheDir = await _pathProviderService.getCache();
-      String filePath = '${cacheDir.path}${Platform.pathSeparator}$fileName';
-      if (await File(filePath).exists()) return filePath;
+  Future<String?> _getThumbnail(int id, String path) async {
+    final cacheDir = await _pathProviderService.getCache();
+    String filePath = '${cacheDir.path}${Platform.pathSeparator}$id';
+    print(filePath);
+    return null;
+    if (await File(filePath).exists()) return filePath;
 
-      final fileStream = await _safStreamService.readFileStream(path);
-      List<int> bytesList = [];
-      await for (final bytes in fileStream) {
-        bytesList.addAll(bytes);
-      }
-      final archive = await _archiveService.extractZip(bytesList);
-      for (final file in archive) {
-        if (imgTypes.contains(file.name.split('.').last)) {
-          final thumbnail = await File(
-            filePath,
-          ).writeAsBytes(file.readBytes() as List<int>);
-          return thumbnail.path;
-        }
-      }
-      return '';
-    } on Exception {
-      rethrow;
+    final fileStream = await _safStreamService.readFileStream(path);
+    List<int> bytesList = [];
+    await for (final bytes in fileStream) {
+      bytesList.addAll(bytes);
     }
+    final archive = await _archiveService.extractZip(bytesList);
+    for (final file in archive) {
+      if (imgTypes.contains(file.name.split('.').last)) {
+        final thumbnail = await File(
+          filePath,
+        ).writeAsBytes(file.readBytes() as List<int>);
+        return thumbnail.path;
+      }
+    }
+    return null;
   }
 }
