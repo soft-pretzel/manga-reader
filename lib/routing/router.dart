@@ -5,10 +5,8 @@ import 'package:provider/provider.dart';
 import 'routes.dart';
 import '../ui/screens/home/home_view.dart';
 import '../ui/screens/home/home_view_model.dart';
-import '../ui/screens/library/view_models/folder_view_model.dart';
-import '../ui/screens/library/view_models/library_view_model.dart';
-import '../ui/screens/library/widgets/folder_view.dart';
-import '../ui/screens/library/widgets/library_view.dart';
+import '../ui/screens/library/library_view_model.dart';
+import '../ui/screens/library/library_view.dart';
 import '../ui/screens/reader/reader_view.dart';
 import '../ui/screens/reader/reader_view_model.dart';
 import '../ui/screens/settings/settings_view.dart';
@@ -57,14 +55,14 @@ final router = GoRouter(
               },
               routes: [
                 GoRoute(
-                  name: RouteNames.folderContents,
-                  path: RoutePaths.folderContents,
+                  name: RouteNames.folder,
+                  path: RoutePaths.folder,
                   builder: (context, state) {
-                    final viewModel = FolderViewModel(
-                      folderId: state.pathParameters['folderId']!,
+                    final viewModel = LibraryViewModel(
+                      folderId: state.pathParameters['folderId'],
                       libraryRepository: context.read(),
                     );
-                    return FolderView(viewModel: viewModel);
+                    return LibraryView(viewModel: viewModel);
                   },
                 ),
               ],
@@ -89,7 +87,10 @@ final router = GoRouter(
       name: RouteNames.reader,
       path: RoutePaths.reader,
       builder: (context, state) {
-        final viewModel = ReaderViewModel(libraryRepository: context.read());
+        final viewModel = ReaderViewModel(
+          bookId: state.pathParameters['bookId']!,
+          libraryRepository: context.read(),
+        );
         return ReaderView(viewModel: viewModel);
       },
     ),

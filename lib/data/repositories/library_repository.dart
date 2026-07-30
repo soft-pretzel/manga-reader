@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
-
 import '../models/book_item.dart';
 import '../models/folder_item.dart';
 import '../models/library_item.dart';
@@ -75,49 +73,48 @@ class LibraryRepository {
     }
   }
 
-  // Future<Result<List<String>>> openComic(String id) async {
-  //   try {
-  //     final book = await _databaseService.getBook(id);
-  //     final cache = await _localStorageService.getCache();
-  //     final readingCache = Directory(
-  //       '${cache.path}${Platform.pathSeparator}reading',
-  //     );
-  //     List<String> pages = [];
+  Future<Result<List<String>>> openBook(String id) async {
+    try {
+      final book = await _databaseService.getBook(id);
+      final cache = await _localStorageService.getCache();
 
-  //     if (!await readingCache.exists()) {
-  //       await readingCache.create(recursive: true);
-  //     }
+      final readingCache = Directory(
+        '${cache.path}${Platform.pathSeparator}reading',
+      );
+      if (!await readingCache.exists()) {
+        await readingCache.create(recursive: true);
+      }
 
-  //     if (book.name == _previousBook) {
-  //       await for (final file in readingCache.list()) {
-  //         pages.add(file.path);
-  //       }
-  //       return Result.ok(pages);
-  //     } else {
-  //       await readingCache.delete(recursive: true);
-  //       await readingCache.create(recursive: true);
-  //     }
+      List<String> pages = [];
+      if (book.id == _previousBook) {
+        await for (final file in readingCache.list()) {
+          pages.add(file.path);
+        }
+        return Result.ok(pages);
+      } else {
+        await readingCache.delete(recursive: true);
+        await readingCache.create(recursive: true);
+      }
 
-  //     final fileStream = await _localStorageService.readFileStream(book.path);
-  //     List<int> bytesList = [];
-  //     await for (final bytes in fileStream) {
-  //       bytesList.addAll(bytes);
-  //     }
-  //     final archive = await _localStorageService.extractZip(bytesList);
-  //     for (final file in archive) {
-  //       if (imgTypes.contains(file.name.split('.').last)) {
-  //         final filePath =
-  //             '${readingCache.path}${Platform.pathSeparator}${file.name}';
-  //         await File(filePath).writeAsBytes(file.readBytes() as List<int>);
-  //         pages.add(filePath);
-  //       }
-  //     }
-  //     _previousBook = book.name;
-  //     return Result.ok(pages);
-  //   } on Exception catch (e) {
-  //     return Result.error(e);
-  //   }
-  // }
+      final archive = await _localStorageService.decodeArchive(book.path);
+      if (archive != null) {
+        for (final file in archive) {
+          if (imgTypes.contains(file.name.split('.').last)) {
+            final page = await _localStorageService.writeArchiveFile(
+              file,
+              readingCache.path,
+            );
+            pages.add(page);
+          }
+        }
+      }
+
+      _previousBook = book.id;
+      return Result.ok(pages);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
 
   Future<Result<void>> updateBook(BookItem book) async {
     try {
@@ -132,9 +129,9 @@ class LibraryRepository {
     final files = await _localStorageService.getFiles(folder.path);
     for (final file in files) {
       if (await _localStorageService.isDir(file)) {
-        await _saveFolder(file, folder.id);
+        _saveFolder(file, folder.id);
       } else {
-        _saveBook(file, folder.id);
+        await _saveBook(file, folder.id);
       }
     }
   }
@@ -189,30 +186,29 @@ class LibraryRepository {
     return newFolderName;
   }
 
-  Future<String> _saveThumbnail(String id, String path) async {
+  Future<String?> _saveThumbnail(String id, String path) async {
     final cache = await _localStorageService.getCache();
     final thumbnailsCache = '${cache.path}${Platform.pathSeparator}thumbnails';
     if (!await Directory(thumbnailsCache).exists()) {
       await Directory(thumbnailsCache).create(recursive: true);
     }
 
-    final stream = await _localStorageService.readFileStream(path);
-    List<int> bytesList = [];
-    await for (final bytes in stream) {
-      bytesList.addAll(bytes);
-    }
-    final archive = await _localStorageService.extractZip(bytesList);
-
-    for (final file in archive) {
-      if (imgTypes.contains(file.name.split('.').last)) {
+    String? thumbnail;
+    final archive = await _localStorageService.decodeArchive(path);
+    if (archive != null) {
+      for (final file in archive) {
         final fileType = file.name.split('.').last;
-        final thumbnail =
-            '$thumbnailsCache${Platform.pathSeparator}$id.$fileType';
-        File(path).writeAsBytes(file.readBytes() as List<int>);
-        return thumbnail;
+        if (imgTypes.contains(fileType)) {
+          thumbnail = await _localStorageService.writeArchiveFile(
+            file,
+            thumbnailsCache,
+            '$id.$fileType',
+          );
+          break;
+        }
       }
     }
 
-    return '';
+    return thumbnail;
   }
 }

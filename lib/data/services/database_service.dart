@@ -57,7 +57,7 @@ class DatabaseService {
     return FolderItem.fromMap(folderMap.single);
   }
 
-  Future<List<LibraryItem>> getLibraryItems(String? parentId) async {
+  Future<List<LibraryItem>> getLibraryItems([String? parentId]) async {
     final db = await _database();
     List<LibraryItem> libraryItems = [];
     final List<Map<String, Object?>> folders = await db.query(

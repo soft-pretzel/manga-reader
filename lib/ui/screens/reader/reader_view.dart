@@ -28,29 +28,36 @@ class _ReaderViewState extends State<ReaderView> {
     return ListenableBuilder(
       listenable: widget.viewModel,
       builder: (context, child) {
-        if (widget.viewModel.openBook.running) {
+        if (widget.viewModel.load.running) {
           return Center(child: CircularProgressIndicator());
         }
 
-        if (widget.viewModel.openBook.error) {
-          return Center(child: Text('Error opening book'));
-        }
-
-        if (widget.viewModel.openBook.completed) {
-          final pages = widget.viewModel.pages;
-          return GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(ReaderMenu());
-            },
-            child: PageView(
-              controller: _pageController,
-              reverse: true,
-              children: [for (final page in pages) Image.file(File(page))],
+        if (widget.viewModel.load.error) {
+          return Center(
+            child: Column(
+              children: [
+                Text('Error opening book'),
+                FilledButton(
+                  onPressed: widget.viewModel.load.execute,
+                  child: Text('Try Again'),
+                ),
+              ],
             ),
           );
         }
 
-        return SizedBox();
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(ReaderMenu());
+          },
+          child: PageView(
+            controller: _pageController,
+            reverse: true,
+            children: [
+              for (final page in widget.viewModel.pages) Image.file(File(page)),
+            ],
+          ),
+        );
       },
     );
   }

@@ -29,6 +29,7 @@ abstract class LibraryItem {
     : id = map['id'].toString(),
       name = map['name'].toString(),
       path = map['path'].toString(),
+      thumbnail = map['thumbnail'].toString(),
       parentId = map['parent_id'].toString();
 
   Widget buildCard(BuildContext context);

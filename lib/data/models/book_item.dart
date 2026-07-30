@@ -63,9 +63,9 @@ class BookItem extends LibraryItem {
     return Column(
       children: [
         Card(
+          clipBehavior: Clip.hardEdge,
           child: InkWell(
             child: () {
-              print(thumbnail);
               if (thumbnail != null) {
                 return Image.file(File(thumbnail!));
               } else {
@@ -73,7 +73,10 @@ class BookItem extends LibraryItem {
               }
             }(),
             onTap: () {
-              context.pushNamed(RouteNames.reader, pathParameters: {});
+              context.pushNamed(
+                RouteNames.reader,
+                pathParameters: {'bookId': id},
+              );
             },
           ),
         ),

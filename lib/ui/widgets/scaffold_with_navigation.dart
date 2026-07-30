@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 class ScaffoldWithNavigation extends StatelessWidget {
   const ScaffoldWithNavigation({Key? key, required this.navigationShell})
-    : super(key: key ?? const ValueKey('ScaffoldWithNestedNavigation'));
+    : super(key: key ?? const ValueKey('ScaffoldWithNavigation'));
 
   final StatefulNavigationShell navigationShell;
 

@@ -22,7 +22,7 @@ class FolderItem extends LibraryItem {
         child: Center(child: Text(name)),
         onTap: () {
           context.pushNamed(
-            RouteNames.folderContents,
+            RouteNames.folder,
             pathParameters: {'folderId': id},
           );
         },
