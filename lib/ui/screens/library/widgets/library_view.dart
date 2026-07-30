@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../view_models/library_view_model.dart';
-import '../../../../routing/routes.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key, required this.viewModel});
@@ -107,57 +103,6 @@ class _LibraryViewState extends State<LibraryView> {
             ),
           ),
         ),
-        // Expanded(
-        //   child: RefreshIndicator(
-        //     onRefresh: widget.viewModel.load.execute,
-        //     child: ListenableBuilder(
-        //       listenable: widget.viewModel,
-        //       builder: (context, child) {
-        //         if (widget.viewModel.load.error) {
-        //           return Center(
-        //             child: ErrorWidget(widget.viewModel.loadFolders.error),
-        //           );
-        //         }
-
-        //         widget.viewModel.loadBooks.execute();
-        //         final books = widget.viewModel.books;
-
-        //         if (books.isEmpty) {
-        //           return Center(
-        //             child: Text('Add a folder with the button below'),
-        //           );
-        //         } else {
-        //           return GridView.count(
-        //             crossAxisCount: 2,
-        //             crossAxisSpacing: 10,
-        //             mainAxisSpacing: 10,
-        //             childAspectRatio: 0.6,
-        //             children: [
-        //               for (final book in books)
-        //                 GestureDetector(
-        //                   onTap: () async {
-        //                     await widget.viewModel.setCurrentBook.execute(
-        //                       book.id,
-        //                     );
-        //                     context.push('/reader');
-        //                   },
-        //                   child: Column(
-        //                     children: [
-        //                       Card(
-        //                         clipBehavior: Clip.antiAlias,
-        //                         child: Image.file(File(book!.thumbnail!)),
-        //                       ),
-        //                       Text(book.name),
-        //                     ],
-        //                   ),
-        //                 ),
-        //             ],
-        //           );
-        //         }
-        //       },
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }

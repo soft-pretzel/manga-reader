@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:manga_reader/ui/screens/library/view_models/folder_view_model.dart';
+
+import '../view_models/folder_view_model.dart';
 
 class FolderView extends StatefulWidget {
   const FolderView({super.key, required this.viewModel});

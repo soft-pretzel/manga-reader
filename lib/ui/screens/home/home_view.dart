@@ -76,11 +76,7 @@ class _HomeViewState extends State<HomeView> {
                                         children: [
                                           Expanded(
                                             child: GestureDetector(
-                                              onTap: () async {
-                                                await widget
-                                                    .viewModel
-                                                    .setCurrentBook
-                                                    .execute(book.id!);
+                                              onTap: () {
                                                 context.push('/reader');
                                               },
                                               child: Card(

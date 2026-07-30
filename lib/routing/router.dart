@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:manga_reader/ui/screens/library/view_models/folder_view_model.dart';
-import 'package:manga_reader/ui/screens/library/widgets/folder_view.dart';
 import 'package:provider/provider.dart';
 
 import 'routes.dart';
 import '../ui/screens/home/home_view.dart';
 import '../ui/screens/home/home_view_model.dart';
-import '../ui/screens/library/widgets/library_view.dart';
+import '../ui/screens/library/view_models/folder_view_model.dart';
 import '../ui/screens/library/view_models/library_view_model.dart';
+import '../ui/screens/library/widgets/folder_view.dart';
+import '../ui/screens/library/widgets/library_view.dart';
 import '../ui/screens/reader/reader_view.dart';
 import '../ui/screens/reader/reader_view_model.dart';
 import '../ui/screens/settings/settings_view.dart';
@@ -51,8 +51,7 @@ final router = GoRouter(
               path: RoutePaths.library,
               builder: (context, state) {
                 final viewModel = LibraryViewModel(
-                  // bookRepository: context.read(),
-                  folderRepository: context.read(),
+                  libraryRepository: context.read(),
                 );
                 return LibraryView(viewModel: viewModel);
               },
@@ -62,8 +61,8 @@ final router = GoRouter(
                   path: RoutePaths.folderContents,
                   builder: (context, state) {
                     final viewModel = FolderViewModel(
-                      folderRepository: context.read(),
-                      folderId: int.parse(state.pathParameters['folderId']!),
+                      folderId: state.pathParameters['folderId']!,
+                      libraryRepository: context.read(),
                     );
                     return FolderView(viewModel: viewModel);
                   },

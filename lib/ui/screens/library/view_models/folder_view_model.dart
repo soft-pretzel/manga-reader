@@ -1,18 +1,18 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../data/models/library_item.dart';
-import '../../../../data/repositories/folder_repository.dart';
+import '../../../../data/repositories/library_repository.dart';
 import '../../../../utils/command.dart';
 import '../../../../utils/result.dart';
 
 class FolderViewModel extends ChangeNotifier {
-  FolderViewModel({required this._folderRepository, required this._folderId}) {
+  FolderViewModel({required this._folderId, required this._libraryRepository}) {
     load = Command0(_load)..execute();
     loadFolderName = Command0(_loadFolderName)..execute();
   }
 
-  final FolderRepository _folderRepository;
-  final int _folderId;
+  final String _folderId;
+  final LibraryRepository _libraryRepository;
 
   late final Command0 load;
   late final Command0 loadFolderName;
@@ -24,7 +24,7 @@ class FolderViewModel extends ChangeNotifier {
   List<LibraryItem?> get libraryItems => _libraryItems;
 
   Future<Result<void>> _load() async {
-    final result = await _folderRepository.getLibraryItems(_folderId);
+    final result = await _libraryRepository.getLibraryItems(_folderId);
     switch (result) {
       case Ok():
         for (final item in result.value) {
@@ -45,7 +45,7 @@ class FolderViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _loadFolderName() async {
-    final result = await _folderRepository.getFolder(_folderId);
+    final result = await _libraryRepository.getFolder(_folderId);
     switch (result) {
       case Ok():
         _folderName = result.value.name;

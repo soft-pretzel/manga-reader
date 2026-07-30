@@ -65,6 +65,7 @@ class BookItem extends LibraryItem {
         Card(
           child: InkWell(
             child: () {
+              print(thumbnail);
               if (thumbnail != null) {
                 return Image.file(File(thumbnail!));
               } else {
