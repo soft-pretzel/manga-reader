@@ -56,7 +56,7 @@ class _ReaderViewState extends State<ReaderView> {
           },
           child: PageView(
             controller: PageController(
-              initialPage: widget.viewModel.currentPage ?? 0,
+              initialPage: widget.viewModel.currentPage,
             ),
             onPageChanged: _onPageChanged,
             reverse: true,

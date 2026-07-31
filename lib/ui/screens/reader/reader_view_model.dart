@@ -18,10 +18,10 @@ class ReaderViewModel extends ChangeNotifier {
   late final Command0 loadPage;
   late final Command1<void, int> updateBook;
 
-  int? _currentPage;
+  int _currentPage = 0;
   List<String> _pages = [];
 
-  int? get currentPage => _currentPage;
+  int get currentPage => _currentPage;
   List<String> get pages => _pages;
 
   Future<Result<void>> _loadBook() async {
@@ -40,7 +40,7 @@ class ReaderViewModel extends ChangeNotifier {
     final result = await _libraryRepository.getBook(_bookId);
     switch (result) {
       case Ok():
-        _currentPage = result.value.currentPage;
+        _currentPage = result.value.currentPage ?? 0;
         notifyListeners();
         return Result.ok(null);
       case Error():

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
+// import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,23 +8,32 @@ import 'package:saf/saf.dart';
 
 class LocalStorageService {
   Future<Archive?> decodeArchive(String path) async {
-    final saf = Saf();
-    Stream<List<int>> byteStream = await saf.readFileStream(path);
-    List<int> bytes = [];
-    await for (final byteList in byteStream) {
-      for (final byte in byteList) {
-        bytes.add(byte);
+    InputStream stream;
+    String archiveType;
+    if (Platform.isAndroid) {
+      final saf = Saf();
+      Stream<List<int>> byteStream = await saf.readFileStream(path);
+      List<int> bytes = [];
+      await for (final byteList in byteStream) {
+        for (final byte in byteList) {
+          bytes.add(byte);
+        }
       }
+      stream = InputMemoryStream(bytes);
+      archiveType = (await saf.stat(path))!.name.split('.').last;
+    } else {
+      stream = InputFileStream(path);
+      archiveType = path.split('.').last;
     }
 
     Archive? archive;
-    final archiveType = (await saf.stat(path))!.name.split('.').last;
     switch (archiveType) {
       case 'cbz' || 'zip':
-        archive = ZipDecoder().decodeStream(InputMemoryStream(bytes));
+        archive = ZipDecoder().decodeStream(stream);
       case 'cbt' || 'cbz':
-        archive = TarDecoder().decodeStream(InputMemoryStream(bytes));
+        archive = TarDecoder().decodeStream(stream);
     }
+
     return archive;
   }
 
@@ -33,9 +42,14 @@ class LocalStorageService {
   }
 
   Future<List<String>> getFiles(String path) async {
-    final saf = Saf();
-    final safDocumentFiles = await saf.list(path);
-    return safDocumentFiles.map((file) => file.uri).toList();
+    if (Platform.isAndroid) {
+      final saf = Saf();
+      final safDocumentFiles = await saf.list(path);
+      return safDocumentFiles.map((file) => file.uri).toList();
+    } else {
+      final files = Directory(path).listSync();
+      return files.map((file) => file.path).toList();
+    }
   }
 
   Future<String> getFileType(String path) async {
@@ -69,16 +83,14 @@ class LocalStorageService {
     }
   }
 
-  Future<bool> isDir(String uri) async {
-    final saf = Saf();
-    final safDocumentFile = await saf.stat(uri);
-    return safDocumentFile!.isDir;
-  }
-
-  // TODO: Add support for non-Android platforms
-  Future<Stream<Uint8List>> readFileStream(String uri) async {
-    final saf = Saf();
-    return await saf.readFileStream(uri);
+  Future<bool> isDir(String path) async {
+    if (Platform.isAndroid) {
+      final saf = Saf();
+      final safDocumentFile = await saf.stat(path);
+      return safDocumentFile!.isDir;
+    } else {
+      return Directory(path).exists();
+    }
   }
 
   Future<String?> selectFolder() async {
