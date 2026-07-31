@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:manga_reader/data/models/book_item.dart';
+import 'package:manga_reader/data/models/folder_item.dart';
+import 'package:manga_reader/ui/widgets/book_card.dart';
+import 'package:manga_reader/ui/screens/library/widgets/folder_card.dart';
 
 import 'library_view_model.dart';
 
@@ -60,7 +64,7 @@ class _LibraryViewState extends State<LibraryView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text('Error loading Library'),
-                          TextButton(
+                          FilledButton(
                             onPressed: widget.viewModel.load.execute,
                             child: Text('Try Again'),
                           ),
@@ -74,7 +78,7 @@ class _LibraryViewState extends State<LibraryView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text('No folders found'),
-                            TextButton(
+                            FilledButton(
                               onPressed: widget.viewModel.addFolder.execute,
                               child: Text('Add Folder'),
                             ),
@@ -103,7 +107,14 @@ class _LibraryViewState extends State<LibraryView> {
                         crossAxisSpacing: 10,
                         children: [
                           for (final item in widget.viewModel.libraryItems)
-                            item!.buildCard(context),
+                            if (item.runtimeType == FolderItem)
+                              FolderCard(folder: item as FolderItem)
+                            else
+                              BookCard(
+                                book: item as BookItem,
+                                setReadingStatus:
+                                    widget.viewModel.setReadingStatus,
+                              ),
                         ],
                       ),
                     );

@@ -15,11 +15,15 @@ class ReaderView extends StatefulWidget {
 }
 
 class _ReaderViewState extends State<ReaderView> {
-  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  void _onPageChanged(int page) {
+    _currentPage = page;
+  }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    widget.viewModel.updateBook.execute(_currentPage);
+    PageController().dispose();
     super.dispose();
   }
 
@@ -28,17 +32,17 @@ class _ReaderViewState extends State<ReaderView> {
     return ListenableBuilder(
       listenable: widget.viewModel,
       builder: (context, child) {
-        if (widget.viewModel.load.running) {
+        if (widget.viewModel.loadBook.running) {
           return Center(child: CircularProgressIndicator());
         }
 
-        if (widget.viewModel.load.error) {
+        if (widget.viewModel.loadBook.error) {
           return Center(
             child: Column(
               children: [
                 Text('Error opening book'),
                 FilledButton(
-                  onPressed: widget.viewModel.load.execute,
+                  onPressed: widget.viewModel.loadBook.execute,
                   child: Text('Try Again'),
                 ),
               ],
@@ -51,7 +55,10 @@ class _ReaderViewState extends State<ReaderView> {
             Navigator.of(context).push(ReaderMenu());
           },
           child: PageView(
-            controller: _pageController,
+            controller: PageController(
+              initialPage: widget.viewModel.currentPage ?? 0,
+            ),
+            onPageChanged: _onPageChanged,
             reverse: true,
             children: [
               for (final page in widget.viewModel.pages) Image.file(File(page)),

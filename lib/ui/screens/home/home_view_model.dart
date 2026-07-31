@@ -8,11 +8,13 @@ import '../../../utils/result.dart';
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({required this._libraryRepository}) {
     load = Command0(_load)..execute();
+    setReadingStatus = Command1(_setReadingStatus);
   }
 
   final LibraryRepository _libraryRepository;
 
   late final Command0 load;
+  late final Command1<void, String> setReadingStatus;
 
   final List<BookItem> _inProgressBooks = [];
 
@@ -25,17 +27,31 @@ class HomeViewModel extends ChangeNotifier {
       case Ok():
         final books = booksResult.value;
         if (books.isNotEmpty) {
+          books.removeWhere(
+            (book) => book!.readingStatus != ReadingStatus.inProgress,
+          );
+          books.sort((a, b) => b!.lastRead!.compareTo(a!.lastRead!));
           for (final book in books) {
-            if (book!.readingStatus == ReadingStatus.inProgress) {
-              _inProgressBooks.add(book);
-              notifyListeners();
-            }
+            _inProgressBooks.add(book!);
           }
         }
         notifyListeners();
         return Result.ok(null);
       case Error():
         return Result.error(booksResult.error);
+    }
+  }
+
+  Future<Result<void>> _setReadingStatus(String id) async {
+    final result = await _libraryRepository.getBook(id);
+    switch (result) {
+      case Ok():
+        final book = result.value;
+        book.readingStatus = ReadingStatus.inProgress;
+        await _libraryRepository.updateBook(book);
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
     }
   }
 }

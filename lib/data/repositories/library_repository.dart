@@ -55,6 +55,15 @@ class LibraryRepository {
     }
   }
 
+  Future<Result<BookItem>> getBook(String id) async {
+    try {
+      final book = await _databaseService.getBook(id);
+      return Result.ok(book);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<FolderItem>> getFolder(String id) async {
     try {
       final folder = await _databaseService.getFolder(id);

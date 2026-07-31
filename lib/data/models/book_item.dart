@@ -1,10 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
 import 'library_item.dart';
-import '../../routing/routes.dart';
 
 enum BookType { book, comic, pdf }
 
@@ -57,31 +51,4 @@ class BookItem extends LibraryItem {
       lastRead = DateTime.tryParse(map['last_read'].toString()),
       currentPage = int.tryParse(map['current_page'].toString()),
       super.fromMap();
-
-  @override
-  Widget buildCard(BuildContext context) {
-    return Column(
-      children: [
-        Card(
-          clipBehavior: Clip.hardEdge,
-          child: InkWell(
-            child: () {
-              if (thumbnail != null) {
-                return Image.file(File(thumbnail!));
-              } else {
-                return SizedBox();
-              }
-            }(),
-            onTap: () {
-              context.pushNamed(
-                RouteNames.reader,
-                pathParameters: {'bookId': id},
-              );
-            },
-          ),
-        ),
-        Text(name),
-      ],
-    );
-  }
 }

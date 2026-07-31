@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 abstract class LibraryItem {
   final String id;
   String name;
@@ -31,6 +29,4 @@ abstract class LibraryItem {
       path = map['path'].toString(),
       thumbnail = map['thumbnail'].toString(),
       parentId = map['parent_id'].toString();
-
-  Widget buildCard(BuildContext context);
 }

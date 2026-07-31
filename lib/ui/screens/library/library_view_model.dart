@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:manga_reader/data/models/book_item.dart';
 
 import '../../../data/models/library_item.dart';
 import '../../../data/repositories/library_repository.dart';
@@ -11,6 +12,7 @@ class LibraryViewModel extends ChangeNotifier {
     deleteFolder = Command1(_deleteFolder);
     load = Command0(_load)..execute();
     loadFolderName = Command0(_loadFolderName)..execute();
+    setReadingStatus = Command1(_setReadingStatus);
   }
 
   final String? _folderId;
@@ -20,6 +22,7 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command1<void, String> deleteFolder;
   late final Command0 load;
   late final Command0 loadFolderName;
+  late final Command1<void, String> setReadingStatus;
 
   String _title = 'Library';
   final List<LibraryItem?> _libraryItems = [];
@@ -68,8 +71,8 @@ class LibraryViewModel extends ChangeNotifier {
               .contains(item.id)) {
             _libraryItems.add(item);
           }
-          notifyListeners();
         }
+        notifyListeners();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
@@ -89,5 +92,18 @@ class LibraryViewModel extends ChangeNotifier {
       }
     }
     return Result.ok(null);
+  }
+
+  Future<Result<void>> _setReadingStatus(String id) async {
+    final result = await _libraryRepository.getBook(id);
+    switch (result) {
+      case Ok():
+        final book = result.value;
+        book.readingStatus = ReadingStatus.inProgress;
+        _libraryRepository.updateBook(book);
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
   }
 }
