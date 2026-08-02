@@ -15,15 +15,20 @@ class ReaderView extends StatefulWidget {
 }
 
 class _ReaderViewState extends State<ReaderView> {
-  int _currentPage = 0;
+  int? _currentPage;
+
+  int _initialPage() {
+    _currentPage ??= widget.viewModel.currentPage;
+    return _currentPage!;
+  }
+
   void _onPageChanged(int page) {
     _currentPage = page;
   }
 
   @override
   void dispose() {
-    widget.viewModel.updateBook.execute(_currentPage);
-    PageController().dispose();
+    widget.viewModel.updateBook.execute(_currentPage!);
     super.dispose();
   }
 
@@ -52,12 +57,10 @@ class _ReaderViewState extends State<ReaderView> {
 
         return GestureDetector(
           onTap: () {
-            Navigator.of(context).push(ReaderMenu());
+            Navigator.of(context).push(ReaderMenu(viewModel: widget.viewModel));
           },
           child: PageView(
-            controller: PageController(
-              initialPage: widget.viewModel.currentPage,
-            ),
+            controller: PageController(initialPage: _initialPage()),
             onPageChanged: _onPageChanged,
             reverse: true,
             children: [
