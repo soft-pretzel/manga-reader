@@ -15,39 +15,46 @@ class ReaderView extends StatefulWidget {
 }
 
 class _ReaderViewState extends State<ReaderView> {
-  int? _currentPage;
+  late int currentPage;
+  late final PageController pageController;
 
-  int _initialPage() {
-    _currentPage ??= widget.viewModel.currentPage;
-    return _currentPage!;
+  Future<void> _initController() async {
+    await widget.viewModel.getCurrentPage.execute();
+    currentPage = widget.viewModel.currentPage;
+    pageController = PageController(initialPage: currentPage);
   }
 
-  void _onPageChanged(int page) {
-    _currentPage = page;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initController();
+    });
   }
 
   @override
   void dispose() {
-    widget.viewModel.updateBook.execute(_currentPage!);
+    widget.viewModel.updateBook.execute(currentPage);
+    pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.viewModel,
+      listenable: widget.viewModel.load,
       builder: (context, child) {
-        if (widget.viewModel.loadBook.running) {
+        if (widget.viewModel.load.running) {
           return Center(child: CircularProgressIndicator());
         }
 
-        if (widget.viewModel.loadBook.error) {
+        if (widget.viewModel.load.error) {
           return Center(
             child: Column(
               children: [
                 Text('Error opening book'),
                 FilledButton(
-                  onPressed: widget.viewModel.loadBook.execute,
+                  onPressed: widget.viewModel.load.execute,
                   child: Text('Try Again'),
                 ),
               ],
@@ -55,20 +62,33 @@ class _ReaderViewState extends State<ReaderView> {
           );
         }
 
-        return GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(ReaderMenu(viewModel: widget.viewModel));
-          },
-          child: PageView(
-            controller: PageController(initialPage: _initialPage()),
-            onPageChanged: _onPageChanged,
-            reverse: true,
-            children: [
-              for (final page in widget.viewModel.pages) Image.file(File(page)),
-            ],
-          ),
-        );
+        return child!;
       },
+      child: ListenableBuilder(
+        listenable: widget.viewModel,
+        builder: (context, _) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                ReaderMenu(
+                  currentPage: currentPage,
+                  pageController: pageController,
+                  viewModel: widget.viewModel,
+                ),
+              );
+            },
+            child: PageView(
+              controller: pageController,
+              onPageChanged: (int newPage) => currentPage = newPage,
+              reverse: true,
+              children: [
+                for (final page in widget.viewModel.pages)
+                  Image.file(File(page)),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

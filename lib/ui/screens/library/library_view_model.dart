@@ -10,8 +10,8 @@ class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({this._folderId, required this._libraryRepository}) {
     addFolder = Command0(_addFolder);
     deleteFolder = Command1(_deleteFolder);
+    getFolderName = Command0(_getFolderName)..execute();
     load = Command0(_load)..execute();
-    loadFolderName = Command0(_loadFolderName)..execute();
     setReadingStatus = Command1(_setReadingStatus);
   }
 
@@ -20,8 +20,8 @@ class LibraryViewModel extends ChangeNotifier {
 
   late final Command0 addFolder;
   late final Command1<void, String> deleteFolder;
+  late final Command0 getFolderName;
   late final Command0 load;
-  late final Command0 loadFolderName;
   late final Command1<void, String> setReadingStatus;
 
   String _title = 'Library';
@@ -61,6 +61,21 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
+  Future<Result<void>> _getFolderName() async {
+    if (_folderId != null) {
+      final result = await _libraryRepository.getFolder(_folderId);
+      switch (result) {
+        case Ok():
+          _title = result.value.name;
+          notifyListeners();
+          return Result.ok(null);
+        case Error():
+          return Result.error(result.error);
+      }
+    }
+    return Result.ok(null);
+  }
+
   Future<Result<void>> _load() async {
     final result = await _libraryRepository.getLibraryItems(_folderId);
     switch (result) {
@@ -77,21 +92,6 @@ class LibraryViewModel extends ChangeNotifier {
       case Error():
         return Result.error(result.error);
     }
-  }
-
-  Future<Result<void>> _loadFolderName() async {
-    if (_folderId != null) {
-      final result = await _libraryRepository.getFolder(_folderId);
-      switch (result) {
-        case Ok():
-          _title = result.value.name;
-          notifyListeners();
-          return Result.ok(null);
-        case Error():
-          return Result.error(result.error);
-      }
-    }
-    return Result.ok(null);
   }
 
   Future<Result<void>> _setReadingStatus(String id) async {

@@ -39,7 +39,7 @@ class _LibraryViewState extends State<LibraryView> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.viewModel,
+      listenable: widget.viewModel.getFolderName,
       builder: (context, child) {
         return Column(
           children: [
@@ -53,7 +53,7 @@ class _LibraryViewState extends State<LibraryView> {
               child: RefreshIndicator(
                 onRefresh: widget.viewModel.load.execute,
                 child: ListenableBuilder(
-                  listenable: widget.viewModel,
+                  listenable: widget.viewModel.load,
                   builder: (context, child) {
                     if (widget.viewModel.load.running) {
                       return Center(child: CircularProgressIndicator());
@@ -72,53 +72,59 @@ class _LibraryViewState extends State<LibraryView> {
                       );
                     }
 
-                    if (widget.viewModel.libraryItems.isEmpty) {
-                      if (widget.viewModel.title == 'Library') {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('No folders found'),
-                            FilledButton(
-                              onPressed: widget.viewModel.addFolder.execute,
-                              child: Text('Add Folder'),
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('No books found'),
-                            TextButton(
-                              onPressed: widget.viewModel.load.execute,
-                              child: Text('Reload'),
-                            ),
-                          ],
-                        );
-                      }
-                    }
-
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: GridView.count(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.6,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        children: [
-                          for (final item in widget.viewModel.libraryItems)
-                            if (item.runtimeType == FolderItem)
-                              FolderCard(folder: item as FolderItem)
-                            else
-                              BookCard(
-                                book: item as BookItem,
-                                setReadingStatus:
-                                    widget.viewModel.setReadingStatus,
-                              ),
-                        ],
-                      ),
-                    );
+                    return child!;
                   },
+                  child: ListenableBuilder(
+                    listenable: widget.viewModel,
+                    builder: (context, _) {
+                      if (widget.viewModel.libraryItems.isEmpty) {
+                        if (widget.viewModel.title == 'Library') {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('No folders found'),
+                              FilledButton(
+                                onPressed: widget.viewModel.addFolder.execute,
+                                child: Text('Add Folder'),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('No books found'),
+                              TextButton(
+                                onPressed: widget.viewModel.load.execute,
+                                child: Text('Reload'),
+                              ),
+                            ],
+                          );
+                        }
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.6,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          children: [
+                            for (final item in widget.viewModel.libraryItems)
+                              if (item.runtimeType == FolderItem)
+                                FolderCard(folder: item as FolderItem)
+                              else
+                                BookCard(
+                                  book: item as BookItem,
+                                  setReadingStatus:
+                                      widget.viewModel.setReadingStatus,
+                                ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
