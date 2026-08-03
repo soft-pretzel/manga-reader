@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'reader_view_model.dart';
 import 'widgets/reader_menu.dart';
@@ -15,18 +16,21 @@ class ReaderView extends StatefulWidget {
 }
 
 class _ReaderViewState extends State<ReaderView> {
-  late int currentPage;
-  late final PageController pageController;
+  late final PageController _pageController;
 
   Future<void> _initController() async {
     await widget.viewModel.getCurrentPage.execute();
-    currentPage = widget.viewModel.currentPage;
-    pageController = PageController(initialPage: currentPage);
+    _pageController = PageController(initialPage: widget.viewModel.currentPage);
+  }
+
+  void _onPageChanged(int newPage) {
+    widget.viewModel.updateBook.execute(newPage);
   }
 
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initController();
     });
@@ -34,8 +38,8 @@ class _ReaderViewState extends State<ReaderView> {
 
   @override
   void dispose() {
-    widget.viewModel.updateBook.execute(currentPage);
-    pageController.dispose();
+    _pageController.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
@@ -69,17 +73,17 @@ class _ReaderViewState extends State<ReaderView> {
         builder: (context, _) {
           return GestureDetector(
             onTap: () {
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
               Navigator.of(context).push(
                 ReaderMenu(
-                  currentPage: currentPage,
-                  pageController: pageController,
+                  pageController: _pageController,
                   viewModel: widget.viewModel,
                 ),
               );
             },
             child: PageView(
-              controller: pageController,
-              onPageChanged: (int newPage) => currentPage = newPage,
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
               reverse: true,
               children: [
                 for (final page in widget.viewModel.pages)

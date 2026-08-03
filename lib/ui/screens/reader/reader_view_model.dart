@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:manga_reader/data/models/book_item.dart';
 
 import '../../../data/repositories/library_repository.dart';
 import '../../../utils/command.dart';
@@ -18,21 +19,31 @@ class ReaderViewModel extends ChangeNotifier {
   late final Command0 getCurrentPage;
   late final Command1<void, int> updateBook;
 
+  BookItem? _book;
   int _currentPage = 0;
   List<String> _pages = [];
 
+  BookItem? get book => _book;
   int get currentPage => _currentPage;
   List<String> get pages => _pages;
 
   Future<Result<void>> _load() async {
-    final result = await _libraryRepository.openBook(_bookId);
-    switch (result) {
+    final pagesResult = await _libraryRepository.openBook(_bookId);
+    switch (pagesResult) {
       case Ok():
-        _pages = result.value;
+        _pages = pagesResult.value;
         notifyListeners();
-        return Result.ok(null);
+        final bookResult = await _libraryRepository.getBook(_bookId);
+        switch (bookResult) {
+          case Ok():
+            _book = bookResult.value;
+            notifyListeners();
+            return Result.ok(null);
+          case Error():
+            return Result.error(bookResult.error);
+        }
       case Error():
-        return Result.error(result.error);
+        return Result.error(pagesResult.error);
     }
   }
 
@@ -55,6 +66,9 @@ class ReaderViewModel extends ChangeNotifier {
         final book = result.value;
         book.currentPage = currentPage;
         book.lastRead = DateTime.now();
+        if (currentPage + 4 >= _pages.length) {
+          book.readingStatus = ReadingStatus.finished;
+        }
         _libraryRepository.updateBook(book);
         return Result.ok(null);
       case Error():
