@@ -17,6 +17,10 @@ class ReaderView extends StatefulWidget {
 
 class _ReaderViewState extends State<ReaderView> {
   late final PageController _pageController;
+  var _scrollPhysics = ScrollPhysics();
+  final _transformationController = TransformationController();
+  var _tapDownDetails = TapDownDetails();
+  bool _zoomedIn = false;
 
   Future<void> _initController() async {
     await widget.viewModel.getCurrentPage.execute();
@@ -39,6 +43,7 @@ class _ReaderViewState extends State<ReaderView> {
   @override
   void dispose() {
     _pageController.dispose();
+    _transformationController.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
@@ -81,14 +86,37 @@ class _ReaderViewState extends State<ReaderView> {
                 ),
               );
             },
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              reverse: true,
-              children: [
-                for (final page in widget.viewModel.pages)
-                  Image.file(File(page)),
-              ],
+            onDoubleTapDown: (d) => _tapDownDetails = d,
+            onDoubleTap: () {
+              if (_zoomedIn) {
+                _transformationController.value = Matrix4.identity();
+                setState(() {
+                  _scrollPhysics = PageScrollPhysics();
+                });
+                _zoomedIn = false;
+              } else {
+                final position = _tapDownDetails.localPosition;
+                _transformationController.value = Matrix4.identity()
+                  ..translateByDouble(-position.dx * 2, -position.dy * 2, 1, 1)
+                  ..scaleByDouble(3, 3, 1, 1);
+                setState(() {
+                  _scrollPhysics = NeverScrollableScrollPhysics();
+                });
+                _zoomedIn = true;
+              }
+            },
+            child: InteractiveViewer(
+              transformationController: _transformationController,
+              child: PageView(
+                controller: _pageController,
+                physics: _scrollPhysics,
+                onPageChanged: _onPageChanged,
+                reverse: true,
+                children: [
+                  for (final page in widget.viewModel.pages)
+                    Image.file(File(page)),
+                ],
+              ),
             ),
           );
         },
