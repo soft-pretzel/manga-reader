@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:manga_reader/ui/widgets/book_card.dart';
 
 import 'home_view_model.dart';
+import '../../widgets/book_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key, required this.viewModel});
@@ -53,6 +53,7 @@ class _HomeViewState extends State<HomeView> {
                   if (widget.viewModel.inProgressBooks.isEmpty) {
                     return Center(
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text('Start reading from the Library page'),
                           FilledButton(

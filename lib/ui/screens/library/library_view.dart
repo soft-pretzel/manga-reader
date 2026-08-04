@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:manga_reader/data/models/book_item.dart';
-import 'package:manga_reader/data/models/folder_item.dart';
-import 'package:manga_reader/ui/widgets/book_card.dart';
-import 'package:manga_reader/ui/screens/library/widgets/folder_card.dart';
 
 import 'library_view_model.dart';
+import 'widgets/folder_card.dart';
+import '../../widgets/book_card.dart';
+import '../../../data/models/book_item.dart';
+import '../../../data/models/folder_item.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key, required this.viewModel});
@@ -53,7 +53,10 @@ class _LibraryViewState extends State<LibraryView> {
               child: RefreshIndicator(
                 onRefresh: widget.viewModel.load.execute,
                 child: ListenableBuilder(
-                  listenable: widget.viewModel.load,
+                  listenable: Listenable.merge([
+                    widget.viewModel.load,
+                    widget.viewModel.addFolder,
+                  ]),
                   builder: (context, child) {
                     if (widget.viewModel.load.running) {
                       return Center(child: CircularProgressIndicator());
@@ -70,6 +73,10 @@ class _LibraryViewState extends State<LibraryView> {
                           ),
                         ],
                       );
+                    }
+
+                    if (widget.viewModel.addFolder.running) {
+                      return Center(child: CircularProgressIndicator());
                     }
 
                     return child!;

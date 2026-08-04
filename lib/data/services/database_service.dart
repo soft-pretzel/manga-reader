@@ -3,58 +3,31 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/book_item.dart';
-import '../models/folder_item.dart';
-import '../models/library_item.dart';
+import '../models/book_model.dart';
+import '../models/library_model.dart';
+import '../models/series_model.dart';
 
 final uuid = Uuid();
 
 class DatabaseService {
-  Future<void> deleteBook(String id) async {
-    final db = await _database();
-    await db.delete('books', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<bool> deleteFolder(String id) async {
-    final db = await _database();
-    final result = await db.delete('folders', where: 'id = ?', whereArgs: [id]);
-    return result != 0;
-  }
-
   Future<String> generateId() async {
     return uuid.v7();
   }
 
-  Future<List<BookItem>> getAllBooks() async {
+  Future<List<BookModel>> getAllBooks() async {
     final db = await _database();
     final List<Map<String, Object?>> booksMap = await db.query('books');
-    return [for (final map in booksMap) BookItem.fromMap(map)];
+    return [for (final map in booksMap) BookModel.fromMap(map)];
   }
 
-  Future<BookItem> getBook(String id) async {
+  Future<BookModel> getBook(String id) async {
     final db = await _database();
     final List<Map<String, Object?>> bookMap = await db.query(
       'books',
       where: 'id = ?',
       whereArgs: [id],
     );
-    return BookItem.fromMap(bookMap.single);
-  }
-
-  Future<List<FolderItem>> getAllFolders() async {
-    final db = await _database();
-    final List<Map<String, Object?>> foldersMap = await db.query('folders');
-    return [for (final map in foldersMap) FolderItem.fromMap(map)];
-  }
-
-  Future<FolderItem> getFolder(String id) async {
-    final db = await _database();
-    final List<Map<String, Object?>> folderMap = await db.query(
-      'folders',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    return FolderItem.fromMap(folderMap.single);
+    return BookModel.fromMap(bookMap.single);
   }
 
   Future<List<LibraryItem>> getLibraryItems([String? parentId]) async {
@@ -71,28 +44,31 @@ class DatabaseService {
       where: parentId != null ? 'parent_id = ?' : 'parent_id IS NULL',
       whereArgs: parentId != null ? [parentId] : null,
     );
-    libraryItems.addAll(books.map((map) => BookItem.fromMap(map)));
+    libraryItems.addAll(books.map((map) => BookModel.fromMap(map)));
     return libraryItems;
   }
 
-  Future<void> insertBook(BookItem book) async {
+  Future<bool> insertBook(BookModel book) async {
     final db = await _database();
-    await db.insert('books', book.toMap());
+    final result = await db.insert('books', book.toMap());
+    return result != 0;
   }
 
-  Future<int> insertFolder(FolderItem folder) async {
+  Future<bool> insertFolder(FolderItem folder) async {
     final db = await _database();
-    return await db.insert('folders', folder.toMap());
+    final result = await db.insert('folders', folder.toMap());
+    return result != 0;
   }
 
-  Future<void> updateBook(BookItem book) async {
+  Future<bool> updateBook(BookModel book) async {
     final db = await _database();
-    await db.update(
+    final result = await db.update(
       'books',
       book.toMap(),
       where: 'id = ?',
       whereArgs: [book.id],
     );
+    return result != 0;
   }
 
   Future<bool> updateFolder(FolderItem folder) async {
@@ -114,28 +90,33 @@ class DatabaseService {
       path,
       onCreate: (db, version) async {
         await db.execute('''
-CREATE TABLE folders (
+CREATE TABLE books (
 id TEXT PRIMARY KEY,
+current_page INTEGER,
+date_added TEXT NOT NULL,
+folder_id TEXT NOT NULL,
+last_read TEXT,
 name TEXT NOT NULL,
 path TEXT NOT NULL,
-thumbnail TEXT,
-parent_id TEXT,
-FOREIGN KEY (parent_id) REFERENCES folders(id)
+reading_status INTEGER NOT NULL,
+series_id TEXT,
+thumbnail TEXT NOT NULL,
+FOREIGN KEY(folder_id) REFERENCES folders(id),
+FOREIGN KEY(series_id) REFERENCES series(id)
 ) WITHOUT ROWID;
 ''');
         await db.execute('''
-CREATE TABLE books (
+CREATE TABLE folders (
 id TEXT PRIMARY KEY,
-name TEXT NOT NULL,
-path TEXT NOT NULL,
-thumbnail TEXT,
-parent_id TEXT,
-book_type TEXT NOT NULL,
 date_added TEXT NOT NULL,
-reading_status TEXT NOT NULL,
-last_read TEXT,
-current_page INTEGER,
-FOREIGN KEY(parent_id) REFERENCES folders(id)
+path TEXT NOT NULL,
+) WITHOUT ROWID;
+''');
+        await db.execute('''
+CREATE TABLE series (
+id TEXT PRIMARY KEY,
+date_added TEXT NOT NULL,
+name TEXT NOT NULL,
 ) WITHOUT ROWID;
 ''');
       },

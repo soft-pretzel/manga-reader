@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import '../models/book_item.dart';
-import '../models/folder_item.dart';
+import '../models/series_item.dart';
 import '../models/library_item.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
@@ -28,7 +28,11 @@ class LibraryRepository {
       final path = await _localStorageService.selectFolder();
       if (path != null) {
         final folder = await _saveFolder(path, null);
-        return Result.ok(folder);
+        if (folder != null) {
+          return Result.ok(folder.name);
+        } else {
+          return Result.ok(null);
+        }
       } else {
         return Result.ok(null);
       }
@@ -134,15 +138,25 @@ class LibraryRepository {
     }
   }
 
+  Future<Result<void>> updateFolder(FolderItem folder) async {
+    try {
+      await _databaseService.updateFolder(folder);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<void> _parseFolder(FolderItem folder) async {
     final files = await _localStorageService.getFiles(folder.path);
     for (final file in files) {
       if (await _localStorageService.isDir(file)) {
-        _saveFolder(file, folder.id);
+        await _saveFolder(file, folder.id);
       } else {
         await _saveBook(file, folder.id);
       }
     }
+    await updateFolderThumbnails();
   }
 
   Future<void> _saveBook(String path, String parentId) async {
@@ -163,19 +177,18 @@ class LibraryRepository {
       id: id,
       name: name,
       path: path,
+      dateAdded: DateTime.now(),
       thumbnail: await _saveThumbnail(id, path),
       bookType: bookType,
-      dateAdded: DateTime.now(),
       readingStatus: ReadingStatus.notStarted,
       parentId: parentId,
     );
 
-    _databaseService.insertBook(book);
+    await _databaseService.insertBook(book);
   }
 
-  Future<String> _saveFolder(String path, String? parentId) async {
+  Future<FolderItem?> _saveFolder(String path, String? parentId) async {
     final folders = await _databaseService.getAllFolders();
-    String newFolderName = '';
 
     if (!folders.map((folder) => folder.path).contains(path)) {
       final id = await _databaseService.generateId();
@@ -184,15 +197,16 @@ class LibraryRepository {
         id: id,
         name: name,
         path: path,
+        dateAdded: DateTime.now(),
         parentId: parentId,
       );
 
-      _databaseService.insertFolder(folder);
-      _parseFolder(folder);
-      newFolderName = folder.name;
+      await _databaseService.insertFolder(folder);
+      await _parseFolder(folder);
+      return folder;
     }
 
-    return newFolderName;
+    return null;
   }
 
   Future<String?> _saveThumbnail(String id, String path) async {
@@ -219,5 +233,18 @@ class LibraryRepository {
     }
 
     return thumbnail;
+  }
+
+  Future<Result<void>> updateFolderThumbnails() async {
+    var folders = await _databaseService.getAllFolders();
+    folders.sort((a, b) => a.dateAdded.compareTo(b.dateAdded));
+    for (final folder in folders) {
+      final contents = await _databaseService.getLibraryItems(folder.id);
+      contents.sort((a, b) => a.name.compareTo(b.name));
+      folder.thumbnail = contents.first.thumbnail;
+      _databaseService.updateFolder(folder);
+      folders = await _databaseService.getAllFolders();
+    }
+    return Result.ok(null);
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:manga_reader/data/models/book_item.dart';
 
+import '../../../data/models/book_item.dart';
 import '../../../data/models/library_item.dart';
 import '../../../data/repositories/library_repository.dart';
 import '../../../utils/command.dart';
@@ -13,6 +13,7 @@ class LibraryViewModel extends ChangeNotifier {
     getFolderName = Command0(_getFolderName)..execute();
     load = Command0(_load)..execute();
     setReadingStatus = Command1(_setReadingStatus);
+    // update = Command0(_update);
   }
 
   final String? _folderId;
@@ -23,6 +24,7 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command0 getFolderName;
   late final Command0 load;
   late final Command1<void, String> setReadingStatus;
+  // late final Command0 update;
 
   String _title = 'Library';
   final List<LibraryItem?> _libraryItems = [];
@@ -80,13 +82,8 @@ class LibraryViewModel extends ChangeNotifier {
     final result = await _libraryRepository.getLibraryItems(_folderId);
     switch (result) {
       case Ok():
-        for (final item in result.value) {
-          if (!_libraryItems
-              .map((libraryItem) => libraryItem?.id)
-              .contains(item.id)) {
-            _libraryItems.add(item);
-          }
-        }
+        _libraryItems.clear();
+        _libraryItems.addAll(result.value);
         notifyListeners();
         return Result.ok(null);
       case Error():

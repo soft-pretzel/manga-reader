@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,7 +16,14 @@ class FolderCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        child: Center(child: Text(folder.name)),
+        child: () {
+          // if (folder.thumbnail != null) {
+          //   return Image.file(File(folder.thumbnail!));
+          // } else {
+          print(folder.thumbnail);
+          return Center(child: Text(folder.name));
+          // }
+        }(),
         onTap: () {
           context.pushNamed(
             RouteNames.folder,
