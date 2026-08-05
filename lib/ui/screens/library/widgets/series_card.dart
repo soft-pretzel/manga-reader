@@ -6,10 +6,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../data/models/series_model.dart';
 import '../../../../routing/routes.dart';
 
-class FolderCard extends StatelessWidget {
-  const FolderCard({super.key, required this.folder});
+class SeriesCard extends StatelessWidget {
+  const SeriesCard({super.key, required this.series});
 
-  final SeriesModel folder;
+  final SeriesModel series;
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +17,16 @@ class FolderCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         child: () {
-          // if (folder.thumbnail != null) {
-          //   return Image.file(File(folder.thumbnail!));
-          // } else {
-          return Center(child: Text(folder.name));
-          // }
+          if (series.thumbnail != null) {
+            return Image.file(File(series.thumbnail!));
+          } else {
+            return Center(child: Text(series.name));
+          }
         }(),
         onTap: () {
           context.pushNamed(
-            RouteNames.folder,
-            pathParameters: {'folderId': folder.id},
+            RouteNames.series,
+            pathParameters: {'seriesId': series.id},
           );
         },
       ),

@@ -6,6 +6,7 @@ class SeriesModel extends LibraryModel {
     required super.dateAdded,
     required super.name,
     super.seriesId,
+    super.thumbnail,
   });
 
   SeriesModel.fromMap(super.map) : super.fromMap();

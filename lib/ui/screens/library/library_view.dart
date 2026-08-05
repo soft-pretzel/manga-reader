@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'library_view_model.dart';
-import 'widgets/folder_card.dart';
+import 'widgets/series_card.dart';
 import '../../widgets/book_card.dart';
 import '../../../data/models/book_model.dart';
 import '../../../data/models/series_model.dart';
@@ -71,15 +71,12 @@ class _LibraryViewState extends State<LibraryView> {
                       crossAxisSpacing: 10,
                       children: [
                         for (final item in widget.viewModel.libraryItems)
-                          Card(child: Text(item!.name)),
-                        // if (item.runtimeType == SeriesModel)
-                        //   FolderCard(folder: item as SeriesModel)
-                        // else
-                        //   BookCard(
-                        //     book: item as BookModel,
-                        //     setReadingStatus:
-                        //         widget.viewModel.setReadingStatus,
-                        //   ),
+                        if (item.runtimeType == SeriesModel)
+                          SeriesCard(series: item as SeriesModel)
+                        else
+                          BookCard(
+                            book: item as BookModel,
+                          ),
                       ],
                     ),
                   );

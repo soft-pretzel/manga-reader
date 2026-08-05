@@ -8,13 +8,11 @@ import '../../../utils/result.dart';
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({required this._libraryRepository}) {
     load = Command0(_load)..execute();
-    setReadingStatus = Command1(_setReadingStatus);
   }
 
   final LibraryRepository _libraryRepository;
 
   late final Command0 load;
-  late final Command1<void, String> setReadingStatus;
 
   final List<BookModel> _inProgressBooks = [];
 
@@ -35,19 +33,6 @@ class HomeViewModel extends ChangeNotifier {
         return Result.ok(null);
       case Error():
         return Result.error(booksResult.error);
-    }
-  }
-
-  Future<Result<void>> _setReadingStatus(String id) async {
-    final result = await _libraryRepository.getBook(id);
-    switch (result) {
-      case Ok():
-        final book = result.value;
-        book.readingStatus = ReadingStatus.inProgress;
-        await _libraryRepository.updateBook(book);
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
     }
   }
 }

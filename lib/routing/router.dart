@@ -56,8 +56,8 @@ final router = GoRouter(
               },
               routes: [
                 GoRoute(
-                  name: RouteNames.folder,
-                  path: RoutePaths.folder,
+                  name: RouteNames.series,
+                  path: RoutePaths.series,
                   builder: (context, state) {
                     final viewModel = LibraryViewModel(
                       seriesId: state.pathParameters['seriesId'],

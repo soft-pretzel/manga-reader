@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
@@ -10,6 +8,16 @@ import '../models/series_model.dart';
 final uuid = Uuid();
 
 class DatabaseService {
+  Future<void> deleteBook(String id) async {
+    final db = await _database();
+    await db.delete('books', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteSeries(String id) async {
+    final db = await _database();
+    await db.delete('series', where: 'id = ?', whereArgs: [id]);
+  }
+
   Future<String> generateId() async {
     return uuid.v7();
   }
@@ -119,11 +127,9 @@ class DatabaseService {
   }
 
   Future<Database> _database() async {
-    final path =
-        '${await getDatabasesPath()}${Platform.pathSeparator}manga_reader.db';
-    // await deleteDatabase(path);
+    // await deleteDatabase('manga_reader.db');
     return openDatabase(
-      path,
+      'manga_reader.db',
       onCreate: (db, version) async {
         await db.execute('''
 CREATE TABLE books (
@@ -135,6 +141,7 @@ name TEXT NOT NULL,
 path TEXT NOT NULL,
 reading_status INTEGER NOT NULL,
 series_id TEXT,
+thumbnail TEXT,
 FOREIGN KEY(series_id) REFERENCES series(id)
 ) WITHOUT ROWID;
 ''');
@@ -144,6 +151,7 @@ id TEXT PRIMARY KEY,
 date_added TEXT NOT NULL,
 name TEXT NOT NULL,
 series_id TEXT,
+thumbnail TEXT,
 FOREIGN KEY(series_id) REFERENCES series(id)
 ) WITHOUT ROWID;
 ''');

@@ -7,7 +7,6 @@ class BookModel extends LibraryModel {
   DateTime? lastRead;
   final String path;
   ReadingStatus readingStatus;
-  final String? seriesId;
 
   BookModel({
     required super.id,
@@ -17,7 +16,8 @@ class BookModel extends LibraryModel {
     required super.name,
     required this.path,
     this.readingStatus = ReadingStatus.notStarted,
-    this.seriesId,
+    super.seriesId,
+    super.thumbnail,
   });
 
   @override
@@ -31,6 +31,7 @@ class BookModel extends LibraryModel {
       'path': path,
       'reading_status': readingStatus.index,
       'series_id': seriesId,
+      'thumbnail' : thumbnail,
     };
   }
 
@@ -40,6 +41,5 @@ class BookModel extends LibraryModel {
       path = map['path'].toString(),
       readingStatus =
           ReadingStatus.values[int.parse(map['reading_status'].toString())],
-      seriesId = map['series_id'].toString(),
       super.fromMap();
 }

@@ -43,10 +43,12 @@ class LocalStorageService {
   Future<List<String>> getFiles(String path) async {
     if (Platform.isAndroid) {
       final saf = Saf();
-      final safDocumentFiles = await saf.list(path);
-      return safDocumentFiles.map((file) => file.uri).toList();
+      final files = await saf.list(path);
+      return files.map((file) => file.uri).toList();
     } else {
-      final files = Directory(path).listSync();
+      final files = Directory(
+        path,
+      ).listSync(recursive: false, followLinks: false);
       return files.map((file) => file.path).toList();
     }
   }
@@ -107,13 +109,11 @@ class LocalStorageService {
 
   Future<String> writeArchiveFile(
     ArchiveFile file,
-    String path, [
-    String? name,
-  ]) async {
-    final outputPath = '$path${Platform.pathSeparator}${name ?? file.name}';
-    final outputStream = OutputFileStream(outputPath);
+    String path,
+  ) async {
+    final outputStream = OutputFileStream(path);
     file.writeContent(outputStream);
     outputStream.closeSync();
-    return outputPath;
+    return path;
   }
 }

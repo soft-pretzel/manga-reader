@@ -83,8 +83,6 @@ class _HomeViewState extends State<HomeView> {
                                       in widget.viewModel.inProgressBooks)
                                     BookCard(
                                       book: book,
-                                      setReadingStatus:
-                                          widget.viewModel.setReadingStatus,
                                     ),
                                 ],
                               ),

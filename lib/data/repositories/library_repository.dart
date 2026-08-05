@@ -94,10 +94,46 @@ class LibraryRepository {
     }
   }
 
+  Future<Result<void>> saveThumbnail(String id) async {
+    try {
+      final cache = await _localStorageService.getCache();
+      final thumbnailsCache =
+          '${cache.path}${Platform.pathSeparator}thumbnails';
+      if (!await Directory(thumbnailsCache).exists()) {
+        await Directory(thumbnailsCache).create(recursive: true);
+      }
+
+      final book = await _databaseService.getBook(id);
+      final archive = await _localStorageService.decodeArchive(book.path);
+      String? thumbnail;
+      if (archive != null) {
+        for (final file in archive) {
+          final fileType = file.name.split('.').last;
+          if (imgTypes.contains(fileType)) {
+            thumbnail =
+                '$thumbnailsCache${Platform.pathSeparator}${book.id}.$fileType';
+            await _localStorageService.writeArchiveFile(file, thumbnail);
+            break;
+          }
+        }
+      }
+
+      if (thumbnail != null) {
+        book.thumbnail = thumbnail;
+        _databaseService.updateBook(book);
+      }
+
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<void>> scanFolder() async {
     try {
       final folder = await _sharedPreferencesService.getFolder();
       if (folder != null) {
+        List<String> bookList = [];
         List<String> dirList = [folder];
         List<String?> seriesId = [null];
         int i = 0;
@@ -109,9 +145,26 @@ class LibraryRepository {
               dirList.add(file);
             } else {
               _saveBook(file, seriesId[i]);
+              bookList.add(file);
             }
           }
           i++;
+        }
+        final dbBooks = await _databaseService.getAllBooks();
+        if (dbBooks.isNotEmpty) {
+          for (final book in dbBooks) {
+            if (!bookList.contains(book!.path)) {
+              _databaseService.deleteBook(book.id);
+            }
+          }
+        }
+        final dbSeries = await _databaseService.getAllSeries();
+        if (dbSeries.isNotEmpty) {
+          for (final series in dbSeries) {
+            if (!seriesId.contains(series!.id)) {
+              _databaseService.deleteSeries(series.id);
+            }
+          }
         }
       }
       return Result.ok(null);
@@ -139,6 +192,7 @@ class LibraryRepository {
         seriesId: seriesId,
       );
       _databaseService.insertBook(book);
+      saveThumbnail(book.id);
     }
   }
 
