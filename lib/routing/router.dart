@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:manga_reader/ui/screens/settings/settings_view_model.dart';
 import 'package:provider/provider.dart';
 
 import 'routes.dart';
@@ -59,7 +60,7 @@ final router = GoRouter(
                   path: RoutePaths.folder,
                   builder: (context, state) {
                     final viewModel = LibraryViewModel(
-                      folderId: state.pathParameters['folderId'],
+                      seriesId: state.pathParameters['seriesId'],
                       libraryRepository: context.read(),
                     );
                     return LibraryView(viewModel: viewModel);
@@ -76,7 +77,10 @@ final router = GoRouter(
               name: RouteNames.settings,
               path: RoutePaths.settings,
               builder: (context, state) {
-                return SettingsView();
+                final viewModel = SettingsViewModel(
+                  settingsRepository: context.read(),
+                );
+                return SettingsView(viewModel: viewModel);
               },
             ),
           ],

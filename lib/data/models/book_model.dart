@@ -6,7 +6,7 @@ class BookModel extends LibraryModel {
   int? currentPage;
   DateTime? lastRead;
   final String path;
-  ReadingStatus readingStatus = ReadingStatus.notStarted;
+  ReadingStatus readingStatus;
   final String? seriesId;
 
   BookModel({
@@ -16,7 +16,7 @@ class BookModel extends LibraryModel {
     this.lastRead,
     required super.name,
     required this.path,
-    required this.readingStatus,
+    this.readingStatus = ReadingStatus.notStarted,
     this.seriesId,
   });
 

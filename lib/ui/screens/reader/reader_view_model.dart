@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:manga_reader/data/models/book_item.dart';
+import 'package:manga_reader/data/models/book_model.dart';
 
 import '../../../data/repositories/library_repository.dart';
 import '../../../utils/command.dart';
@@ -19,11 +19,11 @@ class ReaderViewModel extends ChangeNotifier {
   late final Command0 getCurrentPage;
   late final Command1<void, int> updateBook;
 
-  BookItem? _book;
+  BookModel? _book;
   int _currentPage = 0;
   List<String> _pages = [];
 
-  BookItem? get book => _book;
+  BookModel? get book => _book;
   int get currentPage => _currentPage;
   List<String> get pages => _pages;
 

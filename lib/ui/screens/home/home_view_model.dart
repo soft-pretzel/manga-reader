@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:manga_reader/data/repositories/library_repository.dart';
 
-import '../../../data/models/book_item.dart';
+import '../../../data/models/book_model.dart';
 import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
@@ -16,21 +16,17 @@ class HomeViewModel extends ChangeNotifier {
   late final Command0 load;
   late final Command1<void, String> setReadingStatus;
 
-  final List<BookItem> _inProgressBooks = [];
+  final List<BookModel> _inProgressBooks = [];
 
-  List<BookItem> get inProgressBooks => _inProgressBooks;
+  List<BookModel> get inProgressBooks => _inProgressBooks;
 
   Future<Result<void>> _load() async {
     _inProgressBooks.clear();
-    final booksResult = await _libraryRepository.getAllBooks();
+    final booksResult = await _libraryRepository.getInProgressBooks();
     switch (booksResult) {
       case Ok():
         final books = booksResult.value;
         if (books.isNotEmpty) {
-          books.removeWhere(
-            (book) => book!.readingStatus != ReadingStatus.inProgress,
-          );
-          books.sort((a, b) => b!.lastRead!.compareTo(a!.lastRead!));
           for (final book in books) {
             _inProgressBooks.add(book!);
           }

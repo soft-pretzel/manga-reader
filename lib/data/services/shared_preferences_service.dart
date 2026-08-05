@@ -1,30 +1,26 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../utils/result.dart';
-
 class SharedPreferencesService {
   static const _folderKey = 'folder';
 
-  Future<Result<String?>> getFolder() async {
-    try {
-      final prefs = await SharedPreferencesWithCache.create(
-        cacheOptions: SharedPreferencesWithCacheOptions(),
-      );
-      return Result.ok(prefs.getString(_folderKey));
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> deleteFolder() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.remove(_folderKey);
   }
 
-  Future<Result<void>> setFolder(String folder) async {
-    try {
-      final prefs = await SharedPreferencesWithCache.create(
-        cacheOptions: SharedPreferencesWithCacheOptions(),
-      );
-      await prefs.setString(_folderKey, folder);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<String?> getFolder() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    return prefs.getString(_folderKey);
+  }
+
+  Future<void> setFolder(String folder) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setString(_folderKey, folder);
   }
 }

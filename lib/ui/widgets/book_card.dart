@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../utils/command.dart';
-import '../../data/models/book_item.dart';
+import '../../data/models/book_model.dart';
 import '../../routing/routes.dart';
 
 class BookCard extends StatelessWidget {
@@ -14,7 +14,7 @@ class BookCard extends StatelessWidget {
     required this.setReadingStatus,
   });
 
-  final BookItem book;
+  final BookModel book;
   final Command1<void, String> setReadingStatus;
 
   @override
@@ -26,11 +26,7 @@ class BookCard extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               child: () {
-                if (book.thumbnail != null) {
-                  return Image.file(File(book.thumbnail!));
-                } else {
-                  return SizedBox();
-                }
+                return SizedBox();
               }(),
               onTap: () {
                 setReadingStatus.execute(book.id);

@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../data/models/folder_item.dart';
+import '../../../../data/models/series_model.dart';
 import '../../../../routing/routes.dart';
 
 class FolderCard extends StatelessWidget {
   const FolderCard({super.key, required this.folder});
 
-  final FolderItem folder;
+  final SeriesModel folder;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,6 @@ class FolderCard extends StatelessWidget {
           // if (folder.thumbnail != null) {
           //   return Image.file(File(folder.thumbnail!));
           // } else {
-          print(folder.thumbnail);
           return Center(child: Text(folder.name));
           // }
         }(),
