@@ -36,10 +36,6 @@ class LocalStorageService {
     return archive;
   }
 
-  Future<Directory> getCache() async {
-    return getApplicationCacheDirectory();
-  }
-
   Future<List<String>> getFiles(String path) async {
     if (Platform.isAndroid) {
       final saf = Saf();
@@ -84,6 +80,28 @@ class LocalStorageService {
     }
   }
 
+  Future<Directory> getThumbnailCache() async {
+    final cache = await getApplicationCacheDirectory();
+    final thumbnailCache = Directory(
+      '${cache.path}${Platform.pathSeparator}thumbnails',
+    );
+    if (!await thumbnailCache.exists()) {
+      await thumbnailCache.create(recursive: true);
+    }
+    return thumbnailCache;
+  }
+
+  Future<Directory> getReadingCache() async {
+    final cache = await getApplicationCacheDirectory();
+    final readingCache = Directory(
+      '${cache.path}${Platform.pathSeparator}reading',
+    );
+    if (!await readingCache.exists()) {
+      await readingCache.create(recursive: true);
+    }
+    return readingCache;
+  }
+
   Future<bool> isDir(String path) async {
     if (Platform.isAndroid) {
       final saf = Saf();
@@ -109,11 +127,13 @@ class LocalStorageService {
 
   Future<String> writeArchiveFile(
     ArchiveFile file,
-    String path,
-  ) async {
-    final outputStream = OutputFileStream(path);
+    String path, [
+    String? name,
+  ]) async {
+    final outputPath = '$path${Platform.pathSeparator}${name ?? file.name}';
+    final outputStream = OutputFileStream(outputPath);
     file.writeContent(outputStream);
     outputStream.closeSync();
-    return path;
+    return outputPath;
   }
 }

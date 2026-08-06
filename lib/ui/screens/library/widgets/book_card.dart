@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../library_view_model.dart';
-import '../../../../data/models/series_model.dart';
+import '../../../../data/models/book_model.dart';
 import '../../../../routing/routes.dart';
 
-class SeriesCard extends StatelessWidget {
-  const SeriesCard({super.key, required this.series, required this.viewModel});
+class BookCard extends StatelessWidget {
+  const BookCard({super.key, required this.book, required this.viewModel});
 
-  final SeriesModel series;
+  final BookModel book;
   final LibraryViewModel viewModel;
 
   @override
@@ -23,11 +23,11 @@ class SeriesCard extends StatelessWidget {
             margin: EdgeInsets.all(0),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              child: Thumbnail(series: series, viewModel: viewModel),
+              child: Thumbnail(book: book, viewModel: viewModel),
               onTap: () {
                 context.pushNamed(
-                  RouteNames.series,
-                  pathParameters: {'seriesId': series.id},
+                  RouteNames.reader,
+                  pathParameters: {'bookId': book.id},
                 );
               },
             ),
@@ -46,7 +46,7 @@ class SeriesCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
                       style: DefaultTextStyle.of(context).style,
-                      text: series.name,
+                      text: book.name,
                     ),
                   ),
                 ],
@@ -60,9 +60,9 @@ class SeriesCard extends StatelessWidget {
 }
 
 class Thumbnail extends StatefulWidget {
-  const Thumbnail({super.key, required this.series, required this.viewModel});
+  const Thumbnail({super.key, required this.book, required this.viewModel});
 
-  final SeriesModel series;
+  final BookModel book;
   final LibraryViewModel viewModel;
 
   @override
@@ -73,15 +73,15 @@ class _ThumbnailState extends State<Thumbnail> {
   @override
   void initState() {
     super.initState();
-    widget.viewModel.getSeriesThumbnails.execute();
+    widget.viewModel.getBookThumbnails.execute();
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.viewModel.getSeriesThumbnails,
+      listenable: widget.viewModel.getBookThumbnails,
       builder: (context, child) {
-        if (widget.viewModel.getSeriesThumbnails.error) {
+        if (widget.viewModel.getBookThumbnails.error) {
           return Center(child: Text('Error'));
         }
 
@@ -90,10 +90,10 @@ class _ThumbnailState extends State<Thumbnail> {
       child: ListenableBuilder(
         listenable: widget.viewModel,
         builder: (context, _) {
-          if (widget.series.thumbnail == null) {
+          if (widget.book.thumbnail == null) {
             return Center(child: CircularProgressIndicator());
           }
-          return Image.file(File(widget.series.thumbnail!));
+          return Image.file(File(widget.book.thumbnail!));
         },
       ),
     );

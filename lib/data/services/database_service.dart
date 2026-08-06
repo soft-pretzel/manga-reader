@@ -59,6 +59,16 @@ class DatabaseService {
     }
   }
 
+  Future<List<BookModel>> getBooksBySeries(String seriesId) async {
+    final db = await _database();
+    final mapList = await db.query(
+      'books',
+      where: 'series_id = ?',
+      whereArgs: [seriesId],
+    );
+    return [for (final map in mapList) BookModel.fromMap(map)];
+  }
+
   Future<List<BookModel?>> getInProgressBooks() async {
     final db = await _database();
     final mapList = await db.query(
@@ -97,6 +107,12 @@ class DatabaseService {
     return libraryList;
   }
 
+  Future<SeriesModel> getSeries(String id) async {
+    final db = await _database();
+    final mapList = await db.query('series', where: 'id = ?', whereArgs: [id]);
+    return SeriesModel.fromMap(mapList.single);
+  }
+
   Future<SeriesModel?> getSeriesByName(String name) async {
     final db = await _database();
     final mapList = await db.query(
@@ -123,7 +139,22 @@ class DatabaseService {
 
   Future<void> updateBook(BookModel book) async {
     final db = await _database();
-    await db.update('books', book.toMap());
+    await db.update(
+      'books',
+      book.toMap(),
+      where: 'id = ?',
+      whereArgs: [book.id],
+    );
+  }
+
+  Future<void> updateSeries(SeriesModel series) async {
+    final db = await _database();
+    await db.update(
+      'series',
+      series.toMap(),
+      where: 'id = ?',
+      whereArgs: [series.id],
+    );
   }
 
   Future<Database> _database() async {

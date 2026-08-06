@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:manga_reader/ui/screens/settings/settings_view_model.dart';
 import 'package:provider/provider.dart';
 
 import 'routes.dart';
@@ -11,6 +10,7 @@ import '../ui/screens/library/library_view.dart';
 import '../ui/screens/reader/reader_view.dart';
 import '../ui/screens/reader/reader_view_model.dart';
 import '../ui/screens/settings/settings_view.dart';
+import '../ui/screens/settings/settings_view_model.dart';
 import '../ui/widgets/scaffold_with_navigation.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -49,21 +49,21 @@ final router = GoRouter(
               name: RouteNames.library,
               path: RoutePaths.library,
               builder: (context, state) {
-                final viewModel = LibraryViewModel(
+                final libraryViewModel = LibraryViewModel(
                   libraryRepository: context.read(),
                 );
-                return LibraryView(viewModel: viewModel);
+                return LibraryView(viewModel: libraryViewModel);
               },
               routes: [
                 GoRoute(
                   name: RouteNames.series,
                   path: RoutePaths.series,
                   builder: (context, state) {
-                    final viewModel = LibraryViewModel(
+                    final libraryViewModel = LibraryViewModel(
                       seriesId: state.pathParameters['seriesId'],
                       libraryRepository: context.read(),
                     );
-                    return LibraryView(viewModel: viewModel);
+                    return LibraryView(viewModel: libraryViewModel);
                   },
                 ),
               ],

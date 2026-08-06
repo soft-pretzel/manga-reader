@@ -27,6 +27,6 @@ abstract class LibraryModel {
     : id = map['id'].toString(),
       dateAdded = DateTime.parse(map['date_added'].toString()),
       name = map['name'].toString(),
-      seriesId = map['series_id'].toString(),
-      thumbnail = map['thumbnail'].toString();
+      seriesId = map['series_id']?.toString(),
+      thumbnail = map['thumbnail']?.toString();
 }

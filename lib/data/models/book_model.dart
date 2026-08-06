@@ -31,7 +31,7 @@ class BookModel extends LibraryModel {
       'path': path,
       'reading_status': readingStatus.index,
       'series_id': seriesId,
-      'thumbnail' : thumbnail,
+      'thumbnail': thumbnail,
     };
   }
 

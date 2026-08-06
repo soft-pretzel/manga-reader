@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'home_view_model.dart';
-import '../../widgets/book_card.dart';
+import '../library/widgets/book_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key, required this.viewModel});
@@ -79,11 +79,12 @@ class _HomeViewState extends State<HomeView> {
                               child: ListView(
                                 scrollDirection: Axis.horizontal,
                                 children: [
-                                  for (final book
-                                      in widget.viewModel.inProgressBooks)
-                                    BookCard(
-                                      book: book,
-                                    ),
+                                  // for (final book
+                                  //     in widget.viewModel.inProgressBooks)
+                                  // BookCard(
+                                  //   book: book,
+                                  //   viewModel: widget.viewModel,
+                                  // ),
                                 ],
                               ),
                             ),
