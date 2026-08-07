@@ -42,13 +42,14 @@ class SeriesCard extends StatelessWidget {
               child: Wrap(
                 children: [
                   RichText(
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
                       style: DefaultTextStyle.of(context).style,
                       text: series.name,
                     ),
                   ),
+                  BookCount(series: series, viewModel: viewModel),
                 ],
               ),
             ),
@@ -96,6 +97,47 @@ class _ThumbnailState extends State<Thumbnail> {
           return Image.file(File(widget.series.thumbnail!));
         },
       ),
+    );
+  }
+}
+
+class BookCount extends StatefulWidget {
+  const BookCount({super.key, required this.series, required this.viewModel});
+
+  final SeriesModel series;
+  final LibraryViewModel viewModel;
+
+  @override
+  State<BookCount> createState() => _BookCountState();
+}
+
+class _BookCountState extends State<BookCount> {
+  String _text() {
+    if (widget.series.bookCount == 1) {
+      return '${widget.series.bookCount?.toString()} book';
+    } else {
+      return '${widget.series.bookCount?.toString() ?? '0'} books';
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.viewModel.getSeriesBookCount.execute();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.viewModel.getSeriesBookCount,
+      builder: (context, child) {
+        return RichText(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style,
+            text: _text(),
+          ),
+        );
+      },
     );
   }
 }

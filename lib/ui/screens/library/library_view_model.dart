@@ -10,6 +10,7 @@ import '../../../utils/result.dart';
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({this._seriesId, required this._libraryRepository}) {
     getBookThumbnails = Command0(_getBookThumbnails);
+    getSeriesBookCount = Command0(_getSeriesBookCount);
     getSeriesThumbnails = Command0(_getSeriesThumbnails);
     getTitle = Command0(_getTitle);
     load = Command0(_load)..execute();
@@ -20,6 +21,7 @@ class LibraryViewModel extends ChangeNotifier {
   final LibraryRepository _libraryRepository;
 
   late final Command0 getBookThumbnails;
+  late final Command0 getSeriesBookCount;
   late final Command0 getSeriesThumbnails;
   late final Command0 getTitle;
   late final Command0 load;
@@ -58,6 +60,25 @@ class LibraryViewModel extends ChangeNotifier {
               case Error():
                 return Result.error(result.error);
             }
+          }
+        }
+      }
+    }
+    return Result.ok(null);
+  }
+
+  Future<Result<void>> _getSeriesBookCount() async {
+    if (_library.isNotEmpty) {
+      for (final item in _library) {
+        if (item.runtimeType == SeriesModel) {
+          final series = item as SeriesModel;
+          final result = await _libraryRepository.getSeriesBookCount(series);
+          switch (result) {
+            case Ok():
+              series.bookCount = result.value;
+              notifyListeners();
+            case Error():
+              return Result.error(result.error);
           }
         }
       }
@@ -106,6 +127,7 @@ class LibraryViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         await _load();
+        await _getSeriesBookCount();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

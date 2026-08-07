@@ -81,6 +81,17 @@ class LibraryRepository {
     }
   }
 
+  Future<Result<int>> getSeriesBookCount(SeriesModel series) async {
+    try {
+      final items = await _databaseService.getLibrary(series.id);
+      series.bookCount = items.length;
+      _databaseService.updateSeries(series);
+      return Result.ok(items.length);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<String>> getSeriesName(String id) async {
     try {
       final series = await _databaseService.getSeries(id);

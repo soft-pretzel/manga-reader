@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'home_view_model.dart';
-import '../library/widgets/book_card.dart';
+import 'widgets/book_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key, required this.viewModel});
@@ -36,7 +36,7 @@ class _HomeViewState extends State<HomeView> {
                         Text('Error loading Home'),
                         FilledButton(
                           onPressed: () {
-                            widget.viewModel.load.execute;
+                            widget.viewModel.load.execute();
                           },
                           child: Text('Try Again'),
                         ),
@@ -65,33 +65,30 @@ class _HomeViewState extends State<HomeView> {
                     );
                   }
 
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-
-                    child: ListView(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Continue Reading'),
-                            SizedBox(
-                              height: 400,
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                children: [
-                                  // for (final book
-                                  //     in widget.viewModel.inProgressBooks)
-                                  // BookCard(
-                                  //   book: book,
-                                  //   viewModel: widget.viewModel,
-                                  // ),
-                                ],
-                              ),
+                  return ListView(
+                    padding: EdgeInsets.all(16),
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(2),
+                            child: Text('Continue Reading'),
+                          ),
+                          SizedBox(
+                            height: 600,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                for (final book
+                                    in widget.viewModel.inProgressBooks)
+                                  BookCard(book: book),
+                              ],
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                    ],
                   );
                 },
               ),

@@ -63,8 +63,8 @@ class _LibraryViewState extends State<LibraryView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text('No books found'),
-                            TextButton(
-                              onPressed: widget.viewModel.load.execute,
+                            FilledButton(
+                              onPressed: widget.viewModel.refresh.execute,
                               child: Text('Reload'),
                             ),
                           ],
@@ -76,7 +76,7 @@ class _LibraryViewState extends State<LibraryView> {
                         crossAxisCount: 3,
                         childAspectRatio: 0.51,
                         mainAxisSpacing: 4,
-                        crossAxisSpacing: 10,
+                        crossAxisSpacing: 6,
                         children: [
                           for (final item in widget.viewModel.libraryItems)
                             if (item.runtimeType == SeriesModel)

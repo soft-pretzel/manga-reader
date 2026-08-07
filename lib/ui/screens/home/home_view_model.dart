@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:manga_reader/data/repositories/library_repository.dart';
 
 import '../../../data/models/book_model.dart';
+import '../../../data/repositories/library_repository.dart';
 import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
@@ -27,9 +27,9 @@ class HomeViewModel extends ChangeNotifier {
         if (books.isNotEmpty) {
           for (final book in books) {
             _inProgressBooks.add(book!);
+            notifyListeners();
           }
         }
-        notifyListeners();
         return Result.ok(null);
       case Error():
         return Result.error(booksResult.error);

@@ -73,7 +73,7 @@ class DatabaseService {
     final db = await _database();
     final mapList = await db.query(
       'books',
-      where: 'reading_status',
+      where: 'reading_status = ?',
       whereArgs: [1],
       orderBy: 'last_read',
     );
@@ -179,6 +179,7 @@ FOREIGN KEY(series_id) REFERENCES series(id)
         await db.execute('''
 CREATE TABLE series (
 id TEXT PRIMARY KEY,
+book_count INTEGER,
 date_added TEXT NOT NULL,
 name TEXT NOT NULL,
 series_id TEXT,
