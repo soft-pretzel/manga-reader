@@ -68,8 +68,10 @@ class ReaderViewModel extends ChangeNotifier {
         book.lastRead = DateTime.now();
         if (currentPage + 4 >= _pages.length) {
           book.readingStatus = ReadingStatus.finished;
+          _libraryRepository.deleteBookCache(book.id);
         } else if (currentPage == 1) {
-          book.readingStatus = ReadingStatus.notStarted;
+          book.readingStatus = ReadingStatus.unread;
+          _libraryRepository.deleteBookCache(book.id);
         } else {
           book.readingStatus = ReadingStatus.inProgress;
         }

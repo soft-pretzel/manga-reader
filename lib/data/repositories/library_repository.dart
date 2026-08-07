@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import '../models/book_model.dart';
 import '../models/library_model.dart';
@@ -21,7 +22,16 @@ class LibraryRepository {
 
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
 
-  String? _previousBook;
+  Future<Result<void>> deleteBookCache(String id) async {
+    try {
+      final cache = await _localStorageService.getReadingCache();
+      final bookCache = Directory('${cache.path}${Platform.pathSeparator}$id');
+      await bookCache.delete();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
 
   Future<Result<List<LibraryModel?>>> getLibrary(String? seriesId) async {
     try {
@@ -134,16 +144,18 @@ class LibraryRepository {
     try {
       final book = await _databaseService.getBook(id);
       final cache = await _localStorageService.getReadingCache();
+      final bookCache = Directory(
+        '${cache.path}${Platform.pathSeparator}${book.id}',
+      );
 
       List<String> pages = [];
-      if (book.id == _previousBook) {
-        await for (final file in cache.list()) {
+      if (await bookCache.exists()) {
+        await for (final file in bookCache.list()) {
           pages.add(file.path);
         }
         return Result.ok(pages);
       } else {
-        await cache.delete(recursive: true);
-        await cache.create(recursive: true);
+        await bookCache.create(recursive: true);
       }
 
       final archive = await _localStorageService.decodeArchive(book.path);
@@ -152,14 +164,13 @@ class LibraryRepository {
           if (imgTypes.contains(file.name.split('.').last)) {
             final page = await _localStorageService.writeArchiveFile(
               file,
-              cache.path,
+              bookCache.path,
             );
             pages.add(page);
           }
         }
       }
 
-      _previousBook = book.id;
       return Result.ok(pages);
     } on Exception catch (e) {
       return Result.error(e);

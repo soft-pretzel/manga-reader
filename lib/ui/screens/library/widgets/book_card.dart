@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:manga_reader/ui/screens/library/widgets/book_menu.dart';
 
 import '../library_view_model.dart';
 import '../../../../data/models/book_model.dart';
@@ -23,13 +24,18 @@ class BookCard extends StatelessWidget {
             margin: EdgeInsets.all(0),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              child: Thumbnail(book: book, viewModel: viewModel),
+              child: BookMenu(
+                status: book.readingStatus,
+                viewModel: viewModel,
+                child: Thumbnail(book: book, viewModel: viewModel),
+              ),
               onTap: () {
                 context.pushNamed(
                   RouteNames.reader,
                   pathParameters: {'bookId': book.id},
                 );
               },
+              onLongPress: () {},
             ),
           ),
         ),

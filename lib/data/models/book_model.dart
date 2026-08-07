@@ -1,6 +1,6 @@
 import 'library_model.dart';
 
-enum ReadingStatus { notStarted, inProgress, finished }
+enum ReadingStatus { unread, inProgress, finished }
 
 class BookModel extends LibraryModel {
   int? currentPage;
@@ -15,7 +15,7 @@ class BookModel extends LibraryModel {
     this.lastRead,
     required super.name,
     required this.path,
-    this.readingStatus = ReadingStatus.notStarted,
+    this.readingStatus = ReadingStatus.unread,
     super.seriesId,
     super.thumbnail,
   });
