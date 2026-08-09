@@ -59,9 +59,9 @@ class _ReaderSliderState extends State<ReaderSlider> {
                   ),
                   Directionality(
                     textDirection:
-                        (widget.viewModel.readingDirection == .leftToRight)
-                        ? TextDirection.ltr
-                        : TextDirection.rtl,
+                        (widget.viewModel.readingDirection == .rightToLeft)
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                     child: Expanded(
                       child: Slider(
                         padding: EdgeInsets.symmetric(horizontal: 8),

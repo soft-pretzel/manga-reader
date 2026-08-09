@@ -28,7 +28,13 @@ class _MenuButtonsState extends State<MenuButtons> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  switch (widget.viewModel.readingMode) {
+                    case .single:
+                    case .double:
+                    case .continuous:
+                  }
+                },
                 icon: Icon(Icons.looks_one_outlined),
                 color: Theme.of(context).colorScheme.primary,
               ),

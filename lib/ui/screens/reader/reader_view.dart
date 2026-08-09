@@ -16,7 +16,9 @@ class ReaderView extends StatefulWidget {
 }
 
 class _ReaderViewState extends State<ReaderView> {
-  late final PageController _pageController;
+  int _index = 0;
+  Orientation? _orientation;
+  late PageController _pageController;
   var _scrollPhysics = ScrollPhysics();
   final _transformationController = TransformationController();
   var _tapDownDetails = TapDownDetails();
@@ -27,11 +29,35 @@ class _ReaderViewState extends State<ReaderView> {
     _pageController = PageController(initialPage: widget.viewModel.currentPage);
   }
 
+  void _updatePageController(Orientation orientation) {
+    if (orientation == .landscape) {
+      if (widget.viewModel.currentPage % 2 == 0) {
+        _pageController.jumpToPage(widget.viewModel.currentPage - 1);
+      }
+      _pageController = PageController(
+        viewportFraction:
+            (widget.viewModel.currentPage == 0 ||
+                widget.viewModel.currentPage ==
+                    widget.viewModel.pages.length - 1)
+            ? 1
+            : 1 / 2,
+      );
+    } else {
+      _pageController = PageController();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _initController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _orientation ??= MediaQuery.orientationOf(context);
   }
 
   @override
@@ -125,37 +151,17 @@ class _ReaderViewState extends State<ReaderView> {
               transformationController: _transformationController,
               child: OrientationBuilder(
                 builder: (context, orientation) {
-                  if (orientation == Orientation.landscape) {
-                    setState(() {
-                      _pageController = PageController(
-                        initialPage: () {
-                          if (widget.viewModel.currentPage % 2 == 0) {
-                            return widget.viewModel.currentPage - 1;
-                          } else {
-                            return widget.viewModel.currentPage;
-                          }
-                        }(),
-                        viewportFraction:
-                            (widget.viewModel.currentPage == 0 ||
-                                widget.viewModel.currentPage ==
-                                    widget.viewModel.pages.length - 1)
-                            ? 1
-                            : 1 / 2,
-                      );
-                    });
-                  } else {
-                    setState(() {
-                      _pageController = PageController(
-                        initialPage: widget.viewModel.currentPage,
-                      );
-                    });
+                  if (orientation != _orientation) {
+                    _updatePageController(orientation);
+                    _orientation = orientation;
                   }
                   return PageView(
                     controller: _pageController,
                     physics: _scrollPhysics,
                     padEnds: false,
-                    onPageChanged: (newPage) =>
-                        widget.viewModel.currentPage = newPage,
+                    onPageChanged: (newPage) {
+                      widget.viewModel.currentPage = newPage;
+                    },
                     reverse: (widget.viewModel.readingDirection == .rightToLeft)
                         ? true
                         : false,
@@ -165,7 +171,23 @@ class _ReaderViewState extends State<ReaderView> {
                         : Axis.horizontal,
                     children: [
                       for (final page in widget.viewModel.pages)
-                        Image.file(File(page)),
+                        Image.file(
+                          File(page),
+                          alignment: () {
+                            if (_index == 0 ||
+                                _index + 1 == widget.viewModel.pages.length) {
+                              _index++;
+                              return Alignment.center;
+                            }
+                            if (_index % 2 == 0) {
+                              _index++;
+                              return Alignment.centerRight;
+                            } else {
+                              _index++;
+                              return Alignment.centerLeft;
+                            }
+                          }(),
+                        ),
                     ],
                   );
                 },
