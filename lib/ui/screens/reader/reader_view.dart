@@ -107,9 +107,15 @@ class _ReaderViewState extends State<ReaderView> {
                 ..scaleByDouble(3, 3, 1, 1);
             },
             onLongPressMoveUpdate: (details) {
-              final position = details.globalPosition;
+              final origin = details.localOffsetFromOrigin;
+              final position = details.localPosition;
               _transformationController.value = Matrix4.identity()
-                ..translateByDouble(-position.dx * 2, -position.dy * 2, 1, 1)
+                ..translateByDouble(
+                  (-position.dx * 2) - origin.dx * 10,
+                  (-position.dy * 2) - origin.dy * 10,
+                  1,
+                  1,
+                )
                 ..scaleByDouble(3, 3, 1, 1);
             },
             onLongPressEnd: (details) {
@@ -120,7 +126,8 @@ class _ReaderViewState extends State<ReaderView> {
               child: PageView(
                 controller: _pageController,
                 physics: _scrollPhysics,
-                // onPageChanged: _onPageChanged,
+                onPageChanged: (newPage) =>
+                    widget.viewModel.currentPage = newPage,
                 reverse: (widget.viewModel.readingDirection == .leftToRight)
                     ? false
                     : true,
