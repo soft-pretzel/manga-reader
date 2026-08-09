@@ -35,21 +35,29 @@ class _MenuButtonsState extends State<MenuButtons> {
               IconButton(
                 onPressed: () {
                   switch (widget.viewModel.readingDirection) {
-                    case .rightToLeft:
-                      widget.viewModel.setReadingDirection.execute(
-                        .leftToRight,
-                      );
-                    default:
+                    case .leftToRight:
                       widget.viewModel.setReadingDirection.execute(
                         .rightToLeft,
                       );
+                    case .rightToLeft:
+                      widget.viewModel.setReadingDirection.execute(.vertical);
+                    case .vertical:
+                      widget.viewModel.setReadingDirection.execute(
+                        .leftToRight,
+                      );
                   }
                 },
-                icon: Icon(
-                  (widget.viewModel.readingDirection == .leftToRight)
-                      ? Icons.keyboard_double_arrow_right
-                      : Icons.keyboard_double_arrow_left,
-                ),
+                icon: Icon(() {
+                  switch (widget.viewModel.readingDirection) {
+                    case .leftToRight:
+                      return Icons.keyboard_double_arrow_right;
+                    case .rightToLeft:
+                      return Icons.keyboard_double_arrow_left;
+                    case .vertical:
+                      return Icons.keyboard_double_arrow_down;
+                  }
+                }()),
+
                 color: Theme.of(context).colorScheme.primary,
               ),
             ],

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../data/models/book.dart';
 import '../../../data/models/reading_direction.dart';
+import '../../../data/models/reading_mode.dart';
 import '../../../data/repositories/library_repository.dart';
 import '../../../utils/command.dart';
 import '../../../utils/result.dart';
@@ -13,6 +14,7 @@ class ReaderViewModel extends ChangeNotifier {
     getReadingDirection = Command0(_getReadingDirection);
     updateBook = Command1(_updateBook);
     setReadingDirection = Command1(_setReadingDirection);
+    setReadingMode = Command1(_setReadingMode);
     setReadingStatus = Command0(_setReadingStatus);
   }
 
@@ -24,18 +26,21 @@ class ReaderViewModel extends ChangeNotifier {
   late final Command0 getReadingDirection;
   late final Command1<void, int> updateBook;
   late final Command1<void, ReadingDirection> setReadingDirection;
+  late final Command1<void, ReadingMode> setReadingMode;
   late final Command0 setReadingStatus;
 
   Book? _book;
   late int currentPage;
   List<String> _pages = [];
   late ReadingDirection readingDirection;
+  late ReadingMode readingMode;
 
   Book? get book => _book;
   List<String> get pages => _pages;
 
   Future<Result<void>> _load() async {
     _getReadingDirection();
+    _getReadingMode();
     final pagesResult = await _libraryRepository.openBook(_bookId);
     switch (pagesResult) {
       case Ok():
@@ -71,7 +76,19 @@ class ReaderViewModel extends ChangeNotifier {
     final result = await _libraryRepository.getReadingDirection();
     switch (result) {
       case Ok():
-        readingDirection = result.value ?? ReadingDirection.leftToRight;
+        readingDirection = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _getReadingMode() async {
+    final result = await _libraryRepository.getReadingMode();
+    switch (result) {
+      case Ok():
+        readingMode = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -94,12 +111,25 @@ class ReaderViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _setReadingDirection(
-    ReadingDirection readingStatus,
+    ReadingDirection readingDirection,
   ) async {
-    final result = await _libraryRepository.setReadingDirection(readingStatus);
+    final result = await _libraryRepository.setReadingDirection(
+      readingDirection,
+    );
     switch (result) {
       case Ok():
         await _getReadingDirection();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _setReadingMode(ReadingMode readingMode) async {
+    final result = await _libraryRepository.setReadingMode(readingMode);
+    switch (result) {
+      case Ok():
+        await _getReadingMode();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

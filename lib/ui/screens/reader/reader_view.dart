@@ -123,18 +123,52 @@ class _ReaderViewState extends State<ReaderView> {
             },
             child: InteractiveViewer(
               transformationController: _transformationController,
-              child: PageView(
-                controller: _pageController,
-                physics: _scrollPhysics,
-                onPageChanged: (newPage) =>
-                    widget.viewModel.currentPage = newPage,
-                reverse: (widget.viewModel.readingDirection == .leftToRight)
-                    ? false
-                    : true,
-                children: [
-                  for (final page in widget.viewModel.pages)
-                    Image.file(File(page)),
-                ],
+              child: OrientationBuilder(
+                builder: (context, orientation) {
+                  if (orientation == Orientation.landscape) {
+                    setState(() {
+                      _pageController = PageController(
+                        initialPage: () {
+                          if (widget.viewModel.currentPage % 2 == 0) {
+                            return widget.viewModel.currentPage - 1;
+                          } else {
+                            return widget.viewModel.currentPage;
+                          }
+                        }(),
+                        viewportFraction:
+                            (widget.viewModel.currentPage == 0 ||
+                                widget.viewModel.currentPage ==
+                                    widget.viewModel.pages.length - 1)
+                            ? 1
+                            : 1 / 2,
+                      );
+                    });
+                  } else {
+                    setState(() {
+                      _pageController = PageController(
+                        initialPage: widget.viewModel.currentPage,
+                      );
+                    });
+                  }
+                  return PageView(
+                    controller: _pageController,
+                    physics: _scrollPhysics,
+                    padEnds: false,
+                    onPageChanged: (newPage) =>
+                        widget.viewModel.currentPage = newPage,
+                    reverse: (widget.viewModel.readingDirection == .rightToLeft)
+                        ? true
+                        : false,
+                    scrollDirection:
+                        (widget.viewModel.readingDirection == .vertical)
+                        ? Axis.vertical
+                        : Axis.horizontal,
+                    children: [
+                      for (final page in widget.viewModel.pages)
+                        Image.file(File(page)),
+                    ],
+                  );
+                },
               ),
             ),
           );

@@ -4,6 +4,7 @@ import 'dart:io';
 import '../models/book.dart';
 import '../models/library.dart';
 import '../models/reading_direction.dart';
+import '../models/reading_mode.dart';
 import '../models/series.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
@@ -92,11 +93,20 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<ReadingDirection?>> getReadingDirection() async {
+  Future<Result<ReadingDirection>> getReadingDirection() async {
     try {
       final readingDirection = await _sharedPreferencesService
           .getReadingDirection();
       return Result.ok(readingDirection);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<ReadingMode>> getReadingMode() async {
+    try {
+      final readingMode = await _sharedPreferencesService.getReadingMode();
+      return Result.ok(readingMode);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -239,6 +249,15 @@ class LibraryRepository {
   ) async {
     try {
       await _sharedPreferencesService.setReadingDirection(readingDirection);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setReadingMode(ReadingMode readingMode) async {
+    try {
+      await _sharedPreferencesService.setReadingMode(readingMode);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
