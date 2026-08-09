@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../models/book_model.dart';
-import '../models/library_model.dart';
-import '../models/series_model.dart';
+import '../models/book.dart';
+import '../models/library.dart';
+import '../models/reading_direction.dart';
+import '../models/series.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/shared_preferences_service.dart';
@@ -26,14 +27,14 @@ class LibraryRepository {
     try {
       final cache = await _localStorageService.getReadingCache();
       final bookCache = Directory('${cache.path}${Platform.pathSeparator}$id');
-      await bookCache.delete();
+      await bookCache.delete(recursive: true);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<List<LibraryModel?>>> getLibrary(String? seriesId) async {
+  Future<Result<List<Library?>>> getLibrary(String? seriesId) async {
     try {
       final library = await _databaseService.getLibrary(seriesId);
       return Result.ok(library);
@@ -42,7 +43,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<BookModel>> getBook(String id) async {
+  Future<Result<Book>> getBook(String id) async {
     try {
       final book = await _databaseService.getBook(id);
       return Result.ok(book);
@@ -51,7 +52,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<String?>> getBookThumbnail(BookModel book) async {
+  Future<Result<String?>> getBookThumbnail(Book book) async {
     try {
       final cache = await _localStorageService.getThumbnailCache();
 
@@ -82,7 +83,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<BookModel?>>> getInProgressBooks() async {
+  Future<Result<List<Book?>>> getInProgressBooks() async {
     try {
       final books = await _databaseService.getInProgressBooks();
       return Result.ok(books);
@@ -91,7 +92,17 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<int>> getSeriesBookCount(SeriesModel series) async {
+  Future<Result<ReadingDirection?>> getReadingDirection() async {
+    try {
+      final readingDirection = await _sharedPreferencesService
+          .getReadingDirection();
+      return Result.ok(readingDirection);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<int>> getSeriesBookCount(Series series) async {
     try {
       final items = await _databaseService.getLibrary(series.id);
       series.bookCount = items.length;
@@ -111,7 +122,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<String?>> getSeriesThumbnail(SeriesModel series) async {
+  Future<Result<String?>> getSeriesThumbnail(Series series) async {
     try {
       String? thumbnail;
 
@@ -171,6 +182,8 @@ class LibraryRepository {
         }
       }
 
+      book.length = pages.length;
+      _databaseService.updateBook(book);
       return Result.ok(pages);
     } on Exception catch (e) {
       return Result.error(e);
@@ -221,7 +234,18 @@ class LibraryRepository {
     }
   }
 
-  Future<void> updateBook(BookModel book) async {
+  Future<Result<void>> setReadingDirection(
+    ReadingDirection readingDirection,
+  ) async {
+    try {
+      await _sharedPreferencesService.setReadingDirection(readingDirection);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<void> updateBook(Book book) async {
     await _databaseService.updateBook(book);
   }
 
@@ -232,7 +256,7 @@ class LibraryRepository {
       seriesId,
     );
     if (existingBook == null) {
-      final book = BookModel(
+      final book = Book(
         id: await _databaseService.generateId(),
         dateAdded: DateTime.now(),
         name: await _localStorageService.getName(path),
@@ -247,7 +271,7 @@ class LibraryRepository {
     final name = await _localStorageService.getName(path);
     final existingSeries = await _databaseService.getSeriesByName(name);
     if (existingSeries == null) {
-      final newSeries = SeriesModel(
+      final newSeries = Series(
         id: await _databaseService.generateId(),
         dateAdded: DateTime.now(),
         name: name,

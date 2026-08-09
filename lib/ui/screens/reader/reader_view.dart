@@ -27,17 +27,11 @@ class _ReaderViewState extends State<ReaderView> {
     _pageController = PageController(initialPage: widget.viewModel.currentPage);
   }
 
-  void _onPageChanged(int newPage) {
-    widget.viewModel.updateBook.execute(newPage);
-  }
-
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initController();
-    });
+    _initController();
   }
 
   @override
@@ -45,6 +39,7 @@ class _ReaderViewState extends State<ReaderView> {
     _pageController.dispose();
     _transformationController.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    widget.viewModel.setReadingStatus.execute();
     super.dispose();
   }
 
@@ -86,7 +81,7 @@ class _ReaderViewState extends State<ReaderView> {
                 ),
               );
             },
-            onDoubleTapDown: (d) => _tapDownDetails = d,
+            onDoubleTapDown: (details) => _tapDownDetails = details,
             onDoubleTap: () {
               if (_zoomedIn) {
                 _transformationController.value = Matrix4.identity();
@@ -105,13 +100,30 @@ class _ReaderViewState extends State<ReaderView> {
                 _zoomedIn = true;
               }
             },
+            onLongPressStart: (details) {
+              final position = details.localPosition;
+              _transformationController.value = Matrix4.identity()
+                ..translateByDouble(-position.dx * 2, -position.dy * 2, 1, 1)
+                ..scaleByDouble(3, 3, 1, 1);
+            },
+            onLongPressMoveUpdate: (details) {
+              final position = details.globalPosition;
+              _transformationController.value = Matrix4.identity()
+                ..translateByDouble(-position.dx * 2, -position.dy * 2, 1, 1)
+                ..scaleByDouble(3, 3, 1, 1);
+            },
+            onLongPressEnd: (details) {
+              _transformationController.value = Matrix4.identity();
+            },
             child: InteractiveViewer(
               transformationController: _transformationController,
               child: PageView(
                 controller: _pageController,
                 physics: _scrollPhysics,
-                onPageChanged: _onPageChanged,
-                reverse: true,
+                // onPageChanged: _onPageChanged,
+                reverse: (widget.viewModel.readingDirection == .leftToRight)
+                    ? false
+                    : true,
                 children: [
                   for (final page in widget.viewModel.pages)
                     Image.file(File(page)),

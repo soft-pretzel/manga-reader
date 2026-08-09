@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../library_view_model.dart';
-import '../../../../data/models/book_model.dart';
+import '../../../../data/models/book.dart';
 
 class BookMenu extends StatefulWidget {
   const BookMenu({
     super.key,
+    required this.menuController,
     required this.status,
     required this.viewModel,
     required this.child,
   });
 
+  final MenuController menuController;
   final ReadingStatus status;
   final LibraryViewModel viewModel;
   final Widget child;
@@ -20,13 +22,11 @@ class BookMenu extends StatefulWidget {
 }
 
 class _BookMenuState extends State<BookMenu> {
-  final _menuController = MenuController();
-
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
       animated: true,
-      controller: _menuController,
+      controller: widget.menuController,
       menuChildren: [
         if (widget.status == ReadingStatus.unread)
           MenuItemButton(onPressed: () {}, child: Text('Mark as finished'))

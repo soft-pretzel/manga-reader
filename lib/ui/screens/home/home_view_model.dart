@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../data/models/book_model.dart';
+import '../../../data/models/book.dart';
 import '../../../data/repositories/library_repository.dart';
 import '../../../utils/command.dart';
 import '../../../utils/result.dart';
@@ -14,9 +14,9 @@ class HomeViewModel extends ChangeNotifier {
 
   late final Command0 load;
 
-  final List<BookModel> _inProgressBooks = [];
+  final List<Book> _inProgressBooks = [];
 
-  List<BookModel> get inProgressBooks => _inProgressBooks;
+  List<Book> get inProgressBooks => _inProgressBooks;
 
   Future<Result<void>> _load() async {
     _inProgressBooks.clear();

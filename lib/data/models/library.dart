@@ -1,11 +1,11 @@
-abstract class LibraryModel {
+abstract class Library {
   final String id;
   final DateTime dateAdded;
   String name;
   final String? seriesId;
   String? thumbnail;
 
-  LibraryModel({
+  Library({
     required this.id,
     required this.dateAdded,
     required this.name,
@@ -23,7 +23,7 @@ abstract class LibraryModel {
     };
   }
 
-  LibraryModel.fromMap(Map<String, Object?> map)
+  Library.fromMap(Map<String, Object?> map)
     : id = map['id'].toString(),
       dateAdded = DateTime.parse(map['date_added'].toString()),
       name = map['name'].toString(),

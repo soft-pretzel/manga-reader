@@ -1,9 +1,9 @@
-import 'library_model.dart';
+import 'library.dart';
 
-class SeriesModel extends LibraryModel {
+class Series extends Library {
   int? bookCount;
 
-  SeriesModel({
+  Series({
     required super.id,
     this.bookCount,
     required super.dateAdded,
@@ -24,7 +24,7 @@ class SeriesModel extends LibraryModel {
     };
   }
 
-  SeriesModel.fromMap(super.map)
+  Series.fromMap(super.map)
     : bookCount = int.tryParse(map['book_count'].toString()),
       super.fromMap();
 }

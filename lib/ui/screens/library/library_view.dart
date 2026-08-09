@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/book_card.dart';
 import 'library_view_model.dart';
-import 'widgets/series_card.dart';
-import '../../../data/models/book_model.dart';
-import '../../../data/models/series_model.dart';
+import 'widgets/book_tile.dart';
+import 'widgets/series_tile.dart';
+import '../../../data/models/book.dart';
+import '../../../data/models/series.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key, required this.viewModel});
@@ -74,19 +74,19 @@ class _LibraryViewState extends State<LibraryView> {
                       return GridView.count(
                         padding: EdgeInsets.all(16),
                         crossAxisCount: 3,
-                        childAspectRatio: 0.51,
+                        childAspectRatio: .51,
                         mainAxisSpacing: 4,
                         crossAxisSpacing: 6,
                         children: [
                           for (final item in widget.viewModel.libraryItems)
-                            if (item.runtimeType == SeriesModel)
-                              SeriesCard(
-                                series: item as SeriesModel,
+                            if (item.runtimeType == Series)
+                              SeriesTile(
+                                series: item as Series,
                                 viewModel: widget.viewModel,
                               )
                             else
-                              BookCard(
-                                book: item as BookModel,
+                              BookTile(
+                                book: item as Book,
                                 viewModel: widget.viewModel,
                               ),
                         ],

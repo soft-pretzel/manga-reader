@@ -1,18 +1,20 @@
-import 'library_model.dart';
+import 'library.dart';
 
 enum ReadingStatus { unread, inProgress, finished }
 
-class BookModel extends LibraryModel {
+class Book extends Library {
   int? currentPage;
   DateTime? lastRead;
+  int? length;
   final String path;
   ReadingStatus readingStatus;
 
-  BookModel({
+  Book({
     required super.id,
     this.currentPage,
     required super.dateAdded,
     this.lastRead,
+    this.length,
     required super.name,
     required this.path,
     this.readingStatus = ReadingStatus.unread,
@@ -27,6 +29,7 @@ class BookModel extends LibraryModel {
       'current_page': currentPage,
       'date_added': dateAdded.toString(),
       'last_read': lastRead.toString(),
+      'length': length,
       'name': name,
       'path': path,
       'reading_status': readingStatus.index,
@@ -35,9 +38,10 @@ class BookModel extends LibraryModel {
     };
   }
 
-  BookModel.fromMap(super.map)
+  Book.fromMap(super.map)
     : currentPage = int.tryParse(map['current_page'].toString()),
       lastRead = DateTime.tryParse(map['last_read'].toString()),
+      length = int.tryParse(map['length'].toString()),
       path = map['path'].toString(),
       readingStatus =
           ReadingStatus.values[int.parse(map['reading_status'].toString())],

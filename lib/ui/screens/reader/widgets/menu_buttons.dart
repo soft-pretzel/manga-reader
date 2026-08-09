@@ -1,0 +1,61 @@
+import 'package:flutter/material.dart';
+
+import '../reader_view_model.dart';
+
+class MenuButtons extends StatefulWidget {
+  const MenuButtons({super.key, required this.viewModel});
+
+  final ReaderViewModel viewModel;
+
+  @override
+  State<MenuButtons> createState() => _MenuButtonsState();
+}
+
+class _MenuButtonsState extends State<MenuButtons> {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.viewModel,
+      builder: (context, child) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.animation),
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.looks_one_outlined),
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              IconButton(
+                onPressed: () {
+                  switch (widget.viewModel.readingDirection) {
+                    case .rightToLeft:
+                      widget.viewModel.setReadingDirection.execute(
+                        .leftToRight,
+                      );
+                    default:
+                      widget.viewModel.setReadingDirection.execute(
+                        .rightToLeft,
+                      );
+                  }
+                },
+                icon: Icon(
+                  (widget.viewModel.readingDirection == .leftToRight)
+                      ? Icons.keyboard_double_arrow_right
+                      : Icons.keyboard_double_arrow_left,
+                ),
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

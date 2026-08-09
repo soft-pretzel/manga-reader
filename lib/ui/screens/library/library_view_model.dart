@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../data/models/book_model.dart';
-import '../../../data/models/library_model.dart';
-import '../../../data/models/series_model.dart';
+import '../../../data/models/book.dart';
+import '../../../data/models/library.dart';
+import '../../../data/models/series.dart';
 import '../../../data/repositories/library_repository.dart';
 import '../../../utils/command.dart';
 import '../../../utils/result.dart';
@@ -27,10 +27,10 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command0 load;
   late final Command0 refresh;
 
-  final List<LibraryModel?> _library = [];
+  final List<Library?> _library = [];
   String _title = 'Library';
 
-  List<LibraryModel?> get libraryItems => _library;
+  List<Library?> get libraryItems => _library;
   String get title => _title;
 
   Future<Result<void>> _load() async {
@@ -49,8 +49,8 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _getBookThumbnails() async {
     if (_library.isNotEmpty) {
       for (final item in _library) {
-        if (item.runtimeType == BookModel) {
-          final book = item as BookModel;
+        if (item.runtimeType == Book) {
+          final book = item as Book;
           if (book.thumbnail == null) {
             final result = await _libraryRepository.getBookThumbnail(book);
             switch (result) {
@@ -70,8 +70,8 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _getSeriesBookCount() async {
     if (_library.isNotEmpty) {
       for (final item in _library) {
-        if (item.runtimeType == SeriesModel) {
-          final series = item as SeriesModel;
+        if (item.runtimeType == Series) {
+          final series = item as Series;
           final result = await _libraryRepository.getSeriesBookCount(series);
           switch (result) {
             case Ok():
@@ -89,8 +89,8 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _getSeriesThumbnails() async {
     if (_library.isNotEmpty) {
       for (final item in _library) {
-        if (item.runtimeType == SeriesModel) {
-          final series = item as SeriesModel;
+        if (item.runtimeType == Series) {
+          final series = item as Series;
           if (series.thumbnail == null) {
             final result = await _libraryRepository.getSeriesThumbnail(series);
             switch (result) {

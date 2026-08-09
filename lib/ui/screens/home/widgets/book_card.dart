@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../data/models/book_model.dart';
+import '../../../../data/models/book.dart';
 import '../../../../routing/routes.dart';
 
 class BookCard extends StatelessWidget {
   const BookCard({super.key, required this.book});
 
-  final BookModel book;
+  final Book book;
 
   @override
   Widget build(BuildContext context) {

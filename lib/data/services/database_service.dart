@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/book_model.dart';
-import '../models/library_model.dart';
-import '../models/series_model.dart';
+import '../models/book.dart';
+import '../models/library.dart';
+import '../models/series.dart';
 
 final uuid = Uuid();
 
@@ -22,28 +22,25 @@ class DatabaseService {
     return uuid.v7();
   }
 
-  Future<List<BookModel?>> getAllBooks() async {
+  Future<List<Book?>> getAllBooks() async {
     final db = await _database();
     final mapList = await db.query('books');
-    return [for (final map in mapList) BookModel.fromMap(map)];
+    return [for (final map in mapList) Book.fromMap(map)];
   }
 
-  Future<List<SeriesModel?>> getAllSeries() async {
+  Future<List<Series?>> getAllSeries() async {
     final db = await _database();
     final mapList = await db.query('series');
-    return [for (final map in mapList) SeriesModel.fromMap(map)];
+    return [for (final map in mapList) Series.fromMap(map)];
   }
 
-  Future<BookModel> getBook(String id) async {
+  Future<Book> getBook(String id) async {
     final db = await _database();
     final mapList = await db.query('books', where: 'id = ?', whereArgs: [id]);
-    return BookModel.fromMap(mapList.single);
+    return Book.fromMap(mapList.single);
   }
 
-  Future<BookModel?> getBookByNameAndSeries(
-    String name,
-    String? seriesId,
-  ) async {
+  Future<Book?> getBookByNameAndSeries(String name, String? seriesId) async {
     final db = await _database();
     final mapList = await db.query(
       'books',
@@ -55,34 +52,34 @@ class DatabaseService {
     if (mapList.isEmpty) {
       return null;
     } else {
-      return BookModel.fromMap(mapList.single);
+      return Book.fromMap(mapList.single);
     }
   }
 
-  Future<List<BookModel>> getBooksBySeries(String seriesId) async {
+  Future<List<Book>> getBooksBySeries(String seriesId) async {
     final db = await _database();
     final mapList = await db.query(
       'books',
       where: 'series_id = ?',
       whereArgs: [seriesId],
     );
-    return [for (final map in mapList) BookModel.fromMap(map)];
+    return [for (final map in mapList) Book.fromMap(map)];
   }
 
-  Future<List<BookModel?>> getInProgressBooks() async {
+  Future<List<Book?>> getInProgressBooks() async {
     final db = await _database();
     final mapList = await db.query(
       'books',
       where: 'reading_status = ?',
       whereArgs: [1],
-      orderBy: 'last_read',
+      orderBy: 'last_read DESC',
     );
-    return [for (final map in mapList) BookModel.fromMap(map)];
+    return [for (final map in mapList) Book.fromMap(map)];
   }
 
-  Future<List<LibraryModel?>> getLibrary(String? seriesId) async {
+  Future<List<Library?>> getLibrary(String? seriesId) async {
     final db = await _database();
-    List<LibraryModel?> libraryList = [];
+    List<Library?> libraryList = [];
     final bookList = await db.query(
       'books',
       where: seriesId != null ? 'series_id = ?' : 'series_id IS NULL',
@@ -90,7 +87,7 @@ class DatabaseService {
       orderBy: 'name',
     );
     for (final book in bookList) {
-      libraryList.add(BookModel.fromMap(book));
+      libraryList.add(Book.fromMap(book));
     }
     final seriesList = await db.query(
       'series',
@@ -99,7 +96,7 @@ class DatabaseService {
       orderBy: 'name',
     );
     for (final series in seriesList) {
-      libraryList.add(SeriesModel.fromMap(series));
+      libraryList.add(Series.fromMap(series));
     }
     if (libraryList.length > 1) {
       libraryList.sort((a, b) => a!.name.compareTo(b!.name));
@@ -107,13 +104,13 @@ class DatabaseService {
     return libraryList;
   }
 
-  Future<SeriesModel> getSeries(String id) async {
+  Future<Series> getSeries(String id) async {
     final db = await _database();
     final mapList = await db.query('series', where: 'id = ?', whereArgs: [id]);
-    return SeriesModel.fromMap(mapList.single);
+    return Series.fromMap(mapList.single);
   }
 
-  Future<SeriesModel?> getSeriesByName(String name) async {
+  Future<Series?> getSeriesByName(String name) async {
     final db = await _database();
     final mapList = await db.query(
       'series',
@@ -123,21 +120,21 @@ class DatabaseService {
     if (mapList.isEmpty) {
       return null;
     } else {
-      return SeriesModel.fromMap(mapList.single);
+      return Series.fromMap(mapList.single);
     }
   }
 
-  Future<void> insertBook(BookModel book) async {
+  Future<void> insertBook(Book book) async {
     final db = await _database();
     await db.insert('books', book.toMap());
   }
 
-  Future<void> insertSeries(SeriesModel series) async {
+  Future<void> insertSeries(Series series) async {
     final db = await _database();
     await db.insert('series', series.toMap());
   }
 
-  Future<void> updateBook(BookModel book) async {
+  Future<void> updateBook(Book book) async {
     final db = await _database();
     await db.update(
       'books',
@@ -147,7 +144,7 @@ class DatabaseService {
     );
   }
 
-  Future<void> updateSeries(SeriesModel series) async {
+  Future<void> updateSeries(Series series) async {
     final db = await _database();
     await db.update(
       'series',
@@ -168,6 +165,7 @@ id TEXT PRIMARY KEY,
 current_page INTEGER,
 date_added TEXT NOT NULL,
 last_read TEXT,
+length INTEGER,
 name TEXT NOT NULL,
 path TEXT NOT NULL,
 reading_status INTEGER NOT NULL,
