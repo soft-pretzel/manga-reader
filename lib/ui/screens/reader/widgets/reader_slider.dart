@@ -5,10 +5,12 @@ import '../reader_view_model.dart';
 class ReaderSlider extends StatefulWidget {
   const ReaderSlider({
     super.key,
+    required this.orientation,
     required this.pageController,
     required this.viewModel,
   });
 
+  final Orientation orientation;
   final PageController pageController;
   final ReaderViewModel viewModel;
 
@@ -30,7 +32,7 @@ class _ReaderSliderState extends State<ReaderSlider> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                '${widget.viewModel.currentPage + 1} / ${widget.viewModel.pages.length}',
+                '${widget.viewModel.currentPage} / ${widget.viewModel.pages.length}',
               ),
             ),
             Padding(
@@ -39,12 +41,12 @@ class _ReaderSliderState extends State<ReaderSlider> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      int newPage = 0;
+                      int newPage = 1;
                       if (widget.viewModel.readingDirection == .rightToLeft) {
-                        newPage = widget.viewModel.pages.length - 1;
+                        newPage = widget.viewModel.pages.length;
                       }
                       widget.pageController.animateToPage(
-                        newPage,
+                        newPage - 1,
                         curve: Curves.easeIn,
                         duration: Duration(milliseconds: 500),
                       );
@@ -66,15 +68,18 @@ class _ReaderSliderState extends State<ReaderSlider> {
                       child: Slider(
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         min: 0,
-                        max: widget.viewModel.pages.length.toDouble() - 1,
+                        max: widget.viewModel.pages.length.toDouble() + 1,
                         value: widget.viewModel.currentPage.toDouble(),
                         onChanged: (double newPage) {
                           _previousPage ??= widget.viewModel.currentPage;
                           setState(() {
-                            widget.viewModel.currentPage = newPage.toInt();
+                            widget.viewModel.currentPage = newPage.toInt() + 1;
                           });
                         },
                         onChangeEnd: (double newPage) {
+                          if (widget.orientation == .landscape) {
+                            newPage = newPage / 2;
+                          }
                           widget.pageController.animateToPage(
                             newPage.toInt(),
                             curve: Curves.easeIn,
@@ -112,12 +117,12 @@ class _ReaderSliderState extends State<ReaderSlider> {
                   ),
                   IconButton(
                     onPressed: () {
-                      int newPage = widget.viewModel.pages.length - 1;
+                      int newPage = widget.viewModel.pages.length;
                       if (widget.viewModel.readingDirection == .rightToLeft) {
-                        newPage = 0;
+                        newPage = 1;
                       }
                       widget.pageController.animateToPage(
-                        newPage,
+                        newPage - 1,
                         curve: Curves.easeIn,
                         duration: Duration(milliseconds: 500),
                       );

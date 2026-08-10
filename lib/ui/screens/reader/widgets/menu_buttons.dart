@@ -31,11 +31,23 @@ class _MenuButtonsState extends State<MenuButtons> {
                 onPressed: () {
                   switch (widget.viewModel.readingMode) {
                     case .single:
+                      widget.viewModel.setReadingMode.execute(.double);
                     case .double:
+                      widget.viewModel.setReadingMode.execute(.continuous);
                     case .continuous:
+                      widget.viewModel.setReadingMode.execute(.single);
                   }
                 },
-                icon: Icon(Icons.looks_one_outlined),
+                icon: Icon(() {
+                  switch (widget.viewModel.readingMode) {
+                    case .single:
+                      return Icons.looks_one;
+                    case .double:
+                      return Icons.looks_two;
+                    case .continuous:
+                      return Icons.all_inclusive;
+                  }
+                }()),
                 color: Theme.of(context).colorScheme.primary,
               ),
               IconButton(
@@ -63,7 +75,6 @@ class _MenuButtonsState extends State<MenuButtons> {
                       return Icons.keyboard_double_arrow_down;
                   }
                 }()),
-
                 color: Theme.of(context).colorScheme.primary,
               ),
             ],

@@ -7,8 +7,13 @@ import 'reader_slider.dart';
 import '../reader_view_model.dart';
 
 class ReaderMenu<T> extends PopupRoute<T> {
-  ReaderMenu({required this.pageController, required this.viewModel});
+  ReaderMenu({
+    required this.orientation,
+    required this.pageController,
+    required this.viewModel,
+  });
 
+  final Orientation orientation;
   final PageController pageController;
   final ReaderViewModel viewModel;
 
@@ -80,6 +85,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
               children: [
                 MenuButtons(viewModel: viewModel),
                 ReaderSlider(
+                  orientation: orientation,
                   pageController: pageController,
                   viewModel: viewModel,
                 ),
