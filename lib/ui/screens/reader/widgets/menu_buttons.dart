@@ -23,8 +23,14 @@ class _MenuButtonsState extends State<MenuButtons> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.animation),
+                onPressed: () {
+                  widget.viewModel.toggleAnimations.execute();
+                },
+                icon: Icon(
+                  (widget.viewModel.animations)
+                      ? Icons.blur_on
+                      : Icons.blur_off,
+                ),
                 color: Theme.of(context).colorScheme.primary,
               ),
               IconButton(

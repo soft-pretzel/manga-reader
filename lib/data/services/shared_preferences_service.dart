@@ -4,6 +4,7 @@ import '../models/reading_direction.dart';
 import '../models/reading_mode.dart';
 
 class SharedPreferencesService {
+  static const _animationsKey = 'animations';
   static const _folderKey = 'folder';
   static const _readingDirectionKey = 'reading_direction';
   static const _readingModeKey = 'reading_mode';
@@ -13,6 +14,14 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     await prefs.remove(_folderKey);
+  }
+
+  Future<bool> getAnimations() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final value = prefs.getBool(_animationsKey);
+    return value ?? true;
   }
 
   Future<String?> getFolder() async {
@@ -45,6 +54,14 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     await prefs.setString(_folderKey, folder);
+  }
+
+  Future<void> setAnimations() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final current = await getAnimations();
+    await prefs.setBool(_animationsKey, !current);
   }
 
   Future<void> setReadingDirection(ReadingDirection readingDirection) async {

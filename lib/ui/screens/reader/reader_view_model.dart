@@ -13,6 +13,7 @@ class ReaderViewModel extends ChangeNotifier {
     getCurrentPage = Command0(_getCurrentPage);
     getReadingDirection = Command0(_getReadingDirection);
     updateBook = Command1(_updateBook);
+    toggleAnimations = Command0(_toggleAnimations);
     setReadingDirection = Command1(_setReadingDirection);
     setReadingMode = Command1(_setReadingMode);
     setReadingStatus = Command0(_setReadingStatus);
@@ -22,6 +23,7 @@ class ReaderViewModel extends ChangeNotifier {
   final LibraryRepository _libraryRepository;
 
   late final Command0 load;
+  late final Command0 toggleAnimations;
   late final Command0 getCurrentPage;
   late final Command0 getReadingDirection;
   late final Command1<void, int> updateBook;
@@ -32,6 +34,7 @@ class ReaderViewModel extends ChangeNotifier {
   Book? _book;
   late int currentPage;
   List<String> _pages = [];
+  late bool animations;
   late ReadingDirection readingDirection;
   late ReadingMode readingMode;
 
@@ -39,6 +42,7 @@ class ReaderViewModel extends ChangeNotifier {
   List<String> get pages => _pages;
 
   Future<Result<void>> _load() async {
+    _getAnimations();
     _getReadingDirection();
     _getReadingMode();
     final pagesResult = await _libraryRepository.openBook(_bookId);
@@ -57,6 +61,18 @@ class ReaderViewModel extends ChangeNotifier {
         }
       case Error():
         return Result.error(pagesResult.error);
+    }
+  }
+
+  Future<Result<void>> _getAnimations() async {
+    final result = await _libraryRepository.getAnimations();
+    switch (result) {
+      case Ok():
+        animations = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
     }
   }
 
@@ -104,6 +120,17 @@ class ReaderViewModel extends ChangeNotifier {
         book.currentPage = currentPage;
         book.lastRead = DateTime.now();
         _libraryRepository.updateBook(book);
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _toggleAnimations() async {
+    final result = await _libraryRepository.toggleAnimations();
+    switch (result) {
+      case Ok():
+        await _getAnimations();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

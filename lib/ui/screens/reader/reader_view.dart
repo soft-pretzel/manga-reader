@@ -16,17 +16,18 @@ class ReaderView extends StatefulWidget {
 }
 
 class _ReaderViewState extends State<ReaderView> {
-  Orientation? _orientation;
+  Orientation? _currentOrientation;
   late PageController _pageController;
   var _scrollPhysics = ScrollPhysics();
   final _transformationController = TransformationController();
   var _tapDownDetails = TapDownDetails();
+  late double _width;
   bool _zoomedIn = false;
 
   Future<void> _initController() async {
     await widget.viewModel.getCurrentPage.execute();
     var pageIndex = widget.viewModel.currentPage - 1;
-    if (_orientation == .landscape) pageIndex = (pageIndex / 2).round();
+    if (_currentOrientation == .landscape) pageIndex = (pageIndex / 2).round();
     _pageController = PageController(initialPage: pageIndex);
   }
 
@@ -40,7 +41,8 @@ class _ReaderViewState extends State<ReaderView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _orientation ??= MediaQuery.orientationOf(context);
+    _currentOrientation ??= MediaQuery.orientationOf(context);
+    _width = MediaQuery.sizeOf(context).width;
   }
 
   @override
@@ -81,27 +83,79 @@ class _ReaderViewState extends State<ReaderView> {
         listenable: widget.viewModel,
         builder: (context, _) {
           return OrientationBuilder(
-            builder: (context, orientation) {
-              if (orientation != _orientation) {
-                _orientation = orientation;
-                if (orientation == .landscape) {
-                  _pageController.jumpToPage(
-                    ((widget.viewModel.currentPage / 2)).toInt(),
-                  );
-                } else {
-                  _pageController.jumpToPage(widget.viewModel.currentPage - 1);
+            builder: (context, newOrientation) {
+              if (_currentOrientation != newOrientation) {
+                _currentOrientation = newOrientation;
+                var pageIndex = widget.viewModel.currentPage - 1;
+                if (newOrientation == .landscape) {
+                  pageIndex = (pageIndex / 2).round();
                 }
+                _pageController.jumpToPage(pageIndex);
               }
               return GestureDetector(
+                onTapDown: (details) => _tapDownDetails = details,
                 onTap: () {
-                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-                  Navigator.of(context).push(
-                    ReaderMenu(
-                      orientation: orientation,
-                      pageController: _pageController,
-                      viewModel: widget.viewModel,
-                    ),
-                  );
+                  final x = _tapDownDetails.localPosition.dx;
+                  if (x >= (_width * 2 / 3)) {
+                    if (widget.viewModel.readingDirection == .rightToLeft) {
+                      if (widget.viewModel.animations) {
+                        _pageController.previousPage(
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        _pageController.jumpToPage(
+                          (_pageController.page! - 1).toInt(),
+                        );
+                      }
+                    } else {
+                      if (widget.viewModel.animations) {
+                        _pageController.nextPage(
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        _pageController.jumpToPage(
+                          (_pageController.page! + 1).toInt(),
+                        );
+                      }
+                    }
+                  } else if (x <= (_width / 3)) {
+                    if (widget.viewModel.readingDirection == .rightToLeft) {
+                      if (widget.viewModel.animations) {
+                        _pageController.nextPage(
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        _pageController.jumpToPage(
+                          (_pageController.page! + 1).toInt(),
+                        );
+                      }
+                    } else {
+                      if (widget.viewModel.animations) {
+                        _pageController.previousPage(
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        _pageController.jumpToPage(
+                          (_pageController.page! - 1).toInt(),
+                        );
+                      }
+                    }
+                  } else {
+                    SystemChrome.setEnabledSystemUIMode(
+                      SystemUiMode.edgeToEdge,
+                    );
+                    Navigator.of(context).push(
+                      ReaderMenu(
+                        orientation: newOrientation,
+                        pageController: _pageController,
+                        viewModel: widget.viewModel,
+                      ),
+                    );
+                  }
                 },
                 onDoubleTapDown: (details) => _tapDownDetails = details,
                 onDoubleTap: () {
@@ -158,7 +212,7 @@ class _ReaderViewState extends State<ReaderView> {
                   child: PageView.builder(
                     controller: _pageController,
                     itemBuilder: (context, index) {
-                      if (orientation == .portrait) {
+                      if (newOrientation == .portrait) {
                         return Image.file(File(widget.viewModel.pages[index]));
                       } else {
                         if (index == 0) {
@@ -185,17 +239,18 @@ class _ReaderViewState extends State<ReaderView> {
                         }
                       }
                     },
-                    itemCount: (orientation == .portrait)
+                    itemCount: (newOrientation == .portrait)
                         ? widget.viewModel.pages.length
                         : ((widget.viewModel.pages.length / 2) + 1).toInt(),
-                    onPageChanged: (newPage) {
-                      if (orientation == .landscape) {
-                        newPage = (newPage * 2) + 1;
-                        if (newPage == 1) newPage = 0;
+                    onPageChanged: (pageIndex) {
+                      if (_currentOrientation == newOrientation) {
+                        if (_currentOrientation == .landscape) {
+                          pageIndex = pageIndex * 2 - 1;
+                          if (pageIndex == 0) pageIndex = 0;
+                        }
+                        widget.viewModel.currentPage = pageIndex + 1;
                       }
-                      widget.viewModel.currentPage = newPage + 1;
                     },
-                    padEnds: false,
                     pageSnapping: (widget.viewModel.readingMode == .continuous)
                         ? false
                         : true,

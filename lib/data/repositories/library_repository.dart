@@ -35,10 +35,10 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<Library?>>> getLibrary(String? seriesId) async {
+  Future<Result<bool>> getAnimations() async {
     try {
-      final library = await _databaseService.getLibrary(seriesId);
-      return Result.ok(library);
+      final animations = await _sharedPreferencesService.getAnimations();
+      return Result.ok(animations);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -88,6 +88,15 @@ class LibraryRepository {
     try {
       final books = await _databaseService.getInProgressBooks();
       return Result.ok(books);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<List<Library?>>> getLibrary(String? seriesId) async {
+    try {
+      final library = await _databaseService.getLibrary(seriesId);
+      return Result.ok(library);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -238,6 +247,15 @@ class LibraryRepository {
           }
         }
       }
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> toggleAnimations() async {
+    try {
+      await _sharedPreferencesService.setAnimations();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

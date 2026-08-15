@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:saf/saf.dart';
+import 'package:saf_util/saf_util.dart';
+import 'package:saf_stream/saf_stream.dart';
 
 class LocalStorageService {
   Future<Archive?> decodeArchive(String path) async {
     InputStream stream;
-    String archiveType;
     if (Platform.isAndroid) {
-      final saf = Saf();
-      Stream<List<int>> byteStream = await saf.readFileStream(path);
+      final safStream = SafStream();
+      Stream<List<int>> byteStream = await safStream.readFileStream(path);
       List<int> bytes = [];
       await for (final byteList in byteStream) {
         for (final byte in byteList) {
@@ -19,13 +19,12 @@ class LocalStorageService {
         }
       }
       stream = InputMemoryStream(bytes);
-      archiveType = (await saf.stat(path))!.name.split('.').last;
     } else {
       stream = InputFileStream(path);
-      archiveType = path.split('.').last;
     }
 
     Archive? archive;
+    final archiveType = await getFileType(path);
     switch (archiveType) {
       case 'cbz' || 'zip':
         archive = ZipDecoder().decodeStream(stream);
@@ -38,8 +37,8 @@ class LocalStorageService {
 
   Future<List<String>> getFiles(String path) async {
     if (Platform.isAndroid) {
-      final saf = Saf();
-      final files = await saf.list(path);
+      final safUtil = SafUtil();
+      final files = await safUtil.list(path);
       return files.map((file) => file.uri).toList();
     } else {
       final files = Directory(
@@ -51,8 +50,8 @@ class LocalStorageService {
 
   Future<String> getFileType(String path) async {
     if (Platform.isAndroid) {
-      final saf = Saf();
-      final file = await saf.stat(path);
+      final safUtil = SafUtil();
+      final file = await safUtil.stat(path, null);
       return file!.name.split('.').last;
     } else {
       return path.split('.').last;
@@ -61,8 +60,8 @@ class LocalStorageService {
 
   Future<String> getName(String path) async {
     if (Platform.isAndroid) {
-      final saf = Saf();
-      final file = await saf.stat(path);
+      final safUtil = SafUtil();
+      final file = await safUtil.stat(path, null);
       if (file!.isDir) {
         return file.name;
       } else {
@@ -104,8 +103,8 @@ class LocalStorageService {
 
   Future<bool> isDir(String path) async {
     if (Platform.isAndroid) {
-      final saf = Saf();
-      final safDocumentFile = await saf.stat(path);
+      final safUtil = SafUtil();
+      final safDocumentFile = await safUtil.stat(path, null);
       return safDocumentFile!.isDir;
     } else {
       return Directory(path).exists();
@@ -114,8 +113,8 @@ class LocalStorageService {
 
   Future<String?> selectFolder() async {
     if (Platform.isAndroid) {
-      final saf = Saf();
-      final safDocumentFile = await saf.pickDirectory(
+      final safUtil = SafUtil();
+      final safDocumentFile = await safUtil.pickDirectory(
         persistablePermission: true,
         writePermission: true,
       );

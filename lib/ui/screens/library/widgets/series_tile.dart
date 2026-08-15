@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:manga_reader/ui/screens/library/widgets/series_menu.dart';
 
+import 'series_menu.dart';
 import '../library_view_model.dart';
 import '../../../../data/models/series.dart';
 import '../../../../routing/routes.dart';

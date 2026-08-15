@@ -67,13 +67,13 @@ class _ReaderSliderState extends State<ReaderSlider> {
                     child: Expanded(
                       child: Slider(
                         padding: EdgeInsets.symmetric(horizontal: 8),
-                        min: 0,
-                        max: widget.viewModel.pages.length.toDouble() + 1,
+                        min: 1,
+                        max: widget.viewModel.pages.length.toDouble(),
                         value: widget.viewModel.currentPage.toDouble(),
                         onChanged: (double newPage) {
                           _previousPage ??= widget.viewModel.currentPage;
                           setState(() {
-                            widget.viewModel.currentPage = newPage.toInt() + 1;
+                            widget.viewModel.currentPage = newPage.toInt();
                           });
                         },
                         onChangeEnd: (double newPage) {
@@ -81,7 +81,7 @@ class _ReaderSliderState extends State<ReaderSlider> {
                             newPage = newPage / 2;
                           }
                           widget.pageController.animateToPage(
-                            newPage.toInt(),
+                            newPage.toInt() - 1,
                             curve: Curves.easeIn,
                             duration: Duration(milliseconds: 500),
                           );
