@@ -173,7 +173,7 @@ class ReaderViewModel extends ChangeNotifier {
         if (currentPage + 4 >= _pages.length) {
           book.readingStatus = ReadingStatus.finished;
           _libraryRepository.deleteBookCache(book.id);
-        } else if (currentPage == 0) {
+        } else if (currentPage == 1) {
           book.readingStatus = ReadingStatus.unread;
           _libraryRepository.deleteBookCache(book.id);
         } else {

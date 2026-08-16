@@ -52,7 +52,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
           margin: EdgeInsets.all(0),
           color: Theme.of(context).colorScheme.surface.withAlpha(240),
           child: Padding(
-            padding: const EdgeInsets.only(top: 32),
+            padding: const EdgeInsets.only(top: 48),
             child: Row(
               children: [
                 IconButton(

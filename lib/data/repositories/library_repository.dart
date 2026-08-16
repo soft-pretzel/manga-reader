@@ -190,13 +190,17 @@ class LibraryRepository {
 
       final archive = await _localStorageService.decodeArchive(book.path);
       if (archive != null) {
+        var i = 1;
         for (final file in archive) {
-          if (imgTypes.contains(file.name.split('.').last)) {
+          final fileType = file.name.split('.').last;
+          if (imgTypes.contains(fileType)) {
             final page = await _localStorageService.writeArchiveFile(
               file,
               bookCache.path,
+              i.toString().padLeft(3, '0'),
             );
             pages.add(page);
+            i++;
           }
         }
       }
@@ -282,10 +286,6 @@ class LibraryRepository {
     }
   }
 
-  Future<void> updateBook(Book book) async {
-    await _databaseService.updateBook(book);
-  }
-
   Future<void> _saveBook(String path, String? seriesId) async {
     final name = await _localStorageService.getName(path);
     final existingBook = await _databaseService.getBookByNameAndSeries(
@@ -319,5 +319,9 @@ class LibraryRepository {
     } else {
       return existingSeries.id;
     }
+  }
+
+  Future<void> updateBook(Book book) async {
+    await _databaseService.updateBook(book);
   }
 }
