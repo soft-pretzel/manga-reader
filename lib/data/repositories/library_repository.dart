@@ -183,6 +183,7 @@ class LibraryRepository {
         await for (final file in bookCache.list()) {
           pages.add(file.path);
         }
+        pages.sort((a, b) => a.compareTo(b));
         return Result.ok(pages);
       } else {
         await bookCache.create(recursive: true);
@@ -197,7 +198,7 @@ class LibraryRepository {
             final page = await _localStorageService.writeArchiveFile(
               file,
               bookCache.path,
-              i.toString().padLeft(3, '0'),
+              '${i.toString().padLeft(3, '0')}.$fileType',
             );
             pages.add(page);
             i++;
