@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import '../models/book.dart';
 import '../models/library.dart';
-import '../models/reading_direction.dart';
-import '../models/reading_mode.dart';
 import '../models/series.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
@@ -35,50 +34,10 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<bool>> getAnimations() async {
-    try {
-      final animations = await _sharedPreferencesService.getAnimations();
-      return Result.ok(animations);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
   Future<Result<Book>> getBook(String id) async {
     try {
       final book = await _databaseService.getBook(id);
       return Result.ok(book);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<String?>> getBookThumbnail(Book book) async {
-    try {
-      final cache = await _localStorageService.getThumbnailCache();
-
-      final archive = await _localStorageService.decodeArchive(book.path);
-      String? thumbnail;
-      if (archive != null) {
-        for (final file in archive) {
-          final fileType = file.name.split('.').last;
-          if (imgTypes.contains(fileType)) {
-            thumbnail = await _localStorageService.writeArchiveFile(
-              file,
-              cache.path,
-              '${book.id}.$fileType',
-            );
-            break;
-          }
-        }
-      }
-
-      if (thumbnail != null) {
-        book.thumbnail = thumbnail;
-        _databaseService.updateBook(book);
-      }
-
-      return Result.ok(thumbnail);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -97,25 +56,6 @@ class LibraryRepository {
     try {
       final library = await _databaseService.getLibrary(seriesId);
       return Result.ok(library);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<ReadingDirection>> getReadingDirection() async {
-    try {
-      final readingDirection = await _sharedPreferencesService
-          .getReadingDirection();
-      return Result.ok(readingDirection);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<ReadingMode>> getReadingMode() async {
-    try {
-      final readingMode = await _sharedPreferencesService.getReadingMode();
-      return Result.ok(readingMode);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -141,29 +81,20 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<String?>> getSeriesThumbnail(Series series) async {
+  Future<Result<String?>> getThumbnail(Library item) async {
     try {
       String? thumbnail;
-
-      final books = await _databaseService.getBooksBySeries(series.id);
-      books.sort((a, b) => a.name.compareTo(b.name));
-      if (books.first.thumbnail == null) {
-        final result = await getBookThumbnail(books.first);
-        switch (result) {
-          case Ok():
-            thumbnail = result.value;
-          case Error():
-            return Result.error(result.error);
-        }
-      } else {
-        thumbnail = books.first.thumbnail;
-      }
-
-      if (thumbnail != null) {
+      if (item.runtimeType == Series) {
+        final series = item as Series;
+        thumbnail = await _getSeriesThumbnail(series);
         series.thumbnail = thumbnail;
         _databaseService.updateSeries(series);
+      } else {
+        final book = item as Book;
+        thumbnail = await _getBookThumbnail(book);
+        book.thumbnail = thumbnail;
+        _databaseService.updateBook(book);
       }
-
       return Result.ok(thumbnail);
     } on Exception catch (e) {
       return Result.error(e);
@@ -258,32 +189,45 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<void>> toggleAnimations() async {
+  Future<String?> _getBookThumbnail(Book book) async {
     try {
-      await _sharedPreferencesService.setAnimations();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
+      String? thumbnail;
+      await Isolate.run(() async {
+        final cache = await _localStorageService.getThumbnailCache();
+        final archive = await _localStorageService.decodeArchive(book.path);
+        if (archive != null) {
+          for (final file in archive) {
+            final fileType = file.name.split('.').last;
+            if (imgTypes.contains(fileType)) {
+              thumbnail = await _localStorageService.writeArchiveFile(
+                file,
+                cache.path,
+                '${book.id}.$fileType',
+              );
+              break;
+            }
+          }
+        }
+      });
+      return thumbnail;
+    } on Exception {
+      rethrow;
     }
   }
 
-  Future<Result<void>> setReadingDirection(
-    ReadingDirection readingDirection,
-  ) async {
+  Future<String?> _getSeriesThumbnail(Series series) async {
     try {
-      await _sharedPreferencesService.setReadingDirection(readingDirection);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> setReadingMode(ReadingMode readingMode) async {
-    try {
-      await _sharedPreferencesService.setReadingMode(readingMode);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
+      String? thumbnail;
+      final books = await _databaseService.getBooksBySeries(series.id);
+      books.sort((a, b) => a.name.compareTo(b.name));
+      if (books.first.thumbnail == null) {
+        thumbnail = await _getBookThumbnail(books.first);
+      } else {
+        thumbnail = books.first.thumbnail;
+      }
+      return thumbnail;
+    } on Exception {
+      rethrow;
     }
   }
 

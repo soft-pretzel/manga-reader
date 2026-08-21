@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../ui/screens/settings/widgets/reader_settings/reader_settings_view.dart';
+import '../ui/screens/settings/widgets/reader_settings/reader_settings_view_model.dart';
 import 'routes.dart';
 import '../ui/screens/home/home_view.dart';
 import '../ui/screens/home/home_view_model.dart';
@@ -49,21 +51,21 @@ final router = GoRouter(
               name: RouteNames.library,
               path: RoutePaths.library,
               builder: (context, state) {
-                final libraryViewModel = LibraryViewModel(
+                final viewModel = LibraryViewModel(
                   libraryRepository: context.read(),
                 );
-                return LibraryView(viewModel: libraryViewModel);
+                return LibraryView(viewModel: viewModel);
               },
               routes: [
                 GoRoute(
                   name: RouteNames.series,
                   path: RoutePaths.series,
                   builder: (context, state) {
-                    final libraryViewModel = LibraryViewModel(
+                    final viewModel = LibraryViewModel(
                       seriesId: state.pathParameters['seriesId'],
                       libraryRepository: context.read(),
                     );
-                    return LibraryView(viewModel: libraryViewModel);
+                    return LibraryView(viewModel: viewModel);
                   },
                 ),
               ],
@@ -82,6 +84,48 @@ final router = GoRouter(
                 );
                 return SettingsView(viewModel: viewModel);
               },
+              routes: [
+                GoRoute(
+                  name: RouteNames.generalSettings,
+                  path: RoutePaths.generalSettings,
+                  builder: (context, state) {
+                    final viewModel = ReaderSettingsViewModel(
+                      settingsRepository: context.read(),
+                    );
+                    return ReaderSettingsView(viewModel: viewModel);
+                  },
+                ),
+                GoRoute(
+                  name: RouteNames.storageSettings,
+                  path: RoutePaths.storageSettings,
+                  builder: (context, state) {
+                    final viewModel = ReaderSettingsViewModel(
+                      settingsRepository: context.read(),
+                    );
+                    return ReaderSettingsView(viewModel: viewModel);
+                  },
+                ),
+                GoRoute(
+                  name: RouteNames.appearanceSettings,
+                  path: RoutePaths.appearanceSettings,
+                  builder: (context, state) {
+                    final viewModel = ReaderSettingsViewModel(
+                      settingsRepository: context.read(),
+                    );
+                    return ReaderSettingsView(viewModel: viewModel);
+                  },
+                ),
+                GoRoute(
+                  name: RouteNames.readerSettings,
+                  path: RoutePaths.readerSettings,
+                  builder: (context, state) {
+                    final viewModel = ReaderSettingsViewModel(
+                      settingsRepository: context.read(),
+                    );
+                    return ReaderSettingsView(viewModel: viewModel);
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -94,6 +138,7 @@ final router = GoRouter(
         final viewModel = ReaderViewModel(
           bookId: state.pathParameters['bookId']!,
           libraryRepository: context.read(),
+          settingsRepository: context.read(),
         );
         return ReaderView(viewModel: viewModel);
       },

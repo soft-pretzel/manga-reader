@@ -50,9 +50,8 @@ class ReaderMenu<T> extends PopupRoute<T> {
       children: [
         Card(
           margin: EdgeInsets.all(0),
-          color: Theme.of(context).colorScheme.surface.withAlpha(240),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 48),
+          color: Theme.of(context).colorScheme.surface.withAlpha(224),
+          child: SafeArea(
             child: Row(
               children: [
                 IconButton(
@@ -65,7 +64,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
                       ..pop();
                   },
                 ),
-                Text(viewModel.book!.name),
+                Text(viewModel.book.name),
                 Spacer(),
                 IconButton(
                   icon: Icon(Icons.more_vert),
@@ -78,9 +77,8 @@ class ReaderMenu<T> extends PopupRoute<T> {
         ),
         Card(
           margin: EdgeInsets.all(0),
-          color: Theme.of(context).colorScheme.surface.withAlpha(240),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 32),
+          color: Theme.of(context).colorScheme.surface.withAlpha(224),
+          child: SafeArea(
             child: Column(
               children: [
                 MenuButtons(viewModel: viewModel),

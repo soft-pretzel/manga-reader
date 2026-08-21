@@ -16,6 +16,14 @@ class LibraryView extends StatefulWidget {
 }
 
 class _LibraryViewState extends State<LibraryView> {
+  late final MenuController _menuContoroller;
+
+  @override
+  void initState() {
+    super.initState();
+    _menuContoroller = MenuController();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -29,10 +37,35 @@ class _LibraryViewState extends State<LibraryView> {
       builder: (context, _) {
         return Column(
           children: [
-            AppBar(title: Text(widget.viewModel.title)),
+            AppBar(
+              title: Text(widget.viewModel.title),
+              actions: [
+                MenuAnchor(
+                  builder: (context, controller, child) {
+                    return IconButton(
+                      onPressed: _menuContoroller.open,
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  },
+                  controller: _menuContoroller,
+                  menuChildren: [
+                    MenuItemButton(
+                      onPressed: () {
+                        widget.viewModel.scanFolder.execute();
+                      },
+                      child: Text('Rescan folder'),
+                    ),
+                  ],
+                ),
+                // IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+              ],
+            ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: widget.viewModel.refresh.execute,
+                onRefresh: widget.viewModel.load.execute,
                 child: ListenableBuilder(
                   listenable: widget.viewModel.load,
                   builder: (context, child) {
@@ -44,8 +77,12 @@ class _LibraryViewState extends State<LibraryView> {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
                           Text('Error loading Library'),
-                          FilledButton(
+                          TextButton(
                             onPressed: widget.viewModel.load.execute,
                             child: Text('Try Again'),
                           ),
@@ -58,38 +95,46 @@ class _LibraryViewState extends State<LibraryView> {
                   child: ListenableBuilder(
                     listenable: widget.viewModel,
                     builder: (context, _) {
-                      if (widget.viewModel.libraryItems.isEmpty) {
+                      if (widget.viewModel.library.isEmpty) {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            Icon(
+                              Icons.sentiment_dissatisfied,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             Text('No books found'),
-                            FilledButton(
-                              onPressed: widget.viewModel.refresh.execute,
+                            TextButton(
+                              onPressed: widget.viewModel.load.execute,
                               child: Text('Reload'),
                             ),
                           ],
                         );
                       }
 
-                      return GridView.count(
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: .51,
+                          mainAxisSpacing: 4,
+                          crossAxisSpacing: 6,
+                        ),
+                        itemBuilder: (context, index) {
+                          final item = widget.viewModel.library[index];
+                          if (item.runtimeType == Series) {
+                            return SeriesTile(
+                              series: item as Series,
+                              viewModel: widget.viewModel,
+                            );
+                          } else {
+                            return BookTile(
+                              book: item as Book,
+                              viewModel: widget.viewModel,
+                            );
+                          }
+                        },
+                        itemCount: widget.viewModel.library.length,
                         padding: EdgeInsets.all(16),
-                        crossAxisCount: 3,
-                        childAspectRatio: .51,
-                        mainAxisSpacing: 4,
-                        crossAxisSpacing: 6,
-                        children: [
-                          for (final item in widget.viewModel.libraryItems)
-                            if (item.runtimeType == Series)
-                              SeriesTile(
-                                series: item as Series,
-                                viewModel: widget.viewModel,
-                              )
-                            else
-                              BookTile(
-                                book: item as Book,
-                                viewModel: widget.viewModel,
-                              ),
-                        ],
                       );
                     },
                   ),

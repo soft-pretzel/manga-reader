@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'book_menu.dart';
+import 'thumbnail.dart';
 import '../library_view_model.dart';
 import '../../../../data/models/book.dart';
 import '../../../../routing/routes.dart';
@@ -48,7 +47,7 @@ class _BookTileState extends State<BookTile> {
                 viewModel: widget.viewModel,
                 child: Stack(
                   children: [
-                    Thumbnail(book: widget.book, viewModel: widget.viewModel),
+                    Thumbnail(item: widget.book, viewModel: widget.viewModel),
                     (widget.book.readingStatus == ReadingStatus.inProgress)
                         ? Align(
                             alignment: AlignmentGeometry.bottomCenter,
@@ -72,7 +71,7 @@ class _BookTileState extends State<BookTile> {
                                     colors: [
                                       Theme.of(
                                         context,
-                                      ).colorScheme.surface.withAlpha(200),
+                                      ).colorScheme.surface.withAlpha(224),
                                       Theme.of(
                                         context,
                                       ).colorScheme.surface.withAlpha(0),
@@ -128,47 +127,6 @@ class _BookTileState extends State<BookTile> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class Thumbnail extends StatefulWidget {
-  const Thumbnail({super.key, required this.book, required this.viewModel});
-
-  final Book book;
-  final LibraryViewModel viewModel;
-
-  @override
-  State<Thumbnail> createState() => _ThumbnailState();
-}
-
-class _ThumbnailState extends State<Thumbnail> {
-  @override
-  void initState() {
-    super.initState();
-    widget.viewModel.getBookThumbnails.execute();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: widget.viewModel.getBookThumbnails,
-      builder: (context, child) {
-        if (widget.viewModel.getBookThumbnails.error) {
-          return Center(child: Text('Error'));
-        }
-
-        return child!;
-      },
-      child: ListenableBuilder(
-        listenable: widget.viewModel,
-        builder: (context, _) {
-          if (widget.book.thumbnail == null) {
-            return Center(child: CircularProgressIndicator());
-          }
-          return Image.file(File(widget.book.thumbnail!));
-        },
-      ),
     );
   }
 }

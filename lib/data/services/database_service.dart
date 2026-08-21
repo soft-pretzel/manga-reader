@@ -84,20 +84,14 @@ class DatabaseService {
       'books',
       where: seriesId != null ? 'series_id = ?' : 'series_id IS NULL',
       whereArgs: seriesId != null ? [seriesId] : null,
-      orderBy: 'name',
     );
-    for (final book in bookList) {
-      libraryList.add(Book.fromMap(book));
-    }
+    libraryList.addAll(bookList.map((book) => Book.fromMap(book)));
     final seriesList = await db.query(
       'series',
       where: seriesId != null ? 'series_id = ?' : 'series_id IS NULL',
       whereArgs: seriesId != null ? [seriesId] : null,
-      orderBy: 'name',
     );
-    for (final series in seriesList) {
-      libraryList.add(Series.fromMap(series));
-    }
+    libraryList.addAll(seriesList.map((series) => Series.fromMap(series)));
     if (libraryList.length > 1) {
       libraryList.sort((a, b) => a!.name.compareTo(b!.name));
     }

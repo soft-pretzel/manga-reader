@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../data/models/book.dart';
 import '../../../data/models/library.dart';
 import '../../../data/models/series.dart';
 import '../../../data/repositories/library_repository.dart';
@@ -9,36 +8,33 @@ import '../../../utils/result.dart';
 
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({this._seriesId, required this._libraryRepository}) {
-    getBookThumbnails = Command0(_getBookThumbnails);
-    getSeriesBookCount = Command0(_getSeriesBookCount);
-    getSeriesThumbnails = Command0(_getSeriesThumbnails);
+    getSeriesItemCount = Command1(_getSeriesItemCount);
+    getThumbnail = Command1(_getThumbnail);
     getTitle = Command0(_getTitle);
     load = Command0(_load)..execute();
-    refresh = Command0(_refresh);
+    scanFolder = Command0(_scanFolder);
   }
 
   final String? _seriesId;
   final LibraryRepository _libraryRepository;
 
-  late final Command0 getBookThumbnails;
-  late final Command0 getSeriesBookCount;
-  late final Command0 getSeriesThumbnails;
+  late final Command1<void, Series> getSeriesItemCount;
+  late final Command1<void, Library> getThumbnail;
   late final Command0 getTitle;
   late final Command0 load;
-  late final Command0 refresh;
+  late final Command0 scanFolder;
 
-  final List<Library?> _library = [];
+  List<Library?> _library = [];
   String _title = 'Library';
 
-  List<Library?> get libraryItems => _library;
+  List<Library?> get library => _library;
   String get title => _title;
 
   Future<Result<void>> _load() async {
     final result = await _libraryRepository.getLibrary(_seriesId);
     switch (result) {
       case Ok():
-        _library.clear();
-        _library.addAll(result.value);
+        _library = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -46,65 +42,28 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _getBookThumbnails() async {
-    if (_library.isNotEmpty) {
-      for (final item in _library) {
-        if (item.runtimeType == Book) {
-          final book = item as Book;
-          if (book.thumbnail == null) {
-            final result = await _libraryRepository.getBookThumbnail(book);
-            switch (result) {
-              case Ok():
-                book.thumbnail = result.value;
-                notifyListeners();
-              case Error():
-                return Result.error(result.error);
-            }
-          }
-        }
-      }
+  Future<Result<void>> _getThumbnail(Library item) async {
+    final result = await _libraryRepository.getThumbnail(item);
+    switch (result) {
+      case Ok():
+        item.thumbnail = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
     }
-    return Result.ok(null);
   }
 
-  Future<Result<void>> _getSeriesBookCount() async {
-    if (_library.isNotEmpty) {
-      for (final item in _library) {
-        if (item.runtimeType == Series) {
-          final series = item as Series;
-          final result = await _libraryRepository.getSeriesBookCount(series);
-          switch (result) {
-            case Ok():
-              series.bookCount = result.value;
-              notifyListeners();
-            case Error():
-              return Result.error(result.error);
-          }
-        }
-      }
+  Future<Result<void>> _getSeriesItemCount(Series series) async {
+    final result = await _libraryRepository.getSeriesBookCount(series);
+    switch (result) {
+      case Ok():
+        series.bookCount = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
     }
-    return Result.ok(null);
-  }
-
-  Future<Result<void>> _getSeriesThumbnails() async {
-    if (_library.isNotEmpty) {
-      for (final item in _library) {
-        if (item.runtimeType == Series) {
-          final series = item as Series;
-          if (series.thumbnail == null) {
-            final result = await _libraryRepository.getSeriesThumbnail(series);
-            switch (result) {
-              case Ok():
-                series.thumbnail = result.value;
-                notifyListeners();
-              case Error():
-                return Result.error(result.error);
-            }
-          }
-        }
-      }
-    }
-    return Result.ok(null);
   }
 
   Future<Result<void>> _getTitle() async {
@@ -122,12 +81,11 @@ class LibraryViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
-  Future<Result<void>> _refresh() async {
+  Future<Result<void>> _scanFolder() async {
     final result = await _libraryRepository.scanFolder();
     switch (result) {
       case Ok():
-        await _load();
-        await _getSeriesBookCount();
+        _load();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

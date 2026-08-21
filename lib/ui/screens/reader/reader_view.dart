@@ -25,8 +25,8 @@ class _ReaderViewState extends State<ReaderView> {
   bool _zoomedIn = false;
 
   Future<void> _initController() async {
-    await widget.viewModel.getCurrentPage.execute();
-    var pageIndex = widget.viewModel.currentPage - 1;
+    await widget.viewModel.loadBook.execute();
+    var pageIndex = widget.viewModel.book.currentPage - 1;
     if (_currentOrientation == .landscape) pageIndex = (pageIndex / 2).round();
     _pageController = PageController(initialPage: pageIndex);
   }
@@ -47,9 +47,9 @@ class _ReaderViewState extends State<ReaderView> {
 
   @override
   void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _pageController.dispose();
     _transformationController.dispose();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     widget.viewModel.setReadingStatus.execute();
     super.dispose();
   }
@@ -67,8 +67,12 @@ class _ReaderViewState extends State<ReaderView> {
           return Center(
             child: Column(
               children: [
-                Text('Error opening book'),
-                FilledButton(
+                Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                Text('Error loading Reader'),
+                TextButton(
                   onPressed: widget.viewModel.load.execute,
                   child: Text('Try Again'),
                 ),
@@ -86,7 +90,7 @@ class _ReaderViewState extends State<ReaderView> {
             builder: (context, newOrientation) {
               if (_currentOrientation != newOrientation) {
                 _currentOrientation = newOrientation;
-                var pageIndex = widget.viewModel.currentPage - 1;
+                var pageIndex = widget.viewModel.book.currentPage - 1;
                 if (newOrientation == .landscape) {
                   pageIndex = (pageIndex / 2).round();
                 }
@@ -94,6 +98,7 @@ class _ReaderViewState extends State<ReaderView> {
               }
               return GestureDetector(
                 onTapDown: (details) => _tapDownDetails = details,
+
                 onTap: () {
                   final x = _tapDownDetails.localPosition.dx;
                   if (x >= (_width * 2 / 3)) {
@@ -222,18 +227,10 @@ class _ReaderViewState extends State<ReaderView> {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (widget.viewModel.readingDirection ==
-                                  .rightToLeft) ...[
-                                Image.file(File(widget.viewModel.pages[index])),
-                                Image.file(
-                                  File(widget.viewModel.pages[index - 1]),
-                                ),
-                              ] else ...[
-                                Image.file(
-                                  File(widget.viewModel.pages[index - 1]),
-                                ),
-                                Image.file(File(widget.viewModel.pages[index])),
-                              ],
+                              Image.file(File(widget.viewModel.pages[index])),
+                              Image.file(
+                                File(widget.viewModel.pages[index - 1]),
+                              ),
                             ],
                           );
                         }
@@ -248,7 +245,7 @@ class _ReaderViewState extends State<ReaderView> {
                           pageIndex = pageIndex * 2 - 1;
                           if (pageIndex == 0) pageIndex = 0;
                         }
-                        widget.viewModel.currentPage = pageIndex + 1;
+                        widget.viewModel.updateBook.execute(pageIndex + 1);
                       }
                     },
                     pageSnapping: (widget.viewModel.readingMode == .continuous)

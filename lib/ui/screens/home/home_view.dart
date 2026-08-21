@@ -33,8 +33,12 @@ class _HomeViewState extends State<HomeView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                         Text('Error loading Home'),
-                        FilledButton(
+                        TextButton(
                           onPressed: () {
                             widget.viewModel.load.execute();
                           },

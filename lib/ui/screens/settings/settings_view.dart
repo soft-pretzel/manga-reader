@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'settings_view_model.dart';
+import '../../../routing/routes.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key, required this.viewModel});
@@ -31,8 +33,12 @@ class _SettingsViewState extends State<SettingsView> {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                       Text('Error loading Settings'),
-                      FilledButton(
+                      TextButton(
                         onPressed: widget.viewModel.load.execute,
                         child: Text('Try Again'),
                       ),
@@ -45,44 +51,54 @@ class _SettingsViewState extends State<SettingsView> {
               child: ListenableBuilder(
                 listenable: widget.viewModel,
                 builder: (context, _) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: ListView(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  return ListView(
+                    padding: EdgeInsets.all(16),
+                    children: [
+                      Card(
+                        margin: EdgeInsets.all(0),
+                        child: Column(
                           children: [
-                            Padding(
-                              padding: const EdgeInsetsGeometry.fromLTRB(
-                                8,
-                                0,
-                                0,
-                                4,
-                              ),
-                              child: Text('Local Folder'),
+                            ListTile(
+                              leading: Icon(Icons.settings_outlined),
+                              title: Text('General'),
+                              trailing: Icon(Icons.keyboard_arrow_right),
+                              onTap: () {
+                                context.pushNamed(RouteNames.generalSettings);
+                              },
                             ),
-                            if (widget.viewModel.folder == null)
-                              FilledButton(
-                                onPressed: widget.viewModel.setFolder.execute,
-                                child: Text('Add Folder'),
-                              )
-                            else
-                              Card(
-                                margin: EdgeInsets.all(0),
-                                child: ListTile(
-                                  leading: Icon(Icons.folder),
-                                  title: Text(widget.viewModel.folder!),
-                                  trailing: IconButton(
-                                    onPressed:
-                                        widget.viewModel.setFolder.execute,
-                                    icon: Icon(Icons.edit),
-                                  ),
-                                ),
-                              ),
+                            Divider(),
+                            ListTile(
+                              leading: Icon(Icons.folder_outlined),
+                              title: Text('Local Storage'),
+                              trailing: Icon(Icons.keyboard_arrow_right),
+                              onTap: () {
+                                context.pushNamed(RouteNames.storageSettings);
+                              },
+                            ),
+                            Divider(),
+                            ListTile(
+                              leading: Icon(Icons.palette_outlined),
+                              title: Text('Appearance'),
+                              trailing: Icon(Icons.keyboard_arrow_right),
+                              onTap: () {
+                                context.pushNamed(
+                                  RouteNames.appearanceSettings,
+                                );
+                              },
+                            ),
+                            Divider(),
+                            ListTile(
+                              leading: Icon(Icons.menu_book_outlined),
+                              title: Text('Reader'),
+                              trailing: Icon(Icons.keyboard_arrow_right),
+                              onTap: () {
+                                context.pushNamed(RouteNames.readerSettings);
+                              },
+                            ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 },
               ),

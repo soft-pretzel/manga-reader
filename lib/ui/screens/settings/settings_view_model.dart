@@ -5,19 +5,29 @@ import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
 class SettingsViewModel extends ChangeNotifier {
-  SettingsViewModel({required this._settingsRepository}) {
+  SettingsViewModel({this._setting, required this._settingsRepository}) {
     deleteFolder = Command0(_deleteFolder);
     load = Command0(_load)..execute();
+    loadTitle = Command0(_loadTitle);
     setFolder = Command0(_setFolder);
+    setTheme = Command1(_setTheme);
   }
 
+  final String? _setting;
   final SettingsRepository _settingsRepository;
+
   late final Command0 deleteFolder;
   late final Command0 load;
+  late final Command0 loadTitle;
   late final Command0 setFolder;
+  late final Command1<void, ThemeMode> setTheme;
 
   String? _folder;
+  String _title = 'Settings';
+
   String? get folder => _folder;
+  String get title => _title;
+  String? get setting => _setting;
 
   Future<Result<void>> _deleteFolder() async {
     final result = await _settingsRepository.deleteFolder();
@@ -31,6 +41,7 @@ class SettingsViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _load() async {
+    _loadTitle();
     final result = await _settingsRepository.getFolder();
     switch (result) {
       case Ok():
@@ -42,11 +53,40 @@ class SettingsViewModel extends ChangeNotifier {
     }
   }
 
+  Future<Result<void>> _loadTitle() async {
+    try {
+      switch (_setting) {
+        case 'general':
+          _title = 'General';
+        case 'appearance':
+          _title = 'Appearance';
+        case 'local-storage':
+          _title = 'Local Storage';
+        case 'reader':
+          _title = 'Reader';
+      }
+      notifyListeners();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<void>> _setFolder() async {
     final result = await _settingsRepository.setFolder();
     switch (result) {
       case Ok():
         _load();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _setTheme(ThemeMode theme) async {
+    final result = await _settingsRepository.setTheme(theme);
+    switch (result) {
+      case Ok():
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

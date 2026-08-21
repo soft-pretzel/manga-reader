@@ -3,7 +3,7 @@ import 'library.dart';
 enum ReadingStatus { unread, inProgress, finished }
 
 class Book extends Library {
-  int? currentPage;
+  int currentPage;
   DateTime? lastRead;
   int? length;
   final String path;
@@ -11,13 +11,13 @@ class Book extends Library {
 
   Book({
     required super.id,
-    this.currentPage,
+    this.currentPage = 1,
     required super.dateAdded,
     this.lastRead,
     this.length,
     required super.name,
     required this.path,
-    this.readingStatus = ReadingStatus.unread,
+    this.readingStatus = .unread,
     super.seriesId,
     super.thumbnail,
   });
@@ -39,7 +39,7 @@ class Book extends Library {
   }
 
   Book.fromMap(super.map)
-    : currentPage = int.tryParse(map['current_page'].toString()),
+    : currentPage = int.parse(map['current_page'].toString()),
       lastRead = DateTime.tryParse(map['last_read'].toString()),
       length = int.tryParse(map['length'].toString()),
       path = map['path'].toString(),

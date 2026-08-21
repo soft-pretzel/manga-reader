@@ -32,7 +32,7 @@ class _ReaderSliderState extends State<ReaderSlider> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                '${widget.viewModel.currentPage} / ${widget.viewModel.pages.length}',
+                '${widget.viewModel.book.currentPage} / ${widget.viewModel.pages.length}',
               ),
             ),
             Padding(
@@ -47,14 +47,13 @@ class _ReaderSliderState extends State<ReaderSlider> {
                       }
                       widget.pageController.animateToPage(
                         newPage - 1,
-                        curve: Curves.easeIn,
+                        curve: Curves.easeInOut,
                         duration: Duration(milliseconds: 500),
                       );
-                      setState(() {
-                        _pageHistory.add(widget.viewModel.currentPage);
-                        widget.viewModel.currentPage = newPage;
-                      });
                       widget.viewModel.updateBook.execute(newPage);
+                      setState(() {
+                        _pageHistory.add(widget.viewModel.book.currentPage);
+                      });
                     },
                     icon: Icon(Icons.first_page),
                     color: Theme.of(context).colorScheme.primary,
@@ -69,27 +68,24 @@ class _ReaderSliderState extends State<ReaderSlider> {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         min: 1,
                         max: widget.viewModel.pages.length.toDouble(),
-                        value: widget.viewModel.currentPage.toDouble(),
+                        value: widget.viewModel.book.currentPage.toDouble(),
                         onChanged: (double newPage) {
-                          _previousPage ??= widget.viewModel.currentPage;
-                          setState(() {
-                            widget.viewModel.currentPage = newPage.toInt();
-                          });
-                        },
-                        onChangeEnd: (double newPage) {
                           if (widget.orientation == .landscape) {
                             newPage = newPage / 2;
                           }
                           widget.pageController.animateToPage(
                             newPage.toInt() - 1,
-                            curve: Curves.easeIn,
+                            curve: Curves.easeInOut,
                             duration: Duration(milliseconds: 500),
                           );
+                          _previousPage ??= widget.viewModel.book.currentPage;
+                          widget.viewModel.updateBook.execute(newPage.toInt());
+                        },
+                        onChangeEnd: (double newPage) {
                           setState(() {
                             _pageHistory.add(_previousPage);
                           });
                           _previousPage = null;
-                          widget.viewModel.updateBook.execute(newPage.toInt());
                         },
                       ),
                     ),
@@ -100,14 +96,13 @@ class _ReaderSliderState extends State<ReaderSlider> {
                         final newPage = _pageHistory.last;
                         widget.pageController.animateToPage(
                           newPage,
-                          curve: Curves.easeIn,
+                          curve: Curves.easeInOut,
                           duration: Duration(milliseconds: 500),
                         );
+                        widget.viewModel.updateBook.execute(newPage);
                         setState(() {
                           _pageHistory.removeLast();
-                          widget.viewModel.currentPage = newPage;
                         });
-                        widget.viewModel.updateBook.execute(newPage);
                       }
                     },
                     icon: Icon(Icons.undo),
@@ -123,14 +118,13 @@ class _ReaderSliderState extends State<ReaderSlider> {
                       }
                       widget.pageController.animateToPage(
                         newPage - 1,
-                        curve: Curves.easeIn,
+                        curve: Curves.easeInOut,
                         duration: Duration(milliseconds: 500),
                       );
-                      setState(() {
-                        _pageHistory.add(widget.viewModel.currentPage);
-                        widget.viewModel.currentPage = newPage;
-                      });
                       widget.viewModel.updateBook.execute(newPage);
+                      setState(() {
+                        _pageHistory.add(widget.viewModel.book.currentPage);
+                      });
                     },
                     icon: Icon(Icons.last_page),
                     color: Theme.of(context).colorScheme.primary,
