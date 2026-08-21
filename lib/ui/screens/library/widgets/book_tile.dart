@@ -53,8 +53,7 @@ class _BookTileState extends State<BookTile> {
                             alignment: AlignmentGeometry.bottomCenter,
                             child: LinearProgressIndicator(
                               value:
-                                  widget.book.currentPage! /
-                                  widget.book.length!,
+                                  widget.book.currentPage / widget.book.length!,
                             ),
                           )
                         : SizedBox(),

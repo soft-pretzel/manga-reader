@@ -22,7 +22,6 @@ class _ReaderViewState extends State<ReaderView> {
   final _transformationController = TransformationController();
   var _tapDownDetails = TapDownDetails();
   late double _width;
-  bool _zoomedIn = false;
 
   Future<void> _initController() async {
     await widget.viewModel.loadBook.execute();
@@ -164,50 +163,65 @@ class _ReaderViewState extends State<ReaderView> {
                 },
                 onDoubleTapDown: (details) => _tapDownDetails = details,
                 onDoubleTap: () {
-                  if (_zoomedIn) {
+                  if (_transformationController.value != Matrix4.identity()) {
                     _transformationController.value = Matrix4.identity();
                     setState(() {
                       _scrollPhysics = PageScrollPhysics();
                     });
-                    _zoomedIn = false;
                   } else {
                     final position = _tapDownDetails.localPosition;
                     _transformationController.value = Matrix4.identity()
                       ..translateByDouble(
-                        -position.dx * 2,
-                        -position.dy * 2,
+                        -position.dx * (widget.viewModel.zoom - 1),
+                        -position.dy * (widget.viewModel.zoom - 1),
                         1,
                         1,
                       )
-                      ..scaleByDouble(3, 3, 1, 1);
+                      ..scaleByDouble(
+                        widget.viewModel.zoom,
+                        widget.viewModel.zoom,
+                        1,
+                        1,
+                      );
                     setState(() {
                       _scrollPhysics = NeverScrollableScrollPhysics();
                     });
-                    _zoomedIn = true;
                   }
                 },
                 onLongPressStart: (details) {
                   final position = details.localPosition;
                   _transformationController.value = Matrix4.identity()
                     ..translateByDouble(
-                      -position.dx * 2,
-                      -position.dy * 2,
+                      -position.dy * (widget.viewModel.zoom - 1),
+                      -position.dx * (widget.viewModel.zoom - 1),
                       1,
                       1,
                     )
-                    ..scaleByDouble(3, 3, 1, 1);
+                    ..scaleByDouble(
+                      widget.viewModel.zoom,
+                      widget.viewModel.zoom,
+                      1,
+                      1,
+                    );
                 },
                 onLongPressMoveUpdate: (details) {
                   final offset = details.localOffsetFromOrigin;
                   final position = details.localPosition;
                   _transformationController.value = Matrix4.identity()
                     ..translateByDouble(
-                      (-position.dx * 2) - offset.dx * 10,
-                      (-position.dy * 2) - offset.dy * 10,
+                      (-position.dx * (widget.viewModel.zoom - 1)) -
+                          offset.dx * 10,
+                      (-position.dy * (widget.viewModel.zoom - 1)) -
+                          offset.dy * 10,
                       1,
                       1,
                     )
-                    ..scaleByDouble(3, 3, 1, 1);
+                    ..scaleByDouble(
+                      widget.viewModel.zoom,
+                      widget.viewModel.zoom,
+                      1,
+                      1,
+                    );
                 },
                 onLongPressEnd: (details) {
                   _transformationController.value = Matrix4.identity();

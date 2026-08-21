@@ -55,6 +55,7 @@ class ReaderViewModel extends ChangeNotifier {
         _loadPages(),
         _loadReadingDirection(),
         _loadReadingMode(),
+        _loadZoom(),
       ]);
       return Result.ok(null);
     } on Exception catch (e) {
@@ -122,6 +123,18 @@ class ReaderViewModel extends ChangeNotifier {
     }
   }
 
+  Future<Result<void>> _loadZoom() async {
+    final result = await _settingsRepository.getZoom();
+    switch (result) {
+      case Ok():
+        _zoom = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
   Future<Result<void>> _updateBook(int currentPage) async {
     try {
       _book.currentPage = currentPage;
@@ -171,7 +184,7 @@ class ReaderViewModel extends ChangeNotifier {
 
   Future<Result<void>> _setReadingStatus() async {
     try {
-      if (_book.currentPage! + 4 >= _pages.length) {
+      if (_book.currentPage + 4 >= _pages.length) {
         _book.readingStatus = .finished;
         _libraryRepository.deleteBookCache(_book.id);
       } else if (_book.currentPage == 1) {
