@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../../../data/models/settings.dart';
-import '../../../../../data/repositories/settings_repository.dart';
-import '../../../../../utils/command.dart';
-import '../../../../../utils/result.dart';
+import '../../../../data/models/settings.dart';
+import '../../../../data/repositories/settings_repository.dart';
+import '../../../../utils/command.dart';
+import '../../../../utils/result.dart';
 
 class ReaderSettingsViewModel extends ChangeNotifier {
   ReaderSettingsViewModel({required this._settingsRepository}) {
-    load = Command0(_load)..execute;
+    load = Command0(_load)..execute();
     toggleAnimations = Command0(_toggleAnimations);
     setReadingDirection = Command1(_setReadingDirection);
     setReadingMode = Command1(_setReadingMode);

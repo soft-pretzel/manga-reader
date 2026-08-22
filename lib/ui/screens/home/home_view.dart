@@ -59,8 +59,14 @@ class _HomeViewState extends State<HomeView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Start reading from the Library page'),
-                          FilledButton(
+                          Icon(
+                            Icons.sentiment_dissatisfied,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 64,
+                          ),
+                          SizedBox(height: 12),
+                          Text('No in-progress books'),
+                          TextButton(
                             onPressed: widget.viewModel.load.execute,
                             child: Text('Reload'),
                           ),

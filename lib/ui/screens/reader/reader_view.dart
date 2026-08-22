@@ -192,8 +192,8 @@ class _ReaderViewState extends State<ReaderView> {
                   final position = details.localPosition;
                   _transformationController.value = Matrix4.identity()
                     ..translateByDouble(
-                      -position.dy * (widget.viewModel.zoom - 1),
                       -position.dx * (widget.viewModel.zoom - 1),
+                      -position.dy * (widget.viewModel.zoom - 1),
                       1,
                       1,
                     )

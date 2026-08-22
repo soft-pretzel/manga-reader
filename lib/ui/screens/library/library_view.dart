@@ -102,7 +102,9 @@ class _LibraryViewState extends State<LibraryView> {
                             Icon(
                               Icons.sentiment_dissatisfied,
                               color: Theme.of(context).colorScheme.primary,
+                              size: 64,
                             ),
+                            SizedBox(height: 12),
                             Text('No books found'),
                             TextButton(
                               onPressed: widget.viewModel.load.execute,

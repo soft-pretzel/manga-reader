@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../ui/screens/settings/widgets/reader_settings/reader_settings_view.dart';
-import '../ui/screens/settings/widgets/reader_settings/reader_settings_view_model.dart';
+import '../ui/screens/settings/appearance/appearance_settings_view.dart';
+import '../ui/screens/settings/appearance/appearance_settings_view_model.dart';
+import '../ui/screens/settings/general/general_settings_view.dart';
+import '../ui/screens/settings/general/general_settings_view_model.dart';
+import '../ui/screens/settings/reader/reader_settings_view.dart';
+import '../ui/screens/settings/reader/reader_settings_view_model.dart';
+import '../ui/screens/settings/storage/storage_settings_view.dart';
+import '../ui/screens/settings/storage/storage_settings_view_model.dart';
 import 'routes.dart';
 import '../ui/screens/home/home_view.dart';
 import '../ui/screens/home/home_view_model.dart';
@@ -89,30 +95,30 @@ final router = GoRouter(
                   name: RouteNames.generalSettings,
                   path: RoutePaths.generalSettings,
                   builder: (context, state) {
-                    final viewModel = ReaderSettingsViewModel(
+                    final viewModel = GeneralSettingsViewModel(
                       settingsRepository: context.read(),
                     );
-                    return ReaderSettingsView(viewModel: viewModel);
+                    return GeneralSettingsView(viewModel: viewModel);
                   },
                 ),
                 GoRoute(
                   name: RouteNames.storageSettings,
                   path: RoutePaths.storageSettings,
                   builder: (context, state) {
-                    final viewModel = ReaderSettingsViewModel(
+                    final viewModel = StorageSettingsViewModel(
                       settingsRepository: context.read(),
                     );
-                    return ReaderSettingsView(viewModel: viewModel);
+                    return StorageSettingsView(viewModel: viewModel);
                   },
                 ),
                 GoRoute(
                   name: RouteNames.appearanceSettings,
                   path: RoutePaths.appearanceSettings,
                   builder: (context, state) {
-                    final viewModel = ReaderSettingsViewModel(
+                    final viewModel = AppearanceSettingsViewModel(
                       settingsRepository: context.read(),
                     );
-                    return ReaderSettingsView(viewModel: viewModel);
+                    return AppearanceSettingsView(viewModel: viewModel);
                   },
                 ),
                 GoRoute(

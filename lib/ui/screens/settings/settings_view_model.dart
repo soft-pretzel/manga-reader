@@ -10,7 +10,6 @@ class SettingsViewModel extends ChangeNotifier {
     load = Command0(_load)..execute();
     loadTitle = Command0(_loadTitle);
     setFolder = Command0(_setFolder);
-    setTheme = Command1(_setTheme);
   }
 
   final String? _setting;
@@ -20,7 +19,6 @@ class SettingsViewModel extends ChangeNotifier {
   late final Command0 load;
   late final Command0 loadTitle;
   late final Command0 setFolder;
-  late final Command1<void, ThemeMode> setTheme;
 
   String? _folder;
   String _title = 'Settings';
@@ -77,16 +75,6 @@ class SettingsViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _load();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _setTheme(ThemeMode theme) async {
-    final result = await _settingsRepository.setTheme(theme);
-    switch (result) {
-      case Ok():
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
