@@ -50,7 +50,7 @@ class ReaderViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      Future.wait([
+      await Future.wait([
         _loadAnimations(),
         _loadPages(),
         _loadReadingDirection(),
@@ -93,6 +93,10 @@ class ReaderViewModel extends ChangeNotifier {
       case Ok():
         _pages = result.value;
         notifyListeners();
+        if (_book.length == null) {
+          _book.length = _pages.length;
+          _libraryRepository.updateBook(book);
+        }
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

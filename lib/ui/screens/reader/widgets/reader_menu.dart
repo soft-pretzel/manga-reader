@@ -18,6 +18,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
   final ReaderViewModel viewModel;
 
   bool _stillReading = true;
+  final _transitionDuration = Duration(milliseconds: 200);
 
   @override
   Color? get barrierColor => Colors.black.withAlpha(50);
@@ -31,13 +32,19 @@ class ReaderMenu<T> extends PopupRoute<T> {
   @override
   void didComplete(T? result) {
     if (_stillReading) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      Future.delayed(
+        (viewModel.animations) ? _transitionDuration : Duration.zero,
+        () {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        },
+      );
     }
     super.didComplete(result);
   }
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 200);
+  Duration get transitionDuration =>
+      (viewModel.animations) ? _transitionDuration : Duration.zero;
 
   @override
   Widget buildPage(
@@ -52,6 +59,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
           margin: EdgeInsets.all(0),
           color: Theme.of(context).colorScheme.surface.withAlpha(224),
           child: SafeArea(
+            bottom: false,
             child: Row(
               children: [
                 IconButton(
@@ -79,6 +87,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
           margin: EdgeInsets.all(0),
           color: Theme.of(context).colorScheme.surface.withAlpha(224),
           child: SafeArea(
+            top: false,
             child: Column(
               children: [
                 MenuButtons(viewModel: viewModel),

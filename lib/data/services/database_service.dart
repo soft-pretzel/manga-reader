@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,6 +10,8 @@ import '../models/series.dart';
 final uuid = Uuid();
 
 class DatabaseService {
+  static const _name = 'manga_reader.db';
+
   Future<void> deleteBook(String id) async {
     final db = await _database();
     await db.delete('books', where: 'id = ?', whereArgs: [id]);
@@ -64,6 +68,11 @@ class DatabaseService {
       whereArgs: [seriesId],
     );
     return [for (final map in mapList) Book.fromMap(map)];
+  }
+
+  Future<FileStat> getDatabaseInfo() async {
+    final path = '${await getDatabasesPath()}${Platform.pathSeparator}$_name';
+    return await File(path).stat();
   }
 
   Future<List<Book?>> getInProgressBooks() async {
@@ -151,7 +160,7 @@ class DatabaseService {
   Future<Database> _database() async {
     // await deleteDatabase('manga_reader.db');
     return openDatabase(
-      'manga_reader.db',
+      _name,
       onCreate: (db, version) async {
         await db.execute('''
 CREATE TABLE books (

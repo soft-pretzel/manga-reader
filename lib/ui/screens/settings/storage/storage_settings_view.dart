@@ -35,10 +35,15 @@ class _StorageSettingsViewState extends State<StorageSettingsView> {
                     padding: EdgeInsets.all(16),
                     children: [
                       Card(
+                        clipBehavior: Clip.hardEdge,
                         margin: EdgeInsets.all(0),
                         child: Column(
                           children: [
                             ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
                               title: Text('Local folder'),
                               subtitle: Text(
                                 widget.viewModel.folder ?? 'No folder selected',
@@ -46,6 +51,30 @@ class _StorageSettingsViewState extends State<StorageSettingsView> {
                               trailing: IconButton(
                                 onPressed: widget.viewModel.setFolder.execute,
                                 icon: Icon(Icons.edit),
+                              ),
+                            ),
+                            Divider(height: 0),
+                            ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              title: Text('Cache size'),
+                              trailing: Text(
+                                widget.viewModel.cacheSize,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            Divider(height: 0),
+                            ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              title: Text('Database size'),
+                              trailing: Text(
+                                widget.viewModel.dbSize,
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
                           ],

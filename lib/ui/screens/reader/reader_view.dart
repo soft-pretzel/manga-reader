@@ -34,7 +34,9 @@ class _ReaderViewState extends State<ReaderView> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    _initController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initController();
+    });
   }
 
   @override

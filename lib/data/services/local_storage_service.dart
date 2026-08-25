@@ -35,6 +35,18 @@ class LocalStorageService {
     return archive;
   }
 
+  Future<void> deleteFile(String path) async {
+    final file = File(path);
+    if (file.existsSync()) {
+      await File(path).delete();
+    }
+  }
+
+  Future<FileStat> getCacheInfo() async {
+    final cache = await getApplicationCacheDirectory();
+    return await cache.stat();
+  }
+
   Future<List<String>> getFiles(String path) async {
     if (Platform.isAndroid) {
       final safUtil = SafUtil();

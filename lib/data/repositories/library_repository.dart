@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter/services.dart';
+
 import '../models/book.dart';
 import '../models/library.dart';
 import '../models/series.dart';
@@ -91,9 +93,15 @@ class LibraryRepository {
         _databaseService.updateSeries(series);
       } else {
         final book = item as Book;
-        thumbnail = await _getBookThumbnail(book);
-        book.thumbnail = thumbnail;
-        _databaseService.updateBook(book);
+        if (book.thumbnail == null ||
+            (book.thumbnail != null &&
+                File(book.thumbnail!).existsSync() == false)) {
+          thumbnail = await _getBookThumbnail(book);
+          book.thumbnail = thumbnail;
+          _databaseService.updateBook(book);
+        } else {
+          thumbnail = book.thumbnail;
+        }
       }
       return Result.ok(thumbnail);
     } on Exception catch (e) {
@@ -103,42 +111,46 @@ class LibraryRepository {
 
   Future<Result<List<String>>> openBook(String id) async {
     try {
-      final book = await _databaseService.getBook(id);
-      final cache = await _localStorageService.getReadingCache();
-      final bookCache = Directory(
-        '${cache.path}${Platform.pathSeparator}${book.id}',
-      );
+      final token = RootIsolateToken.instance;
+      final pages = await Isolate.run(() async {
+        BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
+        final book = await _databaseService.getBook(id);
+        final cache = await _localStorageService.getReadingCache();
+        final bookCache = Directory(
+          '${cache.path}${Platform.pathSeparator}${book.id}',
+        );
 
-      List<String> pages = [];
-      if (await bookCache.exists()) {
-        await for (final file in bookCache.list()) {
-          pages.add(file.path);
+        List<String> pages = [];
+        if (await bookCache.exists()) {
+          await for (final file in bookCache.list()) {
+            pages.add(file.path);
+          }
+          pages.sort((a, b) => a.compareTo(b));
+          return pages;
+        } else {
+          await bookCache.create(recursive: true);
         }
-        pages.sort((a, b) => a.compareTo(b));
-        return Result.ok(pages);
-      } else {
-        await bookCache.create(recursive: true);
-      }
 
-      final archive = await _localStorageService.decodeArchive(book.path);
-      if (archive != null) {
-        var i = 1;
-        for (final file in archive) {
-          final fileType = file.name.split('.').last;
-          if (imgTypes.contains(fileType)) {
-            final page = await _localStorageService.writeArchiveFile(
-              file,
-              bookCache.path,
-              '${i.toString().padLeft(3, '0')}.$fileType',
-            );
-            pages.add(page);
-            i++;
+        final archive = await _localStorageService.decodeArchive(book.path);
+        if (archive != null) {
+          var i = 1;
+          for (final file in archive) {
+            final fileType = file.name.split('.').last;
+            if (imgTypes.contains(fileType)) {
+              final page = await _localStorageService.writeArchiveFile(
+                file,
+                bookCache.path,
+                '${i.toString().padLeft(3, '0')}.$fileType',
+              );
+              pages.add(page);
+              i++;
+            }
           }
         }
-      }
 
-      book.length = pages.length;
-      _databaseService.updateBook(book);
+        return pages;
+      });
+
       return Result.ok(pages);
     } on Exception catch (e) {
       return Result.error(e);
@@ -171,6 +183,9 @@ class LibraryRepository {
           for (final book in dbBooks) {
             if (!bookList.contains(book!.path)) {
               await _databaseService.deleteBook(book.id);
+              if (book.thumbnail != null) {
+                await _localStorageService.deleteFile(book.thumbnail!);
+              }
             }
           }
         }
@@ -189,25 +204,30 @@ class LibraryRepository {
     }
   }
 
+  Future<void> updateBook(Book book) async {
+    await _databaseService.updateBook(book);
+  }
+
   Future<String?> _getBookThumbnail(Book book) async {
     try {
-      String? thumbnail;
-      await Isolate.run(() async {
-        final cache = await _localStorageService.getThumbnailCache();
+      final cache = await _localStorageService.getThumbnailCache();
+      final token = RootIsolateToken.instance;
+      final thumbnail = await Isolate.run(() async {
+        BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
         final archive = await _localStorageService.decodeArchive(book.path);
         if (archive != null) {
           for (final file in archive) {
             final fileType = file.name.split('.').last;
             if (imgTypes.contains(fileType)) {
-              thumbnail = await _localStorageService.writeArchiveFile(
+              return await _localStorageService.writeArchiveFile(
                 file,
                 cache.path,
                 '${book.id}.$fileType',
               );
-              break;
             }
           }
         }
+        return null;
       });
       return thumbnail;
     } on Exception {
@@ -222,6 +242,8 @@ class LibraryRepository {
       books.sort((a, b) => a.name.compareTo(b.name));
       if (books.first.thumbnail == null) {
         thumbnail = await _getBookThumbnail(books.first);
+        books.first.thumbnail = thumbnail;
+        _databaseService.updateBook(books.first);
       } else {
         thumbnail = books.first.thumbnail;
       }
@@ -264,9 +286,5 @@ class LibraryRepository {
     } else {
       return existingSeries.id;
     }
-  }
-
-  Future<void> updateBook(Book book) async {
-    await _databaseService.updateBook(book);
   }
 }

@@ -42,8 +42,8 @@ class _BookTileState extends State<BookTile> {
               },
               onLongPressStart: _handleLongPress,
               child: BookMenu(
+                book: widget.book,
                 menuController: _menuController,
-                status: widget.book.readingStatus,
                 viewModel: widget.viewModel,
                 child: Stack(
                   children: [

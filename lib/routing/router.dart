@@ -59,6 +59,7 @@ final router = GoRouter(
               builder: (context, state) {
                 final viewModel = LibraryViewModel(
                   libraryRepository: context.read(),
+                  settingsRepository: context.read(),
                 );
                 return LibraryView(viewModel: viewModel);
               },
@@ -70,6 +71,7 @@ final router = GoRouter(
                     final viewModel = LibraryViewModel(
                       seriesId: state.pathParameters['seriesId'],
                       libraryRepository: context.read(),
+                      settingsRepository: context.read(),
                     );
                     return LibraryView(viewModel: viewModel);
                   },

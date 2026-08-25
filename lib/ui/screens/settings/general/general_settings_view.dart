@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../data/models/settings.dart';
+import '../../../widgets/card_tile_dropdown.dart';
 import 'general_settings_view_model.dart';
 
 class GeneralSettingsView extends StatefulWidget {
@@ -19,47 +19,68 @@ class _GeneralSettingsViewState extends State<GeneralSettingsView> {
       children: [
         AppBar(title: Text('General')),
         Expanded(
-          child: ListView(
-            padding: EdgeInsets.all(16),
-            children: [
-              Card(
-                margin: EdgeInsets.all(0),
-                child: Column(
+          child: RefreshIndicator(
+            onRefresh: widget.viewModel.load.execute,
+            child: ListenableBuilder(
+              listenable: widget.viewModel.load,
+              builder: (context, child) {
+                if (widget.viewModel.load.running) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                return ListView(
+                  padding: EdgeInsets.all(16),
                   children: [
-                    ListTile(title: Text('Animations')),
-                    Divider(),
-                    ListTile(
-                      title: Text('Reading direction'),
-                      subtitle: DropdownMenu(
-                        dropdownMenuEntries: [
-                          DropdownMenuEntry(
-                            value: ReadingDirection.leftToRight,
-                            label: 'Left to right',
+                    Card(
+                      clipBehavior: Clip.hardEdge,
+                      margin: EdgeInsets.all(0),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            title: Text('Version'),
+                            trailing: Text(
+                              widget.viewModel.version,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
-                          DropdownMenuEntry(
-                            value: ReadingDirection.rightToLeft,
-                            label: 'Right to left',
+                          Divider(height: 0),
+                          CardTileDropdown(
+                            dropdownMenuEntries: [
+                              DropdownMenuEntry(
+                                value: 'English',
+                                label: 'English',
+                              ),
+                            ],
+                            initialSelection: 'English',
+                            title: 'Language',
                           ),
-                          DropdownMenuEntry(
-                            value: ReadingDirection.vertical,
-                            label: 'Vertical',
+                          Divider(height: 0),
+                          ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            title: Text('Source code'),
+                            trailing: Icon(Icons.open_in_new),
+                            onTap: () {
+                              widget.viewModel.openLink.execute(
+                                Uri.parse(
+                                  'https://github.com/soft-pretzel/manga-reader',
+                                ),
+                              );
+                            },
                           ),
                         ],
-                        onSelected: (value) {
-                          if (value != null) {
-                            widget.viewModel.setReadingDirection.execute(value);
-                          }
-                        },
                       ),
                     ),
-                    Divider(),
-                    ListTile(title: Text('Reading mode')),
-                    Divider(),
-                    ListTile(title: Text('Zoom level')),
                   ],
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
         ),
       ],

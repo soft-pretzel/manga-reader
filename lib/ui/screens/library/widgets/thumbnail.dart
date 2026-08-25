@@ -17,32 +17,15 @@ class Thumbnail extends StatefulWidget {
 
 class _ThumbnailState extends State<Thumbnail> {
   @override
-  void initState() {
-    super.initState();
-    if (widget.item.thumbnail == null) {
-      widget.viewModel.getThumbnail.execute(widget.item);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.viewModel.getThumbnail,
-      builder: (context, child) {
-        if (widget.viewModel.getThumbnail.running) {
+      listenable: widget.viewModel.loadThumbnails,
+      builder: (context, _) {
+        if (widget.item.thumbnail == null ||
+            (widget.item.thumbnail != null &&
+                File(widget.item.thumbnail!).existsSync() == false)) {
           return Center(child: CircularProgressIndicator());
         }
-
-        if (widget.viewModel.getThumbnail.error ||
-            widget.item.thumbnail == null) {
-          return Center(
-            child: Icon(
-              Icons.error_outline,
-              color: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-
         return Image.file(File(widget.item.thumbnail!));
       },
     );

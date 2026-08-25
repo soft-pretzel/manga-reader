@@ -1,16 +1,24 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../models/settings.dart';
+import '../services/api_service.dart';
+import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../../utils/result.dart';
 
 class SettingsRepository {
   SettingsRepository({
+    required this._apiService,
+    required this._databaseService,
     required this._localStorageService,
     required this._sharedPreferencesService,
   });
 
+  final ApiService _apiService;
+  final DatabaseService _databaseService;
   final LocalStorageService _localStorageService;
   final SharedPreferencesService _sharedPreferencesService;
 
@@ -27,6 +35,24 @@ class SettingsRepository {
     try {
       final animations = await _sharedPreferencesService.getAnimations();
       return Result.ok(animations);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<FileStat>> getCacheInfo() async {
+    try {
+      final cacheInfo = await _localStorageService.getCacheInfo();
+      return Result.ok(cacheInfo);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<FileStat>> getDatabaseInfo() async {
+    try {
+      final dbInfo = await _databaseService.getDatabaseInfo();
+      return Result.ok(dbInfo);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -76,6 +102,15 @@ class SettingsRepository {
     try {
       final zoom = await _sharedPreferencesService.getZoom();
       return Result.ok(zoom);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> openLink(Uri url) async {
+    try {
+      await _apiService.openLink(url);
+      return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }

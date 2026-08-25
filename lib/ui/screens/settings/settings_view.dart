@@ -55,10 +55,15 @@ class _SettingsViewState extends State<SettingsView> {
                     padding: EdgeInsets.all(16),
                     children: [
                       Card(
+                        clipBehavior: Clip.hardEdge,
                         margin: EdgeInsets.all(0),
                         child: Column(
                           children: [
                             ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
                               leading: Icon(Icons.settings_outlined),
                               title: Text('General'),
                               trailing: Icon(Icons.keyboard_arrow_right),
@@ -66,8 +71,12 @@ class _SettingsViewState extends State<SettingsView> {
                                 context.pushNamed(RouteNames.generalSettings);
                               },
                             ),
-                            Divider(),
+                            Divider(height: 0),
                             ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
                               leading: Icon(Icons.folder_outlined),
                               title: Text('Local Storage'),
                               trailing: Icon(Icons.keyboard_arrow_right),
@@ -75,8 +84,12 @@ class _SettingsViewState extends State<SettingsView> {
                                 context.pushNamed(RouteNames.storageSettings);
                               },
                             ),
-                            Divider(),
+                            Divider(height: 0),
                             ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
                               leading: Icon(Icons.palette_outlined),
                               title: Text('Appearance'),
                               trailing: Icon(Icons.keyboard_arrow_right),
@@ -86,8 +99,12 @@ class _SettingsViewState extends State<SettingsView> {
                                 );
                               },
                             ),
-                            Divider(),
+                            Divider(height: 0),
                             ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
                               leading: Icon(Icons.menu_book_outlined),
                               title: Text('Reader'),
                               trailing: Icon(Icons.keyboard_arrow_right),

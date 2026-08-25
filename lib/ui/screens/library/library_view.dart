@@ -107,7 +107,7 @@ class _LibraryViewState extends State<LibraryView> {
                             SizedBox(height: 12),
                             Text('No books found'),
                             TextButton(
-                              onPressed: widget.viewModel.load.execute,
+                              onPressed: widget.viewModel.scanFolder.execute,
                               child: Text('Reload'),
                             ),
                           ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../data/models/settings.dart';
+import '../../../widgets/card_tile_dropdown.dart';
 import 'appearance_settings_view_model.dart';
 
 class AppearanceSettingsView extends StatefulWidget {
@@ -24,17 +24,23 @@ class _AppearanceSettingsViewState extends State<AppearanceSettingsView> {
             child: ListenableBuilder(
               listenable: widget.viewModel.load,
               builder: (context, child) {
-                return ListView(
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    Card(
-                      margin: EdgeInsets.all(0),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text('Theme'),
-                            trailing: DropdownMenu(
-                              initialSelection: widget.viewModel.theme,
+                if (widget.viewModel.load.running) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                return child!;
+              },
+              child: ListenableBuilder(
+                listenable: widget.viewModel,
+                builder: (context, _) {
+                  return ListView(
+                    clipBehavior: Clip.hardEdge,
+                    padding: EdgeInsets.all(16),
+                    children: [
+                      Card(
+                        margin: EdgeInsets.all(0),
+                        child: Column(
+                          children: [
+                            CardTileDropdown(
                               dropdownMenuEntries: [
                                 DropdownMenuEntry(
                                   value: ThemeMode.light,
@@ -49,19 +55,21 @@ class _AppearanceSettingsViewState extends State<AppearanceSettingsView> {
                                   label: 'System',
                                 ),
                               ],
+                              initialSelection: widget.viewModel.theme,
                               onSelected: (value) {
                                 if (value != null) {
                                   widget.viewModel.setTheme.execute(value);
                                 }
                               },
+                              title: 'Theme',
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

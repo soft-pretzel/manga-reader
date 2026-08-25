@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:proper_filesize/proper_filesize.dart';
 
 import '../../../../data/repositories/settings_repository.dart';
 import '../../../../utils/command.dart';
@@ -15,11 +16,54 @@ class StorageSettingsViewModel extends ChangeNotifier {
   late Command0 load;
   late final Command0 setFolder;
 
+  late String _cacheSize;
+  late String _dbSize;
   String? _folder;
 
+  String get cacheSize => _cacheSize;
+  String get dbSize => _dbSize;
   String? get folder => _folder;
 
   Future<Result<void>> _load() async {
+    try {
+      await Future.wait([_loadCacheInfo(), _loadDatabaseInfo(), _loadFolder()]);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _loadCacheInfo() async {
+    final result = await _settingsRepository.getCacheInfo();
+    switch (result) {
+      case Ok():
+        _cacheSize = FileSize.fromBytes(result.value.size).toString(
+          decimals: 1,
+          unit: Unit.auto(size: result.value.size, baseType: BaseType.metric),
+        );
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _loadDatabaseInfo() async {
+    final result = await _settingsRepository.getDatabaseInfo();
+    switch (result) {
+      case Ok():
+        _dbSize = FileSize.fromBytes(result.value.size).toString(
+          decimals: 1,
+          unit: Unit.auto(size: result.value.size, baseType: BaseType.metric),
+        );
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _loadFolder() async {
     final result = await _settingsRepository.getFolder();
     switch (result) {
       case Ok():
