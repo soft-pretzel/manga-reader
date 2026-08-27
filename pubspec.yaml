@@ -31,10 +31,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/test_cover.jpg
-    - assets/images/test_page_000.jpg
-    - assets/images/test_page_001.jpg
-    - assets/images/test_page_002.jpg
-    - assets/images/test_page_003.jpg
-    - assets/images/test_page_004.jpg
