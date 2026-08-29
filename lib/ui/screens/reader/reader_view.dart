@@ -22,7 +22,7 @@ class _ReaderViewState extends State<ReaderView> {
   var _scrollPhysics = ScrollPhysics();
   final _transformationController = TransformationController();
   var _tapDownDetails = TapDownDetails();
-  late double _width;
+  late double _tapAreaWidth;
 
   Future<void> _initController() async {
     await widget.viewModel.loadBook.execute();
@@ -44,7 +44,7 @@ class _ReaderViewState extends State<ReaderView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _currentOrientation ??= MediaQuery.orientationOf(context);
-    _width = MediaQuery.sizeOf(context).width;
+    _tapAreaWidth = MediaQuery.sizeOf(context).width / 4;
   }
 
   @override
@@ -159,75 +159,38 @@ class _ReaderViewState extends State<ReaderView> {
                       ),
                     ),
                   ),
-                  Positioned(
+
+                  // Next page
+                  Positioned.directional(
                     bottom: 0,
-                    left: 0,
-                    right: (_width * 2 / 3),
+                    end: 0,
+                    textDirection:
+                        (widget.viewModel.readingDirection == .rightToLeft)
+                        ? .rtl
+                        : .ltr,
                     top: 0,
+                    width: _tapAreaWidth,
                     child: GestureDetector(
-                      onTap: () {
-                        if (widget.viewModel.readingDirection == .rightToLeft) {
-                          if (widget.viewModel.animations) {
-                            _pageController.nextPage(
-                              duration: Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                            );
-                          } else {
-                            _pageController.jumpToPage(
-                              (_pageController.page! + 1).toInt(),
-                            );
-                          }
+                      onTapDown: (details) {
+                        if (widget.viewModel.animations) {
+                          _pageController.nextPage(
+                            duration: Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                          );
                         } else {
-                          if (widget.viewModel.animations) {
-                            _pageController.previousPage(
-                              duration: Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                            );
-                          } else {
-                            _pageController.jumpToPage(
-                              (_pageController.page! - 1).toInt(),
-                            );
-                          }
+                          _pageController.jumpToPage(
+                            (_pageController.page! + 1).toInt(),
+                          );
                         }
                       },
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    left: (_width * 2 / 3),
-                    right: 0,
-                    top: 0,
-                    child: GestureDetector(
-                      onTap: () {
-                        if (widget.viewModel.readingDirection == .rightToLeft) {
-                          if (widget.viewModel.animations) {
-                            _pageController.previousPage(
-                              duration: Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                            );
-                          } else {
-                            _pageController.jumpToPage(
-                              (_pageController.page! - 1).toInt(),
-                            );
-                          }
-                        } else {
-                          if (widget.viewModel.animations) {
-                            _pageController.nextPage(
-                              duration: Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                            );
-                          } else {
-                            _pageController.jumpToPage(
-                              (_pageController.page! + 1).toInt(),
-                            );
-                          }
-                        }
-                      },
-                    ),
-                  ),
+
+                  // Center
                   Positioned.fill(
+                    left: (_tapAreaWidth),
+                    right: (_tapAreaWidth),
                     child: GestureDetector(
-                      onTapDown: (details) => _tapDownDetails = details,
                       onTap: () {
                         SystemChrome.setEnabledSystemUIMode(
                           SystemUiMode.edgeToEdge,
@@ -240,7 +203,9 @@ class _ReaderViewState extends State<ReaderView> {
                           ),
                         );
                       },
-                      onDoubleTapDown: (details) => _tapDownDetails = details,
+                      onDoubleTapDown: (details) {
+                        _tapDownDetails = details;
+                      },
                       onDoubleTap: () {
                         if (_transformationController.value !=
                             Matrix4.identity()) {
@@ -249,7 +214,7 @@ class _ReaderViewState extends State<ReaderView> {
                             _scrollPhysics = PageScrollPhysics();
                           });
                         } else {
-                          final position = _tapDownDetails.localPosition;
+                          final position = _tapDownDetails.globalPosition;
                           _transformationController.value = Matrix4.identity()
                             ..translateByDouble(
                               -position.dx * (widget.viewModel.zoom - 1),
@@ -269,7 +234,7 @@ class _ReaderViewState extends State<ReaderView> {
                         }
                       },
                       onLongPressStart: (details) {
-                        final position = details.localPosition;
+                        final position = details.globalPosition;
                         _transformationController.value = Matrix4.identity()
                           ..translateByDouble(
                             -position.dx * (widget.viewModel.zoom - 1),
@@ -285,8 +250,8 @@ class _ReaderViewState extends State<ReaderView> {
                           );
                       },
                       onLongPressMoveUpdate: (details) {
-                        final offset = details.localOffsetFromOrigin;
-                        final position = details.localPosition;
+                        final offset = details.offsetFromOrigin;
+                        final position = details.globalPosition;
                         _transformationController.value = Matrix4.identity()
                           ..translateByDouble(
                             (-position.dx * (widget.viewModel.zoom - 1)) -
@@ -305,6 +270,40 @@ class _ReaderViewState extends State<ReaderView> {
                       },
                       onLongPressEnd: (details) {
                         _transformationController.value = Matrix4.identity();
+                      },
+                    ),
+                  ),
+
+                  // Previous page
+                  Positioned.directional(
+                    bottom: 0,
+                    start: 0,
+                    textDirection:
+                        (widget.viewModel.readingDirection == .rightToLeft)
+                        ? .rtl
+                        : .ltr,
+                    top: 0,
+                    width: _tapAreaWidth,
+                    child: GestureDetector(
+                      onTapDown: (details) {
+                        if (widget.viewModel.animations) {
+                          _pageController.previousPage(
+                            duration: Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                          );
+                        } else {
+                          _pageController.jumpToPage(
+                            (_pageController.page! - 1).toInt(),
+                          );
+                        }
+                      },
+                      onVerticalDragUpdate: (details) {
+                        final delta = -details.delta.dy;
+                        if (delta > 0) {
+                          widget.viewModel.brightnessUp.execute();
+                        } else {
+                          widget.viewModel.brightnessDown.execute();
+                        }
                       },
                     ),
                   ),

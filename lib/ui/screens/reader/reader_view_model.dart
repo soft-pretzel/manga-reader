@@ -13,6 +13,8 @@ class ReaderViewModel extends ChangeNotifier {
     required this._libraryRepository,
     required this._settingsRepository,
   }) {
+    brightnessDown = Command0(_brightnessDown);
+    brightnessUp = Command0(_brightnessUp);
     load = Command0(_load)..execute();
     loadBook = Command0(_loadBook);
     setReadingDirection = Command1(_setReadingDirection);
@@ -26,6 +28,8 @@ class ReaderViewModel extends ChangeNotifier {
   final LibraryRepository _libraryRepository;
   final SettingsRepository _settingsRepository;
 
+  late final Command0 brightnessDown;
+  late final Command0 brightnessUp;
   late final Command0 load;
   late final Command0 loadBook;
   late final Command1<void, ReadingDirection> setReadingDirection;
@@ -47,6 +51,24 @@ class ReaderViewModel extends ChangeNotifier {
   ReadingDirection get readingDirection => _readingDirection;
   ReadingMode get readingMode => _readingMode;
   double get zoom => _zoom;
+
+  Future<Result<void>> _brightnessDown() async {
+    try {
+      await _settingsRepository.brightnessDown();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _brightnessUp() async {
+    try {
+      await _settingsRepository.brightnessUp();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
 
   Future<Result<void>> _load() async {
     try {

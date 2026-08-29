@@ -8,6 +8,7 @@ import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../../utils/result.dart';
+import '../services/utils_service.dart';
 
 class SettingsRepository {
   SettingsRepository({
@@ -15,12 +16,32 @@ class SettingsRepository {
     required this._databaseService,
     required this._localStorageService,
     required this._sharedPreferencesService,
+    required this._utilsService,
   });
 
   final ApiService _apiService;
   final DatabaseService _databaseService;
   final LocalStorageService _localStorageService;
   final SharedPreferencesService _sharedPreferencesService;
+  final UtilsService _utilsService;
+
+  Future<Result<void>> brightnessDown() async {
+    try {
+      await _utilsService.brightnessDown();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> brightnessUp() async {
+    try {
+      await _utilsService.brightnessUp();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
 
   Future<Result<void>> deleteFolder() async {
     try {
