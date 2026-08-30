@@ -40,6 +40,7 @@ class ReaderViewModel extends ChangeNotifier {
 
   late bool _animations;
   late Book _book;
+  late bool _doubleTapZoom;
   late List<String> _pages = [];
   late ReadingDirection _readingDirection;
   late ReadingMode _readingMode;
@@ -47,6 +48,7 @@ class ReaderViewModel extends ChangeNotifier {
 
   bool get animations => _animations;
   Book get book => _book;
+  bool get doubleTapZoom => _doubleTapZoom;
   List<String> get pages => _pages;
   ReadingDirection get readingDirection => _readingDirection;
   ReadingMode get readingMode => _readingMode;
@@ -74,6 +76,7 @@ class ReaderViewModel extends ChangeNotifier {
     try {
       await Future.wait([
         _loadAnimations(),
+        _loadDoubleTapZoom(),
         _loadPages(),
         _loadReadingDirection(),
         _loadReadingMode(),
@@ -102,6 +105,18 @@ class ReaderViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _book = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _loadDoubleTapZoom() async {
+    final result = await _settingsRepository.getDoubleTapZoom();
+    switch (result) {
+      case Ok():
+        _doubleTapZoom = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():

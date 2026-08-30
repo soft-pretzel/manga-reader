@@ -61,6 +61,15 @@ class SettingsRepository {
     }
   }
 
+  Future<Result<bool>> getDoubleTapZoom() async {
+    try {
+      final doubleTapZoom = await _sharedPreferencesService.getDoubleTapZoom();
+      return Result.ok(doubleTapZoom);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<FileStat>> getCacheInfo() async {
     try {
       final cacheInfo = await _localStorageService.getCacheInfo();
@@ -192,6 +201,15 @@ class SettingsRepository {
   Future<Result<bool>> toggleAnimations() async {
     try {
       final result = await _sharedPreferencesService.toggleAnimations();
+      return Result.ok(result);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<bool>> toggleDoubleTapZoom() async {
+    try {
+      final result = await _sharedPreferencesService.toggleDoubleTapZoom();
       return Result.ok(result);
     } on Exception catch (e) {
       return Result.error(e);

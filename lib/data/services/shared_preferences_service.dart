@@ -5,6 +5,7 @@ import '../models/settings.dart';
 
 class SharedPreferencesService {
   static const _animationsKey = 'animations';
+  static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _folderKey = 'folder';
   static const _readingDirectionKey = 'reading_direction';
   static const _readingModeKey = 'reading_mode';
@@ -23,6 +24,14 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     final value = prefs.getBool(_animationsKey);
+    return value ?? true;
+  }
+
+  Future<bool> getDoubleTapZoom() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final value = prefs.getBool(_doubleTapZoomKey);
     return value ?? true;
   }
 
@@ -108,6 +117,15 @@ class SharedPreferencesService {
     );
     final current = await getAnimations();
     prefs.setBool(_animationsKey, !current);
+    return !current;
+  }
+
+  Future<bool> toggleDoubleTapZoom() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final current = await getDoubleTapZoom();
+    prefs.setBool(_doubleTapZoomKey, !current);
     return !current;
   }
 }

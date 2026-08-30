@@ -8,26 +8,30 @@ import '../../../../utils/result.dart';
 class ReaderSettingsViewModel extends ChangeNotifier {
   ReaderSettingsViewModel({required this._settingsRepository}) {
     load = Command0(_load)..execute();
-    toggleAnimations = Command0(_toggleAnimations);
     setReadingDirection = Command1(_setReadingDirection);
     setReadingMode = Command1(_setReadingMode);
     setZoom = Command1(_setZoom);
+    toggleAnimations = Command0(_toggleAnimations);
+    toggleDoubleTapZoom = Command0(_toggleDoubleTapZoom);
   }
 
   final SettingsRepository _settingsRepository;
 
   late Command0 load;
-  late Command0 toggleAnimations;
   late Command1<void, ReadingDirection> setReadingDirection;
   late Command1<void, ReadingMode> setReadingMode;
   late Command1<void, double> setZoom;
+  late Command0 toggleAnimations;
+  late Command0 toggleDoubleTapZoom;
 
   late bool _animations;
+  late bool _doubleTapZoom;
   late ReadingDirection _readingDirection;
   late ReadingMode _readingMode;
   late double _zoom;
 
   bool get animations => _animations;
+  bool get doubleTapZoom => _doubleTapZoom;
   ReadingDirection get readingDirection => _readingDirection;
   ReadingMode get readingMode => _readingMode;
   double get zoom => _zoom;
@@ -36,6 +40,7 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     try {
       Future.wait([
         _loadAnimations(),
+        _loadDoubleTapZoom(),
         _loadReadingDirection(),
         _loadReadingMode(),
         _loadZoom(),
@@ -51,6 +56,18 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _animations = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _loadDoubleTapZoom() async {
+    final result = await _settingsRepository.getDoubleTapZoom();
+    switch (result) {
+      case Ok():
+        _doubleTapZoom = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -94,17 +111,6 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _toggleAnimations() async {
-    try {
-      _animations = !_animations;
-      notifyListeners();
-      _settingsRepository.toggleAnimations();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
   Future<Result<void>> _setReadingDirection(
     ReadingDirection readingDirection,
   ) async {
@@ -134,6 +140,28 @@ class ReaderSettingsViewModel extends ChangeNotifier {
       _zoom = zoom;
       notifyListeners();
       _settingsRepository.setZoom(zoom);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _toggleAnimations() async {
+    try {
+      _animations = !_animations;
+      notifyListeners();
+      _settingsRepository.toggleAnimations();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _toggleDoubleTapZoom() async {
+    try {
+      _doubleTapZoom = !_doubleTapZoom;
+      notifyListeners();
+      _settingsRepository.toggleDoubleTapZoom();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

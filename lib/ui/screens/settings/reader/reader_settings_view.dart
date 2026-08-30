@@ -151,6 +151,26 @@ class _ReaderSettingsViewState extends State<ReaderSettingsView> {
                                 ),
                               ),
                             ),
+                            Divider(height: 0),
+                            ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              subtitle: Text(
+                                'Disabling double tap zoom allows for instant single tap actions',
+                              ),
+                              title: Text('Double tap zoom'),
+                              trailing: Switch(
+                                value: widget.viewModel.doubleTapZoom,
+                                onChanged: (value) {
+                                  setState(() {
+                                    widget.viewModel.toggleDoubleTapZoom
+                                        .execute();
+                                  });
+                                },
+                              ),
+                            ),
                           ],
                         ),
                       ),
