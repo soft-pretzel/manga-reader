@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 
 import 'data/providers.dart';
 import 'routing/router.dart';
+import 'ui/themes/theme_provider.dart';
 
 void main() {
-  runApp(MainApp());
+  runApp(
+    ChangeNotifierProvider(create: (_) => ThemeProvider(), child: MainApp()),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -13,12 +16,19 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return MultiProvider(
       providers: providers,
       child: MaterialApp.router(
-        theme: ThemeData(brightness: Brightness.light),
-        darkTheme: ThemeData(brightness: Brightness.dark),
-        themeMode: ThemeMode.system,
+        theme: ThemeData(
+          brightness: Brightness.light,
+          colorSchemeSeed: themeProvider.themeColor,
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          colorSchemeSeed: themeProvider.themeColor,
+        ),
+        themeMode: themeProvider.themeMode,
         routerConfig: router,
       ),
     );

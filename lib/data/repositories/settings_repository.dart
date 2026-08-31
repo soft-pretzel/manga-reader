@@ -119,10 +119,19 @@ class SettingsRepository {
     }
   }
 
-  Future<Result<ThemeMode>> getTheme() async {
+  Future<Result<Color>> getThemeColor() async {
     try {
-      final theme = await _sharedPreferencesService.getTheme();
-      return Result.ok(theme);
+      final themeColor = await _sharedPreferencesService.getThemeColor();
+      return Result.ok(themeColor);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<ThemeMode>> getThemeMode() async {
+    try {
+      final themeMode = await _sharedPreferencesService.getThemeMode();
+      return Result.ok(themeMode);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -180,9 +189,18 @@ class SettingsRepository {
     }
   }
 
-  Future<Result<void>> setTheme(ThemeMode theme) async {
+  Future<Result<void>> setThemeColor(Color color) async {
     try {
-      await _sharedPreferencesService.setTheme(theme);
+      await _sharedPreferencesService.setThemeColor(color);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setThemeMode(ThemeMode theme) async {
+    try {
+      await _sharedPreferencesService.setThemeMode(theme);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

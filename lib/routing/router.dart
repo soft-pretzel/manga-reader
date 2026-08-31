@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../ui/themes/theme_provider.dart';
+import 'routes.dart';
 import '../ui/screens/settings/appearance/appearance_settings_view.dart';
 import '../ui/screens/settings/appearance/appearance_settings_view_model.dart';
 import '../ui/screens/settings/general/general_settings_view.dart';
@@ -10,7 +12,6 @@ import '../ui/screens/settings/reader/reader_settings_view.dart';
 import '../ui/screens/settings/reader/reader_settings_view_model.dart';
 import '../ui/screens/settings/storage/storage_settings_view.dart';
 import '../ui/screens/settings/storage/storage_settings_view_model.dart';
-import 'routes.dart';
 import '../ui/screens/home/home_view.dart';
 import '../ui/screens/home/home_view_model.dart';
 import '../ui/screens/library/library_view_model.dart';
@@ -118,6 +119,7 @@ final router = GoRouter(
                   path: RoutePaths.appearanceSettings,
                   builder: (context, state) {
                     final viewModel = AppearanceSettingsViewModel(
+                      themeProvider: context.read(),
                       settingsRepository: context.read(),
                     );
                     return AppearanceSettingsView(viewModel: viewModel);

@@ -9,7 +9,8 @@ class SharedPreferencesService {
   static const _folderKey = 'folder';
   static const _readingDirectionKey = 'reading_direction';
   static const _readingModeKey = 'reading_mode';
-  static const _themeKey = 'theme';
+  static const _themeColorKey = 'theme_color';
+  static const _themeModeKey = 'theme_mode';
   static const _zoomKey = 'zoom';
 
   Future<void> deleteFolder() async {
@@ -60,11 +61,19 @@ class SharedPreferencesService {
     return index != null ? ReadingMode.values[index] : ReadingMode.single;
   }
 
-  Future<ThemeMode> getTheme() async {
+  Future<Color> getThemeColor() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final index = prefs.getInt(_themeKey);
+    final value = prefs.getInt(_themeColorKey);
+    return value != null ? Color(value) : Color(0xff6750a4);
+  }
+
+  Future<ThemeMode> getThemeMode() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final index = prefs.getInt(_themeModeKey);
     return index != null ? ThemeMode.values[index] : ThemeMode.system;
   }
 
@@ -97,11 +106,18 @@ class SharedPreferencesService {
     await prefs.setInt(_readingModeKey, readingMode.index);
   }
 
-  Future<void> setTheme(ThemeMode theme) async {
+  Future<void> setThemeColor(Color color) async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    await prefs.setInt(_themeKey, theme.index);
+    await prefs.setInt(_themeColorKey, color.toARGB32());
+  }
+
+  Future<void> setThemeMode(ThemeMode theme) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setInt(_themeModeKey, theme.index);
   }
 
   Future<void> setZoom(double zoom) async {

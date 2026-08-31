@@ -184,35 +184,34 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                     ? (details) => _tapDownDetails = details
                     : null,
                 onDoubleTap: (widget.viewModel.doubleTapZoom)
-                    ? () {
-                        if (_transformationController.value !=
-                            Matrix4.identity()) {
-                          _transformationController.value = Matrix4.identity();
+                    ? () async {
+                        if (_scaleEnd == widget.viewModel.zoom) {
                           setState(() {
+                            _scaleBegin = widget.viewModel.zoom;
+                            _scaleEnd = 1;
+                            _xBegin = _xEnd;
+                            _xEnd = 0;
+                            _yBegin = _yEnd;
+                            _yEnd = 0;
                             _scrollPhysics = PageScrollPhysics();
                           });
+                          await _animationController.forward(from: 0);
                         } else {
                           final position = _tapDownDetails.localPosition;
-                          _transformationController.value = Matrix4.identity()
-                            ..translateByDouble(
-                              -position.dx * (widget.viewModel.zoom - 1),
-                              -position.dy * (widget.viewModel.zoom - 1),
-                              1,
-                              1,
-                            )
-                            ..scaleByDouble(
-                              widget.viewModel.zoom,
-                              widget.viewModel.zoom,
-                              1,
-                              1,
-                            );
                           setState(() {
+                            _scaleBegin = 1;
+                            _scaleEnd = widget.viewModel.zoom;
+                            _xBegin = 0;
+                            _xEnd = -position.dx * (widget.viewModel.zoom - 1);
+                            _yBegin = 0;
+                            _yEnd = -position.dy * (widget.viewModel.zoom - 1);
                             _scrollPhysics = NeverScrollableScrollPhysics();
                           });
+                          await _animationController.forward(from: 0);
                         }
                       }
                     : null,
-                onLongPressStart: (details) {
+                onLongPressStart: (details) async {
                   setState(() {
                     _scaleBegin = 1;
                     _scaleEnd = widget.viewModel.zoom;
@@ -221,18 +220,13 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                     _yBegin = 0;
                     _yEnd = -(_size.height / 2) * (widget.viewModel.zoom - 1);
                   });
-                  _animationController.forward(from: 0);
+                  await _animationController.forward(from: 0);
                 },
                 onLongPressMoveUpdate: (details) {
                   final offset = details.offsetFromOrigin;
                   setState(() {
-                    _animation = CurvedAnimation(
-                      parent: _animationController,
-                      curve: const Interval(0, 1, curve: Curves.easeIn),
-                    );
-                    _animationController.duration = Duration(milliseconds: 100);
+                    _animationController.duration = Duration(milliseconds: 200);
                     _scaleBegin = widget.viewModel.zoom;
-                    // _scaleEnd = widget.viewModel.zoom;
                     _xBegin = _xEnd;
                     _xEnd =
                         (-_size.width / 2 * (widget.viewModel.zoom - 1)) -
@@ -248,10 +242,6 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                 },
                 onLongPressEnd: (details) async {
                   setState(() {
-                    _animation = CurvedAnimation(
-                      parent: _animationController,
-                      curve: const Interval(0, 1, curve: Curves.easeInOut),
-                    );
                     _animationController.duration = Duration(milliseconds: 200);
                     _scaleBegin = widget.viewModel.zoom;
                     _scaleEnd = 1;
@@ -267,9 +257,13 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                   if (x >= (_size.width * 2 / 3)) {
                     final delta = -details.delta.dy;
                     if (delta > 0) {
-                      widget.viewModel.brightnessUp.execute();
+                      if (!widget.viewModel.brightnessUp.running) {
+                        widget.viewModel.brightnessUp.execute();
+                      }
                     } else {
-                      widget.viewModel.brightnessDown.execute();
+                      if (!widget.viewModel.brightnessDown.running) {
+                        widget.viewModel.brightnessDown.execute();
+                      }
                     }
                   }
                 },

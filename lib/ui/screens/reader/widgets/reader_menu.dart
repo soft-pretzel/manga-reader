@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'menu_buttons.dart';
 import 'reader_slider.dart';
 import '../reader_view_model.dart';
+import '../../../../routing/routes.dart';
 
 class ReaderMenu<T> extends PopupRoute<T> {
   ReaderMenu({
@@ -17,6 +18,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
   final PageController pageController;
   final ReaderViewModel viewModel;
 
+  final _menuContoroller = MenuController();
   bool _stillReading = true;
   final _transitionDuration = Duration(milliseconds: 200);
 
@@ -74,10 +76,26 @@ class ReaderMenu<T> extends PopupRoute<T> {
                 ),
                 Text(viewModel.book.name),
                 Spacer(),
-                IconButton(
-                  icon: Icon(Icons.more_vert),
-                  onPressed: () {},
-                  color: Theme.of(context).colorScheme.primary,
+                MenuAnchor(
+                  builder: (context, controller, child) {
+                    return IconButton(
+                      onPressed: _menuContoroller.open,
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  },
+                  controller: _menuContoroller,
+                  menuChildren: [
+                    MenuItemButton(
+                      onPressed: () {
+                        _stillReading = false;
+                        context.goNamed(RouteNames.readerSettings);
+                      },
+                      child: Text('Reader settings'),
+                    ),
+                  ],
                 ),
               ],
             ),
