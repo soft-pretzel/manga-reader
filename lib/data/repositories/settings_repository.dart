@@ -34,6 +34,15 @@ class SettingsRepository {
     }
   }
 
+  Future<Result<void>> brightnessReset() async {
+    try {
+      await _utilsService.brightnessReset();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<void>> brightnessUp() async {
     try {
       await _utilsService.brightnessUp();

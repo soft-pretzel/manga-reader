@@ -66,6 +66,7 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    widget.viewModel.brightnessReset.execute();
     _animationController.dispose();
     _pageController.dispose();
     _transformationController.dispose();
@@ -119,7 +120,7 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                 onTapDown: (details) => _tapDownDetails = details,
                 onTap: () {
                   final x = _tapDownDetails.localPosition.dx;
-                  if (x >= (_size.width * 2 / 3)) {
+                  if (x >= (_size.width * 3 / 4)) {
                     if (widget.viewModel.readingDirection == .rightToLeft) {
                       if (widget.viewModel.animations) {
                         _pageController.previousPage(
@@ -143,7 +144,7 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                         );
                       }
                     }
-                  } else if (x <= (_size.width / 3)) {
+                  } else if (x <= (_size.width / 4)) {
                     if (widget.viewModel.readingDirection == .rightToLeft) {
                       if (widget.viewModel.animations) {
                         _pageController.nextPage(
@@ -254,16 +255,12 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                 },
                 onVerticalDragUpdate: (details) {
                   final x = details.localPosition.dx;
-                  if (x >= (_size.width * 2 / 3)) {
+                  if (x >= (_size.width * 3 / 4)) {
                     final delta = -details.delta.dy;
-                    if (delta > 0) {
-                      if (!widget.viewModel.brightnessUp.running) {
-                        widget.viewModel.brightnessUp.execute();
-                      }
-                    } else {
-                      if (!widget.viewModel.brightnessDown.running) {
-                        widget.viewModel.brightnessDown.execute();
-                      }
+                    if (delta > 1) {
+                      widget.viewModel.brightnessUp.execute();
+                    } else if (delta < -1) {
+                      widget.viewModel.brightnessDown.execute();
                     }
                   }
                 },

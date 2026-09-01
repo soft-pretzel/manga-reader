@@ -14,6 +14,7 @@ class ReaderViewModel extends ChangeNotifier {
     required this._settingsRepository,
   }) {
     brightnessDown = Command0(_brightnessDown);
+    brightnessReset = Command0(_brightnessReset);
     brightnessUp = Command0(_brightnessUp);
     load = Command0(_load)..execute();
     loadBook = Command0(_loadBook);
@@ -29,6 +30,7 @@ class ReaderViewModel extends ChangeNotifier {
   final SettingsRepository _settingsRepository;
 
   late final Command0 brightnessDown;
+  late final Command0 brightnessReset;
   late final Command0 brightnessUp;
   late final Command0 load;
   late final Command0 loadBook;
@@ -57,6 +59,15 @@ class ReaderViewModel extends ChangeNotifier {
   Future<Result<void>> _brightnessDown() async {
     try {
       await _settingsRepository.brightnessDown();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _brightnessReset() async {
+    try {
+      await _settingsRepository.brightnessReset();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
