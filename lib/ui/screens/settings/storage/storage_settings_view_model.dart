@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:proper_filesize/proper_filesize.dart';
 
 import '../../../../data/repositories/settings_repository.dart';
 import '../../../../utils/command.dart';
@@ -26,7 +25,7 @@ class StorageSettingsViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      await Future.wait([_loadCacheInfo(), _loadDatabaseInfo(), _loadFolder()]);
+      Future.wait([_loadCacheInfo(), _loadDatabaseInfo(), _loadFolder()]);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -37,10 +36,7 @@ class StorageSettingsViewModel extends ChangeNotifier {
     final result = await _settingsRepository.getCacheInfo();
     switch (result) {
       case Ok():
-        _cacheSize = FileSize.fromBytes(result.value.size).toString(
-          decimals: 1,
-          unit: Unit.auto(size: result.value.size, baseType: BaseType.metric),
-        );
+        _cacheSize = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -52,10 +48,7 @@ class StorageSettingsViewModel extends ChangeNotifier {
     final result = await _settingsRepository.getDatabaseInfo();
     switch (result) {
       case Ok():
-        _dbSize = FileSize.fromBytes(result.value.size).toString(
-          decimals: 1,
-          unit: Unit.auto(size: result.value.size, baseType: BaseType.metric),
-        );
+        _dbSize = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():

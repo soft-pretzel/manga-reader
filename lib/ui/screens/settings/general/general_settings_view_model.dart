@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../data/repositories/settings_repository.dart';
 import '../../../../utils/command.dart';
@@ -30,13 +29,14 @@ class GeneralSettingsViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _loadVersion() async {
-    try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      _version = packageInfo.version;
-      notifyListeners();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
+    final result = await _settingsRepository.getAppVersion();
+    switch (result) {
+      case Ok():
+        _version = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
     }
   }
 

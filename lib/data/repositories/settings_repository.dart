@@ -70,6 +70,15 @@ class SettingsRepository {
     }
   }
 
+  Future<Result<String>> getAppVersion() async {
+    try {
+      final version = await _utilsService.getAppVersion();
+      return Result.ok(version);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<bool>> getDoubleTapZoom() async {
     try {
       final doubleTapZoom = await _sharedPreferencesService.getDoubleTapZoom();
@@ -79,19 +88,21 @@ class SettingsRepository {
     }
   }
 
-  Future<Result<FileStat>> getCacheInfo() async {
+  Future<Result<String>> getCacheInfo() async {
     try {
-      final cacheInfo = await _localStorageService.getCacheInfo();
-      return Result.ok(cacheInfo);
+      final info = await _localStorageService.getCacheInfo();
+      final size = await _utilsService.formatFileSize(info.size);
+      return Result.ok(size);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<FileStat>> getDatabaseInfo() async {
+  Future<Result<String>> getDatabaseInfo() async {
     try {
-      final dbInfo = await _databaseService.getDatabaseInfo();
-      return Result.ok(dbInfo);
+      final info = await _databaseService.getDatabaseInfo();
+      final size = await _utilsService.formatFileSize(info.size);
+      return Result.ok(size);
     } on Exception catch (e) {
       return Result.error(e);
     }

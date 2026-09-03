@@ -1,3 +1,5 @@
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:proper_filesize/proper_filesize.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
 class UtilsService {
@@ -21,5 +23,16 @@ class UtilsService {
         brightness,
       );
     }
+  }
+
+  Future<String> formatFileSize(int size) async {
+    return FileSize.fromBytes(size).toString(
+      decimals: 1,
+      unit: Unit.auto(size: size, baseType: BaseType.metric),
+    );
+  }
+
+  Future<String> getAppVersion() async {
+    return (await PackageInfo.fromPlatform()).version;
   }
 }

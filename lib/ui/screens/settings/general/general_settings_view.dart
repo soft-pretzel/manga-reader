@@ -19,68 +19,64 @@ class _GeneralSettingsViewState extends State<GeneralSettingsView> {
       children: [
         AppBar(title: Text('General')),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: widget.viewModel.load.execute,
-            child: ListenableBuilder(
-              listenable: widget.viewModel.load,
-              builder: (context, child) {
-                if (widget.viewModel.load.running) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                return ListView(
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    Card(
-                      clipBehavior: Clip.hardEdge,
-                      margin: EdgeInsets.all(0),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
-                            ),
-                            title: Text('Version'),
-                            trailing: Text(
-                              widget.viewModel.version,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+          child: ListenableBuilder(
+            listenable: widget.viewModel,
+            builder: (context, child) {
+              if (widget.viewModel.load.running) {
+                return SizedBox.shrink();
+              }
+              return ListView(
+                padding: EdgeInsets.all(16),
+                children: [
+                  Card(
+                    clipBehavior: Clip.hardEdge,
+                    margin: EdgeInsets.all(0),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
                           ),
-                          Divider(height: 0),
-                          CardTileDropdown(
-                            dropdownMenuEntries: [
-                              DropdownMenuEntry(
-                                value: 'English',
-                                label: 'English',
+                          title: Text('Version'),
+                          trailing: Text(
+                            widget.viewModel.version,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        Divider(height: 0),
+                        CardTileDropdown(
+                          dropdownMenuEntries: [
+                            DropdownMenuEntry(
+                              value: 'English',
+                              label: 'English',
+                            ),
+                          ],
+                          initialSelection: 'English',
+                          title: 'Language',
+                        ),
+                        Divider(height: 0),
+                        ListTile(
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
+                          title: Text('Source code'),
+                          trailing: Icon(Icons.open_in_new),
+                          onTap: () {
+                            widget.viewModel.openLink.execute(
+                              Uri.parse(
+                                'https://github.com/soft-pretzel/manga-reader',
                               ),
-                            ],
-                            initialSelection: 'English',
-                            title: 'Language',
-                          ),
-                          Divider(height: 0),
-                          ListTile(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
-                            ),
-                            title: Text('Source code'),
-                            trailing: Icon(Icons.open_in_new),
-                            onTap: () {
-                              widget.viewModel.openLink.execute(
-                                Uri.parse(
-                                  'https://github.com/soft-pretzel/manga-reader',
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ],

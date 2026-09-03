@@ -42,6 +42,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _themeColor = result.value;
+        notifyListeners();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
@@ -53,6 +54,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _themeMode = result.value;
+        notifyListeners();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

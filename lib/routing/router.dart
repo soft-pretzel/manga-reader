@@ -18,7 +18,6 @@ import '../ui/screens/library/library_view.dart';
 import '../ui/screens/reader/reader_view.dart';
 import '../ui/screens/reader/reader_view_model.dart';
 import '../ui/screens/settings/settings_view.dart';
-import '../ui/screens/settings/settings_view_model.dart';
 import '../ui/widgets/scaffold_with_navigation.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -87,10 +86,7 @@ final router = GoRouter(
               name: RouteNames.settings,
               path: RoutePaths.settings,
               builder: (context, state) {
-                final viewModel = SettingsViewModel(
-                  settingsRepository: context.read(),
-                );
-                return SettingsView(viewModel: viewModel);
+                return SettingsView();
               },
               routes: [
                 GoRoute(
