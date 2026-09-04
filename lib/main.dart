@@ -26,7 +26,11 @@ class MainApp extends StatelessWidget {
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
-          colorSchemeSeed: themeProvider.color,
+          colorScheme: ColorScheme.fromSeed(
+            brightness: Brightness.dark,
+            seedColor: themeProvider.color,
+            surface: (themeProvider.oledDarkMode) ? Colors.black : null,
+          ),
         ),
         themeMode: themeProvider.mode,
         routerConfig: router,

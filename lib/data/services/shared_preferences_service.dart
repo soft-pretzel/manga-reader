@@ -7,6 +7,7 @@ class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _folderKey = 'folder';
+  static const _oledDarkModeKey = 'oled_dark_mode';
   static const _readingDirectionKey = 'reading_direction';
   static const _readingModeKey = 'reading_mode';
   static const _themeColorKey = 'theme_color';
@@ -34,6 +35,14 @@ class SharedPreferencesService {
     );
     final value = prefs.getBool(_doubleTapZoomKey);
     return value ?? true;
+  }
+
+  Future<bool> getOledDarkMode() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final value = prefs.getBool(_oledDarkModeKey);
+    return value ?? false;
   }
 
   Future<String?> getFolder() async {
@@ -142,6 +151,15 @@ class SharedPreferencesService {
     );
     final current = await getDoubleTapZoom();
     prefs.setBool(_doubleTapZoomKey, !current);
+    return !current;
+  }
+
+  Future<bool> toggleOledDarkMode() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final current = await getOledDarkMode();
+    prefs.setBool(_oledDarkModeKey, !current);
     return !current;
   }
 }

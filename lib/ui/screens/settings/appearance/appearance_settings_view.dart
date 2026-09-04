@@ -125,6 +125,29 @@ class _AppearanceSettingsViewState extends State<AppearanceSettingsView> {
                             ),
                           ),
                         ),
+                        Divider(height: 0),
+                        ListTile(
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
+                          enabled: (widget.viewModel.themeMode == .light)
+                              ? false
+                              : true,
+                          subtitle: Text('Use a true black background'),
+                          title: Text('OLED dark mode'),
+                          trailing: Switch(
+                            value: widget.viewModel.oledDarkMode,
+                            onChanged: (widget.viewModel.themeMode == .light)
+                                ? null
+                                : (value) {
+                                    setState(() {
+                                      widget.viewModel.toggleOledDarkMode
+                                          .execute();
+                                    });
+                                  },
+                          ),
+                        ),
                       ],
                     ),
                   ),

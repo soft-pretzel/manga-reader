@@ -118,6 +118,15 @@ class SettingsRepository {
     }
   }
 
+  Future<Result<bool>> getOledDarkMode() async {
+    try {
+      final oledDarkMode = await _sharedPreferencesService.getOledDarkMode();
+      return Result.ok(oledDarkMode);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<ReadingDirection>> getReadingDirection() async {
     try {
       final readingDirection = await _sharedPreferencesService
@@ -246,6 +255,15 @@ class SettingsRepository {
   Future<Result<bool>> toggleDoubleTapZoom() async {
     try {
       final result = await _sharedPreferencesService.toggleDoubleTapZoom();
+      return Result.ok(result);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<bool>> toggleOledDarkMode() async {
+    try {
+      final result = await _sharedPreferencesService.toggleOledDarkMode();
       return Result.ok(result);
     } on Exception catch (e) {
       return Result.error(e);

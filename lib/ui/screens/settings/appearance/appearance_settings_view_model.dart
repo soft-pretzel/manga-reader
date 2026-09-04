@@ -13,6 +13,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     load = Command0(_load)..execute();
     setThemeColor = Command1(_setThemeColor);
     setThemeMode = Command1(_setThemeMode);
+    toggleOledDarkMode = Command0(_toggleOledDarkMode);
   }
 
   final ThemeProvider _themeProvider;
@@ -21,19 +22,34 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   late Command0 load;
   late Command1<void, Color> setThemeColor;
   late Command1<void, ThemeMode> setThemeMode;
+  late Command0 toggleOledDarkMode;
 
+  late bool _oledDarkMode;
   late Color _themeColor;
   late ThemeMode _themeMode;
 
+  bool get oledDarkMode => _oledDarkMode;
   Color get themeColor => _themeColor;
   ThemeMode get themeMode => _themeMode;
 
   Future<Result<void>> _load() async {
     try {
-      Future.wait([_loadThemeColor(), _loadThemeMode()]);
+      Future.wait([_loadOledDarkMode(), _loadThemeColor(), _loadThemeMode()]);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _loadOledDarkMode() async {
+    final result = await _settingsRepository.getOledDarkMode();
+    switch (result) {
+      case Ok():
+        _oledDarkMode = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
     }
   }
 
@@ -84,6 +100,18 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _toggleOledDarkMode() async {
+    try {
+      _oledDarkMode = !_oledDarkMode;
+      notifyListeners();
+      await _settingsRepository.toggleOledDarkMode();
+      _themeProvider.loadOledDarkMode();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 }
