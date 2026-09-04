@@ -22,13 +22,13 @@ class MainApp extends StatelessWidget {
       child: MaterialApp.router(
         theme: ThemeData(
           brightness: Brightness.light,
-          colorSchemeSeed: themeProvider.themeColor,
+          colorSchemeSeed: themeProvider.color,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
-          colorSchemeSeed: themeProvider.themeColor,
+          colorSchemeSeed: themeProvider.color,
         ),
-        themeMode: themeProvider.themeMode,
+        themeMode: themeProvider.mode,
         routerConfig: router,
       ),
     );

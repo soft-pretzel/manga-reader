@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../widgets/card_tile_dropdown.dart';
+import '../../../widgets/error_screen.dart';
 import 'appearance_settings_view_model.dart';
 
 class AppearanceSettingsView extends StatefulWidget {
@@ -35,6 +36,12 @@ class _AppearanceSettingsViewState extends State<AppearanceSettingsView> {
             builder: (context, child) {
               if (widget.viewModel.load.running) {
                 return SizedBox.shrink();
+              }
+              if (widget.viewModel.load.error) {
+                return ErrorScreen(
+                  function: widget.viewModel.load.execute,
+                  text: 'Error loading settings',
+                );
               }
               return ListView(
                 clipBehavior: Clip.hardEdge,

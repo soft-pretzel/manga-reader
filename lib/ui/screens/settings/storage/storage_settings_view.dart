@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/error_screen.dart';
 import 'storage_settings_view_model.dart';
 
 class StorageSettingsView extends StatefulWidget {
@@ -19,10 +20,16 @@ class _StorageSettingsViewState extends State<StorageSettingsView> {
         AppBar(title: Text("Local Storage")),
         Expanded(
           child: ListenableBuilder(
-            listenable: widget.viewModel.load,
+            listenable: widget.viewModel,
             builder: (context, child) {
               if (widget.viewModel.load.running) {
                 return SizedBox.shrink();
+              }
+              if (widget.viewModel.load.error) {
+                return ErrorScreen(
+                  function: widget.viewModel.load.execute,
+                  text: 'Error loading settings',
+                );
               }
               return ListView(
                 padding: EdgeInsets.all(16),

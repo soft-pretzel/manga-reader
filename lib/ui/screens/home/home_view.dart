@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/empty_screen.dart';
+import '../../widgets/error_screen.dart';
 import 'home_view_model.dart';
 import 'widgets/book_card.dart';
 
@@ -22,86 +24,49 @@ class _HomeViewState extends State<HomeView> {
           child: RefreshIndicator(
             onRefresh: widget.viewModel.load.execute,
             child: ListenableBuilder(
-              listenable: widget.viewModel.load,
+              listenable: widget.viewModel,
               builder: (context, child) {
                 if (widget.viewModel.load.running) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const SizedBox.shrink();
                 }
-
                 if (widget.viewModel.load.error) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  return ErrorScreen(
+                    function: widget.viewModel.load.execute,
+                    text: 'Error loading Home',
+                  );
+                }
+                if (widget.viewModel.inProgressBooks.isEmpty) {
+                  return EmptyScreen(
+                    function: widget.viewModel.load.execute,
+                    text: 'No in-progress books',
+                  );
+                }
+                return ListView(
+                  padding: EdgeInsets.all(16),
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: Theme.of(context).colorScheme.error,
+                        Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: Text('Continue Reading'),
                         ),
-                        Text('Error loading Home'),
-                        TextButton(
-                          onPressed: () {
-                            widget.viewModel.load.execute();
-                          },
-                          child: Text('Try Again'),
+                        SizedBox(
+                          height: 600,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              for (final book
+                                  in widget.viewModel.inProgressBooks)
+                                BookCard(book: book!),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  );
-                }
-
-                return child!;
+                  ],
+                );
               },
-              child: ListenableBuilder(
-                listenable: widget.viewModel,
-                builder: (context, _) {
-                  if (widget.viewModel.inProgressBooks.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.sentiment_dissatisfied,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 64,
-                          ),
-                          SizedBox(height: 12),
-                          Text('No in-progress books'),
-                          TextButton(
-                            onPressed: widget.viewModel.load.execute,
-                            child: Text('Reload'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return ListView(
-                    padding: EdgeInsets.all(16),
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(2),
-                            child: Text('Continue Reading'),
-                          ),
-                          SizedBox(
-                            height: 600,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                for (final book
-                                    in widget.viewModel.inProgressBooks)
-                                  BookCard(book: book),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              ),
             ),
           ),
         ),

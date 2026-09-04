@@ -7,11 +7,11 @@ class ThemeProvider extends ChangeNotifier {
     loadThemeMode();
   }
 
-  Color _themeColor = Color(0xff6750a4);
-  ThemeMode _themeMode = .system;
+  Color _color = Color(0xff6750a4);
+  ThemeMode _mode = .system;
 
-  Color get themeColor => _themeColor;
-  ThemeMode get themeMode => _themeMode;
+  Color get color => _color;
+  ThemeMode get mode => _mode;
 
   static const _themeColorKey = 'theme_color';
   static const _themeModeKey = 'theme_mode';
@@ -21,7 +21,7 @@ class ThemeProvider extends ChangeNotifier {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     final value = prefs.getInt(_themeColorKey);
-    _themeColor = value != null ? Color(value) : Color(0xff6750a4);
+    _color = value != null ? Color(value) : Color(0xff6750a4);
     notifyListeners();
   }
 
@@ -30,7 +30,7 @@ class ThemeProvider extends ChangeNotifier {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     final index = prefs.getInt(_themeModeKey);
-    _themeMode = index != null ? ThemeMode.values[index] : ThemeMode.system;
+    _mode = index != null ? ThemeMode.values[index] : ThemeMode.system;
     notifyListeners();
   }
 }

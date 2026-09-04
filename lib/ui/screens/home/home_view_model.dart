@@ -14,25 +14,19 @@ class HomeViewModel extends ChangeNotifier {
 
   late final Command0 load;
 
-  final List<Book> _inProgressBooks = [];
+  List<Book?> _inProgressBooks = [];
 
-  List<Book> get inProgressBooks => _inProgressBooks;
+  List<Book?> get inProgressBooks => _inProgressBooks;
 
   Future<Result<void>> _load() async {
-    _inProgressBooks.clear();
-    final booksResult = await _libraryRepository.getInProgressBooks();
-    switch (booksResult) {
+    final result = await _libraryRepository.getInProgressBooks();
+    switch (result) {
       case Ok():
-        final books = booksResult.value;
-        if (books.isNotEmpty) {
-          for (final book in books) {
-            _inProgressBooks.add(book!);
-            notifyListeners();
-          }
-        }
+        _inProgressBooks = result.value;
+        notifyListeners();
         return Result.ok(null);
       case Error():
-        return Result.error(booksResult.error);
+        return Result.error(result.error);
     }
   }
 }

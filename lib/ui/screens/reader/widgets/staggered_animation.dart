@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class StaggerAnimation extends StatelessWidget {
-  StaggerAnimation({
+class StaggeredAnimation extends StatelessWidget {
+  StaggeredAnimation({
     super.key,
     required this.animation,
     required this.animationController,

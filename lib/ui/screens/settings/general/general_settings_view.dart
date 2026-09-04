@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../widgets/card_tile_dropdown.dart';
+import '../../../widgets/error_screen.dart';
 import 'general_settings_view_model.dart';
 
 class GeneralSettingsView extends StatefulWidget {
@@ -24,6 +25,12 @@ class _GeneralSettingsViewState extends State<GeneralSettingsView> {
             builder: (context, child) {
               if (widget.viewModel.load.running) {
                 return SizedBox.shrink();
+              }
+              if (widget.viewModel.load.error) {
+                return ErrorScreen(
+                  function: widget.viewModel.load.execute,
+                  text: 'Error loading settings',
+                );
               }
               return ListView(
                 padding: EdgeInsets.all(16),
