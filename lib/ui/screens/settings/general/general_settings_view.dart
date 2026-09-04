@@ -1,92 +1,81 @@
 import 'package:flutter/material.dart';
 
-import '../../../widgets/card_tile_dropdown.dart';
-import '../../../widgets/error_screen.dart';
+import '../widgets/card_list.dart';
+import '../widgets/card_tile.dart';
+import '../widgets/dropdown_card.dart';
 import 'general_settings_view_model.dart';
 
-class GeneralSettingsView extends StatefulWidget {
+class GeneralSettingsView extends StatelessWidget {
   const GeneralSettingsView({super.key, required this.viewModel});
 
   final GeneralSettingsViewModel viewModel;
 
   @override
-  State<GeneralSettingsView> createState() => _GeneralSettingsViewState();
-}
-
-class _GeneralSettingsViewState extends State<GeneralSettingsView> {
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         AppBar(title: Text('General')),
-        Expanded(
-          child: ListenableBuilder(
-            listenable: widget.viewModel,
-            builder: (context, child) {
-              if (widget.viewModel.load.running) {
-                return SizedBox.shrink();
-              }
-              if (widget.viewModel.load.error) {
-                return ErrorScreen(
-                  function: widget.viewModel.load.execute,
-                  text: 'Error loading settings',
+        CardList(
+          children: [
+            CardTile(
+              title: Text('Version'),
+              trailing: LoadVersion(viewModel: viewModel),
+            ),
+            DropdownCard(
+              dropdownMenuEntries: [
+                DropdownMenuEntry(value: 'English', label: 'English'),
+              ],
+              initialSelection: 'English',
+              title: 'Language',
+            ),
+            CardTile(
+              title: Text('Source code'),
+              trailing: Icon(Icons.open_in_new),
+              onTap: () {
+                viewModel.openLink.execute(
+                  Uri.parse('https://github.com/soft-pretzel/manga-reader'),
                 );
-              }
-              return ListView(
-                padding: EdgeInsets.all(16),
-                children: [
-                  Card(
-                    clipBehavior: Clip.hardEdge,
-                    margin: EdgeInsets.all(0),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          title: Text('Version'),
-                          trailing: Text(
-                            widget.viewModel.version,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ),
-                        Divider(height: 0),
-                        CardTileDropdown(
-                          dropdownMenuEntries: [
-                            DropdownMenuEntry(
-                              value: 'English',
-                              label: 'English',
-                            ),
-                          ],
-                          initialSelection: 'English',
-                          title: 'Language',
-                        ),
-                        Divider(height: 0),
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          title: Text('Source code'),
-                          trailing: Icon(Icons.open_in_new),
-                          onTap: () {
-                            widget.viewModel.openLink.execute(
-                              Uri.parse(
-                                'https://github.com/soft-pretzel/manga-reader',
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+              },
+            ),
+          ],
         ),
       ],
+    );
+  }
+}
+
+class LoadVersion extends StatefulWidget {
+  const LoadVersion({super.key, required this.viewModel});
+
+  final GeneralSettingsViewModel viewModel;
+
+  @override
+  State<LoadVersion> createState() => _LoadVersionState();
+}
+
+class _LoadVersionState extends State<LoadVersion> {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.viewModel,
+      builder: (context, child) {
+        if (widget.viewModel.load.running) {
+          return SizedBox.shrink();
+        }
+        if (widget.viewModel.load.error) {
+          return IconButton(
+            onPressed: () => widget.viewModel.load.execute(),
+            icon: Icon(
+              Icons.refresh,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+        return Text(
+          widget.viewModel.version,
+          style: Theme.of(context).textTheme.bodyMedium,
+        );
+      },
     );
   }
 }

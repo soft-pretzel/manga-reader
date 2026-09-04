@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class CardTileDropdown extends StatelessWidget {
-  const CardTileDropdown({
+class DropdownCard extends StatelessWidget {
+  const DropdownCard({
     super.key,
     required this.dropdownMenuEntries,
     this.initialSelection,

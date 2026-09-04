@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../data/models/settings.dart';
-import '../../../widgets/card_tile_dropdown.dart';
+import '../widgets/dropdown_card.dart';
 import '../../../widgets/error_screen.dart';
 import 'reader_settings_view_model.dart';
 
@@ -59,7 +59,7 @@ class _ReaderSettingsViewState extends State<ReaderSettingsView> {
                           ),
                         ),
                         Divider(height: 0),
-                        CardTileDropdown(
+                        DropdownCard(
                           dropdownMenuEntries: [
                             DropdownMenuEntry(
                               value: ReadingDirection.leftToRight,
@@ -85,7 +85,7 @@ class _ReaderSettingsViewState extends State<ReaderSettingsView> {
                           title: 'Reading direction',
                         ),
                         Divider(height: 0),
-                        CardTileDropdown(
+                        DropdownCard(
                           dropdownMenuEntries: [
                             DropdownMenuEntry(
                               value: ReadingMode.single,

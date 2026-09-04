@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../widgets/card_tile_dropdown.dart';
+import '../widgets/dropdown_card.dart';
 import '../../../widgets/error_screen.dart';
 import 'appearance_settings_view_model.dart';
 
@@ -51,7 +51,7 @@ class _AppearanceSettingsViewState extends State<AppearanceSettingsView> {
                     margin: EdgeInsets.all(0),
                     child: Column(
                       children: [
-                        CardTileDropdown(
+                        DropdownCard(
                           dropdownMenuEntries: [
                             DropdownMenuEntry(
                               value: ThemeMode.light,
