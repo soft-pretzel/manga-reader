@@ -141,9 +141,10 @@ class LocalStorageService {
     String path, [
     String? name,
   ]) async {
+    file.decompress();
     final outputPath = '$path${Platform.pathSeparator}${name ?? file.name}';
     final outputStream = OutputFileStream(outputPath);
-    file.writeContent(outputStream);
+    file.writeContent(outputStream, freeMemory: true);
     outputStream.closeSync();
     return outputPath;
   }

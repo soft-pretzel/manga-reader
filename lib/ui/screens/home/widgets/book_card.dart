@@ -19,6 +19,7 @@ class BookCard extends StatelessWidget {
         Flexible(
           flex: 4,
           child: Card(
+            elevation: 2,
             margin: EdgeInsets.only(right: 8),
             clipBehavior: Clip.antiAlias,
             child: InkWell(

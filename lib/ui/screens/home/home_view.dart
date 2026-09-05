@@ -41,30 +41,29 @@ class _HomeViewState extends State<HomeView> {
                     text: 'No in-progress books',
                   );
                 }
-                return ListView(
+                return SingleChildScrollView(
                   padding: EdgeInsets.all(16),
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(2),
-                          child: Text('Continue Reading'),
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Continue Reading',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      SizedBox(height: 16),
+                      SizedBox(
+                        height: double.maxFinite,
+                        child: PageView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            for (final book in widget.viewModel.inProgressBooks)
+                              BookCard(book: book!),
+                          ],
                         ),
-                        SizedBox(
-                          height: 600,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              for (final book
-                                  in widget.viewModel.inProgressBooks)
-                                BookCard(book: book!),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
