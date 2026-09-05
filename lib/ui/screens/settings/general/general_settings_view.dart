@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/card_list.dart';
 import '../widgets/card_tile.dart';
-import '../widgets/dropdown_card.dart';
+import '../widgets/card_dropdown.dart';
 import 'general_settings_view_model.dart';
 
 class GeneralSettingsView extends StatelessWidget {
@@ -15,29 +15,36 @@ class GeneralSettingsView extends StatelessWidget {
     return Column(
       children: [
         AppBar(title: Text('General')),
-        CardList(
-          children: [
-            CardTile(
-              title: Text('Version'),
-              trailing: LoadVersion(viewModel: viewModel),
-            ),
-            DropdownCard(
-              dropdownMenuEntries: [
-                DropdownMenuEntry(value: 'English', label: 'English'),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: viewModel.refresh.execute,
+            child: CardList(
+              children: [
+                CardTile(
+                  title: Text('Version'),
+                  trailing: LoadVersion(viewModel: viewModel),
+                ),
+                CardTile(
+                  title: Text('Language'),
+                  subtitle: CardDropdown(
+                    dropdownMenuEntries: [
+                      DropdownMenuEntry(value: 'English', label: 'English'),
+                    ],
+                    initialSelection: 'English',
+                  ),
+                ),
+                CardTile(
+                  onTap: () {
+                    viewModel.openLink.execute(
+                      Uri.parse('https://github.com/soft-pretzel/manga-reader'),
+                    );
+                  },
+                  title: Text('Source code'),
+                  trailing: Icon(Icons.open_in_new),
+                ),
               ],
-              initialSelection: 'English',
-              title: 'Language',
             ),
-            CardTile(
-              title: Text('Source code'),
-              trailing: Icon(Icons.open_in_new),
-              onTap: () {
-                viewModel.openLink.execute(
-                  Uri.parse('https://github.com/soft-pretzel/manga-reader'),
-                );
-              },
-            ),
-          ],
+          ),
         ),
       ],
     );
@@ -59,12 +66,12 @@ class _LoadVersionState extends State<LoadVersion> {
     return ListenableBuilder(
       listenable: widget.viewModel,
       builder: (context, child) {
-        if (widget.viewModel.load.running) {
+        if (widget.viewModel.loadVersion.running) {
           return SizedBox.shrink();
         }
-        if (widget.viewModel.load.error) {
+        if (widget.viewModel.loadVersion.error) {
           return IconButton(
-            onPressed: () => widget.viewModel.load.execute(),
+            onPressed: () => widget.viewModel.loadVersion.execute(),
             icon: Icon(
               Icons.refresh,
               color: Theme.of(context).colorScheme.error,

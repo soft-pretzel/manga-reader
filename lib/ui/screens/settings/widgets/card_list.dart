@@ -7,34 +7,34 @@ class CardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemBuilder: (context, index) {
-          return Card(
-            clipBehavior: Clip.hardEdge,
-            margin: (index == 0)
-                ? EdgeInsets.only(bottom: 2)
-                : (index == children.length - 1)
-                ? EdgeInsets.only(top: 2)
-                : EdgeInsets.symmetric(vertical: 2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular((index == 0) ? 16 : 4),
-                topRight: Radius.circular((index == 0) ? 16 : 4),
-                bottomLeft: Radius.circular(
-                  (index == children.length - 1) ? 16 : 4,
-                ),
-                bottomRight: Radius.circular(
-                  (index == children.length - 1) ? 16 : 4,
-                ),
+    return ListView.builder(
+      padding: EdgeInsets.all(16),
+      itemBuilder: (context, index) {
+        return Card(
+          clipBehavior: Clip.hardEdge,
+          margin: (children.length == 1)
+              ? EdgeInsets.all(0)
+              : (index == 0)
+              ? EdgeInsets.only(bottom: 1)
+              : (index == children.length - 1)
+              ? EdgeInsets.only(top: 1)
+              : EdgeInsets.symmetric(vertical: 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular((index == 0) ? 20 : 4),
+              topRight: Radius.circular((index == 0) ? 20 : 4),
+              bottomLeft: Radius.circular(
+                (index == children.length - 1) ? 20 : 4,
+              ),
+              bottomRight: Radius.circular(
+                (index == children.length - 1) ? 20 : 4,
               ),
             ),
-            child: children[index],
-          );
-        },
-        itemCount: children.length,
-      ),
+          ),
+          child: children[index],
+        );
+      },
+      itemCount: children.length,
     );
   }
 }

@@ -13,41 +13,43 @@ class SettingsView extends StatelessWidget {
     return Column(
       children: [
         AppBar(title: Text('Settings')),
-        CardList(
-          children: [
-            CardTile(
-              leading: Icon(Icons.settings_outlined),
-              title: Text('General'),
-              trailing: Icon(Icons.keyboard_arrow_right),
-              onTap: () {
-                context.pushNamed(RouteNames.generalSettings);
-              },
-            ),
-            CardTile(
-              leading: Icon(Icons.folder_outlined),
-              title: Text('Local Storage'),
-              trailing: Icon(Icons.keyboard_arrow_right),
-              onTap: () {
-                context.pushNamed(RouteNames.storageSettings);
-              },
-            ),
-            CardTile(
-              leading: Icon(Icons.palette_outlined),
-              title: Text('Appearance'),
-              trailing: Icon(Icons.keyboard_arrow_right),
-              onTap: () {
-                context.pushNamed(RouteNames.appearanceSettings);
-              },
-            ),
-            CardTile(
-              leading: Icon(Icons.menu_book_outlined),
-              title: Text('Reader'),
-              trailing: Icon(Icons.keyboard_arrow_right),
-              onTap: () {
-                context.pushNamed(RouteNames.readerSettings);
-              },
-            ),
-          ],
+        Expanded(
+          child: CardList(
+            children: [
+              CardTile(
+                leading: Icon(Icons.settings_outlined),
+                title: Text('General'),
+                trailing: Icon(Icons.keyboard_arrow_right),
+                onTap: () {
+                  context.pushNamed(RouteNames.generalSettings);
+                },
+              ),
+              CardTile(
+                leading: Icon(Icons.folder_outlined),
+                title: Text('Local Storage'),
+                trailing: Icon(Icons.keyboard_arrow_right),
+                onTap: () {
+                  context.pushNamed(RouteNames.storageSettings);
+                },
+              ),
+              CardTile(
+                leading: Icon(Icons.palette_outlined),
+                title: Text('Appearance'),
+                trailing: Icon(Icons.keyboard_arrow_right),
+                onTap: () {
+                  context.pushNamed(RouteNames.appearanceSettings);
+                },
+              ),
+              CardTile(
+                leading: Icon(Icons.menu_book_outlined),
+                title: Text('Reader'),
+                trailing: Icon(Icons.keyboard_arrow_right),
+                onTap: () {
+                  context.pushNamed(RouteNames.readerSettings);
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );

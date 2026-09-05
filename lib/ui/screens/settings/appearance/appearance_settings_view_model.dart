@@ -10,7 +10,10 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     required this._themeProvider,
     required this._settingsRepository,
   }) {
-    load = Command0(_load)..execute();
+    loadOledDarkMode = Command0(_loadOledDarkMode)..execute();
+    loadThemeColor = Command0(_loadThemeColor)..execute();
+    loadThemeMode = Command0(_loadThemeMode)..execute();
+    refresh = Command0(_refresh);
     setThemeColor = Command1(_setThemeColor);
     setThemeMode = Command1(_setThemeMode);
     toggleOledDarkMode = Command0(_toggleOledDarkMode);
@@ -19,7 +22,10 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   final ThemeProvider _themeProvider;
   final SettingsRepository _settingsRepository;
 
-  late Command0 load;
+  late Command0 loadOledDarkMode;
+  late Command0 loadThemeColor;
+  late Command0 loadThemeMode;
+  late Command0 refresh;
   late Command1<void, Color> setThemeColor;
   late Command1<void, ThemeMode> setThemeMode;
   late Command0 toggleOledDarkMode;
@@ -32,9 +38,13 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   Color get themeColor => _themeColor;
   ThemeMode get themeMode => _themeMode;
 
-  Future<Result<void>> _load() async {
+  Future<Result<void>> _refresh() async {
     try {
-      Future.wait([_loadOledDarkMode(), _loadThemeColor(), _loadThemeMode()]);
+      await Future.wait([
+        _loadOledDarkMode(),
+        _loadThemeColor(),
+        _loadThemeMode(),
+      ]);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

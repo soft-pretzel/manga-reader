@@ -7,7 +7,12 @@ import '../../../../utils/result.dart';
 
 class ReaderSettingsViewModel extends ChangeNotifier {
   ReaderSettingsViewModel({required this._settingsRepository}) {
-    load = Command0(_load)..execute();
+    loadAnimations = Command0(_loadAnimations)..execute();
+    loadDoubleTapZoom = Command0(_loadDoubleTapZoom)..execute();
+    loadReadingDirection = Command0(_loadReadingDirection)..execute();
+    loadReadingMode = Command0(_loadReadingMode)..execute();
+    loadZoom = Command0(_loadZoom)..execute();
+    refresh = Command0(_refresh);
     setReadingDirection = Command1(_setReadingDirection);
     setReadingMode = Command1(_setReadingMode);
     setZoom = Command1(_setZoom);
@@ -17,7 +22,12 @@ class ReaderSettingsViewModel extends ChangeNotifier {
 
   final SettingsRepository _settingsRepository;
 
-  late Command0 load;
+  late Command0 loadAnimations;
+  late Command0 loadDoubleTapZoom;
+  late Command0 loadReadingDirection;
+  late Command0 loadReadingMode;
+  late Command0 loadZoom;
+  late Command0 refresh;
   late Command1<void, ReadingDirection> setReadingDirection;
   late Command1<void, ReadingMode> setReadingMode;
   late Command1<void, double> setZoom;
@@ -36,9 +46,9 @@ class ReaderSettingsViewModel extends ChangeNotifier {
   ReadingMode get readingMode => _readingMode;
   double get zoom => _zoom;
 
-  Future<Result<void>> _load() async {
+  Future<Result<void>> _refresh() async {
     try {
-      Future.wait([
+      await Future.wait([
         _loadAnimations(),
         _loadDoubleTapZoom(),
         _loadReadingDirection(),
