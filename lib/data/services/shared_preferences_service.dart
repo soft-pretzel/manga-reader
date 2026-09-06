@@ -6,6 +6,7 @@ import '../models/settings.dart';
 class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
+  static const _dynamicModeKey = 'dynamic_mode';
   static const _folderKey = 'folder';
   static const _oledDarkModeKey = 'oled_dark_mode';
   static const _readingDirectionKey = 'reading_direction';
@@ -35,6 +36,14 @@ class SharedPreferencesService {
     );
     final value = prefs.getBool(_doubleTapZoomKey);
     return value ?? true;
+  }
+
+  Future<bool> getDynamicMode() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final value = prefs.getBool(_dynamicModeKey);
+    return value ?? false;
   }
 
   Future<bool> getOledDarkMode() async {
@@ -142,6 +151,15 @@ class SharedPreferencesService {
     );
     final current = await getAnimations();
     prefs.setBool(_animationsKey, !current);
+    return !current;
+  }
+
+  Future<bool> toggleDynamicMode() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final current = await getDynamicMode();
+    prefs.setBool(_dynamicModeKey, !current);
     return !current;
   }
 

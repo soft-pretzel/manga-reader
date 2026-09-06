@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../models/settings.dart';
-import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/shared_preferences_service.dart';
@@ -10,14 +9,12 @@ import '../services/utils_service.dart';
 
 class SettingsRepository {
   SettingsRepository({
-    required this._apiService,
     required this._databaseService,
     required this._localStorageService,
     required this._sharedPreferencesService,
     required this._utilsService,
   });
 
-  final ApiService _apiService;
   final DatabaseService _databaseService;
   final LocalStorageService _localStorageService;
   final SharedPreferencesService _sharedPreferencesService;
@@ -106,6 +103,15 @@ class SettingsRepository {
     }
   }
 
+  Future<Result<bool>> getDynamicMode() async {
+    try {
+      final result = await _sharedPreferencesService.getDynamicMode();
+      return Result.ok(result);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<String?>> getFolder() async {
     try {
       final folder = await _sharedPreferencesService.getFolder();
@@ -175,7 +181,7 @@ class SettingsRepository {
 
   Future<Result<void>> openLink(Uri url) async {
     try {
-      await _apiService.openLink(url);
+      await _utilsService.openLink(url);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -246,6 +252,15 @@ class SettingsRepository {
   Future<Result<bool>> toggleAnimations() async {
     try {
       final result = await _sharedPreferencesService.toggleAnimations();
+      return Result.ok(result);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<bool>> toggleDynamicMode() async {
+    try {
+      final result = await _sharedPreferencesService.toggleDynamicMode();
       return Result.ok(result);
     } on Exception catch (e) {
       return Result.error(e);

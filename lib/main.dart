@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,21 +20,34 @@ class MainApp extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return MultiProvider(
       providers: providers,
-      child: MaterialApp.router(
-        theme: ThemeData(
-          brightness: Brightness.light,
-          colorSchemeSeed: themeProvider.color,
-        ),
-        darkTheme: ThemeData(
-          brightness: Brightness.dark,
-          colorScheme: ColorScheme.fromSeed(
-            brightness: Brightness.dark,
-            seedColor: themeProvider.color,
-            surface: (themeProvider.oledDarkMode) ? Colors.black : null,
-          ),
-        ),
-        themeMode: themeProvider.mode,
-        routerConfig: router,
+      child: DynamicColorBuilder(
+        builder: (lightDynamic, darkDynamic) {
+          ColorScheme lightColorScheme;
+          ColorScheme darkColorScheme;
+          if (lightDynamic != null &&
+              darkDynamic != null &&
+              themeProvider.dynamicMode) {
+            lightColorScheme = lightDynamic.harmonized() as ColorScheme;
+            darkColorScheme = darkDynamic.harmonized() as ColorScheme;
+          } else {
+            lightColorScheme = ColorScheme.fromSeed(
+              seedColor: themeProvider.color,
+            );
+            darkColorScheme = ColorScheme.fromSeed(
+              brightness: Brightness.dark,
+              seedColor: themeProvider.color,
+            );
+          }
+          if (themeProvider.oledDarkMode) {
+            darkColorScheme = darkColorScheme.copyWith(surface: Colors.black);
+          }
+          return MaterialApp.router(
+            theme: ThemeData(colorScheme: lightColorScheme),
+            darkTheme: ThemeData(colorScheme: darkColorScheme),
+            themeMode: themeProvider.mode,
+            routerConfig: router,
+          );
+        },
       ),
     );
   }

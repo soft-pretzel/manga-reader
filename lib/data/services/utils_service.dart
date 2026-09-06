@@ -1,6 +1,7 @@
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:proper_filesize/proper_filesize.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UtilsService {
   Future<void> brightnessDown() async {
@@ -34,5 +35,11 @@ class UtilsService {
 
   Future<String> getAppVersion() async {
     return (await PackageInfo.fromPlatform()).version;
+  }
+
+  Future<void> openLink(Uri url) async {
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }

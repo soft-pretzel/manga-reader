@@ -3,7 +3,6 @@ import 'package:provider/single_child_widget.dart';
 
 import 'repositories/library_repository.dart';
 import 'repositories/settings_repository.dart';
-import 'services/api_service.dart';
 import 'services/database_service.dart';
 import 'services/local_storage_service.dart';
 import 'services/shared_preferences_service.dart';
@@ -11,7 +10,6 @@ import 'services/utils_service.dart';
 
 List<SingleChildWidget> get providers {
   return [
-    Provider(create: (context) => ApiService()),
     Provider(create: (context) => DatabaseService()),
     Provider(create: (context) => LocalStorageService()),
     Provider(create: (context) => SharedPreferencesService()),
@@ -25,7 +23,6 @@ List<SingleChildWidget> get providers {
     ),
     Provider(
       create: (context) => SettingsRepository(
-        apiService: context.read(),
         databaseService: context.read(),
         localStorageService: context.read(),
         sharedPreferencesService: context.read(),

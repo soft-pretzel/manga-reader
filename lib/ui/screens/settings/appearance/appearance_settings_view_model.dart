@@ -10,30 +10,36 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     required this._themeProvider,
     required this._settingsRepository,
   }) {
+    loadDynamicMode = Command0(_loadDynamicMode)..execute();
     loadOledDarkMode = Command0(_loadOledDarkMode)..execute();
     loadThemeColor = Command0(_loadThemeColor)..execute();
     loadThemeMode = Command0(_loadThemeMode)..execute();
     refresh = Command0(_refresh);
     setThemeColor = Command1(_setThemeColor);
     setThemeMode = Command1(_setThemeMode);
+    toggleDynamicMode = Command0(_toggleDynamicMode);
     toggleOledDarkMode = Command0(_toggleOledDarkMode);
   }
 
   final ThemeProvider _themeProvider;
   final SettingsRepository _settingsRepository;
 
+  late Command0 loadDynamicMode;
   late Command0 loadOledDarkMode;
   late Command0 loadThemeColor;
   late Command0 loadThemeMode;
   late Command0 refresh;
   late Command1<void, Color> setThemeColor;
   late Command1<void, ThemeMode> setThemeMode;
+  late Command0 toggleDynamicMode;
   late Command0 toggleOledDarkMode;
 
+  late bool _dynamicMode;
   late bool _oledDarkMode;
   late Color _themeColor;
   late ThemeMode _themeMode;
 
+  bool get dynamicMode => _dynamicMode;
   bool get oledDarkMode => _oledDarkMode;
   Color get themeColor => _themeColor;
   ThemeMode get themeMode => _themeMode;
@@ -41,6 +47,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   Future<Result<void>> _refresh() async {
     try {
       await Future.wait([
+        _loadDynamicMode(),
         _loadOledDarkMode(),
         _loadThemeColor(),
         _loadThemeMode(),
@@ -48,6 +55,18 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _loadDynamicMode() async {
+    final result = await _settingsRepository.getDynamicMode();
+    switch (result) {
+      case Ok():
+        _dynamicMode = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
     }
   }
 
@@ -110,6 +129,18 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _toggleDynamicMode() async {
+    try {
+      _dynamicMode = !_dynamicMode;
+      notifyListeners();
+      await _settingsRepository.toggleDynamicMode();
+      _themeProvider.loadDynamicMode();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 

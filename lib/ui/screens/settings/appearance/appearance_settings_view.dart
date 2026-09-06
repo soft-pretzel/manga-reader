@@ -29,6 +29,11 @@ class AppearanceSettingsView extends StatelessWidget {
                   subtitle: ThemeColorSelector(viewModel: viewModel),
                 ),
                 CardTile(
+                  subtitle: Text('Use system theme colors'),
+                  title: Text('Dynamic color'),
+                  trailing: DynamicModeSwitch(viewModel: viewModel),
+                ),
+                CardTile(
                   subtitle: Text('Use a true black background'),
                   title: Text('OLED dark mode'),
                   trailing: OledDarkModeSwitch(viewModel: viewModel),
@@ -147,6 +152,37 @@ class _ThemeColorSelectorState extends State<ThemeColorSelector> {
               );
             },
           ),
+        );
+      },
+    );
+  }
+}
+
+class DynamicModeSwitch extends StatefulWidget {
+  const DynamicModeSwitch({super.key, required this.viewModel});
+
+  final AppearanceSettingsViewModel viewModel;
+
+  @override
+  State<DynamicModeSwitch> createState() => _DynamicModeSwitchState();
+}
+
+class _DynamicModeSwitchState extends State<DynamicModeSwitch> {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.viewModel,
+      builder: (context, child) {
+        if (widget.viewModel.loadDynamicMode.running) {
+          return SizedBox.shrink();
+        }
+        return Switch(
+          value: widget.viewModel.dynamicMode,
+          onChanged: (value) {
+            setState(() {
+              widget.viewModel.toggleDynamicMode.execute();
+            });
+          },
         );
       },
     );
