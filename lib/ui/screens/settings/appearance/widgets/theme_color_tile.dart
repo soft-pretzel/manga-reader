@@ -1,0 +1,73 @@
+import 'package:flutter/material.dart';
+
+import '../appearance_settings_view_model.dart';
+
+class ThemeColorTile extends StatelessWidget {
+  const ThemeColorTile({super.key, required this.viewModel});
+
+  final AppearanceSettingsViewModel viewModel;
+  static const List<Color> _colors = [
+    Color(0xff6750a4),
+    Colors.pink,
+    Colors.red,
+    Colors.orange,
+    Colors.amber,
+    Colors.green,
+    Colors.teal,
+    Colors.blue,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      title: Text('Theme color'),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 10, bottom: 4),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              height: 36,
+              width: constraints.maxWidth,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  for (final color in _colors)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: InkWell(
+                        onTap: () => viewModel.setThemeColor.execute(color),
+                        borderRadius: BorderRadius.circular(4),
+                        child: ListenableBuilder(
+                          listenable: viewModel,
+                          builder: (context, _) {
+                            return Container(
+                              width: 36,
+                              decoration: BoxDecoration(
+                                color: color,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                                  width: (viewModel.loadThemeColor.running)
+                                      ? 1
+                                      : viewModel.themeColor == color
+                                      ? 3
+                                      : 1,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

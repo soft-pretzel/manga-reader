@@ -1,4 +1,4 @@
-import 'package:dynamic_color/dynamic_color.dart';
+import 'package:dynamic_system_colors/dynamic_system_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,8 +27,8 @@ class MainApp extends StatelessWidget {
           if (lightDynamic != null &&
               darkDynamic != null &&
               themeProvider.dynamicMode) {
-            lightColorScheme = lightDynamic.harmonized() as ColorScheme;
-            darkColorScheme = darkDynamic.harmonized() as ColorScheme;
+            lightColorScheme = lightDynamic.harmonized();
+            darkColorScheme = darkDynamic.harmonized();
           } else {
             lightColorScheme = ColorScheme.fromSeed(
               seedColor: themeProvider.color,

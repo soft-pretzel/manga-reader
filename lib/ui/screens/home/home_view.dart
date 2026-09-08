@@ -5,16 +5,11 @@ import '../../widgets/error_screen.dart';
 import 'home_view_model.dart';
 import 'widgets/book_card.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({super.key, required this.viewModel});
 
   final HomeViewModel viewModel;
 
-  @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -22,22 +17,22 @@ class _HomeViewState extends State<HomeView> {
         AppBar(title: Text('Home')),
         Expanded(
           child: RefreshIndicator(
-            onRefresh: widget.viewModel.load.execute,
+            onRefresh: viewModel.load.execute,
             child: ListenableBuilder(
-              listenable: widget.viewModel,
+              listenable: viewModel,
               builder: (context, child) {
-                if (widget.viewModel.load.running) {
+                if (viewModel.load.running) {
                   return const SizedBox.shrink();
                 }
-                if (widget.viewModel.load.error) {
+                if (viewModel.load.error) {
                   return ErrorScreen(
-                    function: widget.viewModel.load.execute,
+                    function: viewModel.load.execute,
                     text: 'Error loading Home',
                   );
                 }
-                if (widget.viewModel.inProgressBooks.isEmpty) {
+                if (viewModel.inProgressBooks.isEmpty) {
                   return EmptyScreen(
-                    function: widget.viewModel.load.execute,
+                    function: viewModel.load.execute,
                     text: 'No in-progress books',
                   );
                 }
@@ -49,15 +44,15 @@ class _HomeViewState extends State<HomeView> {
                     children: [
                       Text(
                         'Continue Reading',
-                        style: Theme.of(context).textTheme.headlineMedium,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       SizedBox(height: 16),
                       SizedBox(
-                        height: double.maxFinite,
-                        child: PageView(
+                        height: 600,
+                        child: ListView(
                           scrollDirection: Axis.horizontal,
                           children: [
-                            for (final book in widget.viewModel.inProgressBooks)
+                            for (final book in viewModel.inProgressBooks)
                               BookCard(book: book!),
                           ],
                         ),
