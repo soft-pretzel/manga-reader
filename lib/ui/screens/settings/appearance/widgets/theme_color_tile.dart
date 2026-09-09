@@ -21,6 +21,7 @@ class ThemeColorTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      enabled: !viewModel.dynamicMode,
       title: Text('Theme color'),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 10, bottom: 4),
@@ -36,7 +37,9 @@ class ThemeColorTile extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: InkWell(
-                        onTap: () => viewModel.setThemeColor.execute(color),
+                        onTap: (!viewModel.dynamicMode)
+                            ? () => viewModel.setThemeColor.execute(color)
+                            : null,
                         borderRadius: BorderRadius.circular(4),
                         child: ListenableBuilder(
                           listenable: viewModel,
@@ -50,7 +53,9 @@ class ThemeColorTile extends StatelessWidget {
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onPrimaryContainer,
-                                  width: (viewModel.loadThemeColor.running)
+                                  width:
+                                      (viewModel.loadThemeColor.running ||
+                                          viewModel.dynamicMode)
                                       ? 1
                                       : viewModel.themeColor == color
                                       ? 3

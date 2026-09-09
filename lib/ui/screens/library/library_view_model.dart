@@ -18,10 +18,12 @@ class LibraryViewModel extends ChangeNotifier {
   }) {
     getSeriesItemCount = Command1(_getSeriesItemCount);
     getTitle = Command0(_getTitle);
-    load = Command0(_load)..execute();
-    loadThumbnails = Command0(_loadThumbnails);
+    loadAnimations = Command0(_loadAnimations)..execute();
+    loadLibrary = Command0(_loadLibrary)..execute();
+    loadThumbnails = Command0(_loadThumbnails)..execute();
     markAsFinished = Command1(_markAsFinished);
     markAsUnread = Command1(_markAsUnread);
+    refresh = Command0(_refresh);
     scanFolder = Command0(_scanFolder);
   }
 
@@ -31,10 +33,12 @@ class LibraryViewModel extends ChangeNotifier {
 
   late final Command1<void, Series> getSeriesItemCount;
   late final Command0 getTitle;
-  late final Command0 load;
+  late final Command0 loadAnimations;
+  late final Command0 loadLibrary;
   late final Command0 loadThumbnails;
   late final Command1<void, Book> markAsFinished;
   late final Command1<void, Book> markAsUnread;
+  late final Command0 refresh;
   late final Command0 scanFolder;
 
   late bool _animations;
@@ -44,17 +48,6 @@ class LibraryViewModel extends ChangeNotifier {
   bool get animations => _animations;
   List<Library?> get library => _library;
   String get title => _title;
-
-  Future<Result<void>> _load() async {
-    try {
-      await _loadLibrary();
-      Future.wait([_loadAnimations()]);
-      _loadThumbnails();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
 
   Future<Result<void>> _loadAnimations() async {
     final result = await _settingsRepository.getAnimations();
@@ -151,11 +144,21 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
+  Future<Result<void>> _refresh() async {
+    try {
+      await _loadLibrary();
+      await Future.wait([_loadAnimations(), _loadThumbnails()]);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<void>> _scanFolder() async {
     final result = await _libraryRepository.scanFolder();
     switch (result) {
       case Ok():
-        _load();
+        _refresh();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

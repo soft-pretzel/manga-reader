@@ -23,6 +23,7 @@ class LibraryRepository {
   final LocalStorageService _localStorageService;
   final SharedPreferencesService _sharedPreferencesService;
 
+  static List<String> comicTypes = ['cbt', 'cbz', 'tar', 'zip'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
 
   Future<Result<void>> deleteBookCache(String id) async {
@@ -169,11 +170,17 @@ class LibraryRepository {
           final files = await _localStorageService.getFiles(dirList[i]);
           for (final file in files) {
             if (await _localStorageService.isDir(file)) {
-              seriesId.add(await _saveSeries(file, seriesId[i]));
-              dirList.add(file);
+              if ((await _localStorageService.getFiles(file)).isNotEmpty) {
+                seriesId.add(await _saveSeries(file, seriesId[i]));
+                dirList.add(file);
+              }
             } else {
-              await _saveBook(file, seriesId[i]);
-              bookList.add(file);
+              if (comicTypes.contains(
+                await _localStorageService.getFileType(file),
+              )) {
+                await _saveBook(file, seriesId[i]);
+                bookList.add(file);
+              }
             }
           }
           i++;

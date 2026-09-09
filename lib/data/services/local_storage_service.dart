@@ -28,7 +28,7 @@ class LocalStorageService {
     switch (archiveType) {
       case 'cbz' || 'zip':
         archive = ZipDecoder().decodeStream(stream);
-      case 'cbt' || 'cbz':
+      case 'cbt' || 'tar':
         archive = TarDecoder().decodeStream(stream);
     }
 
