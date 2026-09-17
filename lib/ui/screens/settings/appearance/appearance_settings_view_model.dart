@@ -10,11 +10,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     required this._themeProvider,
     required this._settingsRepository,
   }) {
-    loadDynamicMode = Command0(_loadDynamicMode)..execute();
-    loadOledDarkMode = Command0(_loadOledDarkMode)..execute();
-    loadThemeColor = Command0(_loadThemeColor)..execute();
-    loadThemeMode = Command0(_loadThemeMode)..execute();
-    refresh = Command0(_refresh);
+    load = Command0(_load)..execute();
     setThemeColor = Command1(_setThemeColor);
     setThemeMode = Command1(_setThemeMode);
     toggleDynamicMode = Command0(_toggleDynamicMode);
@@ -24,11 +20,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   final ThemeProvider _themeProvider;
   final SettingsRepository _settingsRepository;
 
-  late Command0 loadDynamicMode;
-  late Command0 loadOledDarkMode;
-  late Command0 loadThemeColor;
-  late Command0 loadThemeMode;
-  late Command0 refresh;
+  late Command0 load;
   late Command1<void, Color> setThemeColor;
   late Command1<void, ThemeMode> setThemeMode;
   late Command0 toggleDynamicMode;
@@ -44,7 +36,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   Color get themeColor => _themeColor;
   ThemeMode get themeMode => _themeMode;
 
-  Future<Result<void>> _refresh() async {
+  Future<Result<void>> _load() async {
     try {
       await Future.wait([
         _loadDynamicMode(),

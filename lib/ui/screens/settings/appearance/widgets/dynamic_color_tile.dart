@@ -13,18 +13,10 @@ class DynamicColorTile extends StatelessWidget {
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       subtitle: Text('Use system theme colors'),
       title: Text('Dynamic color'),
-      trailing: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          if (viewModel.loadDynamicMode.running) {
-            return SizedBox.shrink();
-          }
-          return Switch(
-            value: viewModel.dynamicMode,
-            onChanged: (_) {
-              viewModel.toggleDynamicMode.execute();
-            },
-          );
+      trailing: Switch(
+        value: viewModel.dynamicMode,
+        onChanged: (value) {
+          viewModel.toggleDynamicMode.execute();
         },
       ),
     );

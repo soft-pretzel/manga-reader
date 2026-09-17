@@ -12,18 +12,7 @@ class DatabaseSizeTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Text('Database size'),
-      trailing: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          if (viewModel.loadDatabaseSize.running) {
-            return SizedBox.shrink();
-          }
-          return Text(
-            viewModel.dbSize,
-            style: Theme.of(context).textTheme.bodyMedium,
-          );
-        },
-      ),
+      subtitle: Text(viewModel.dbSize),
     );
   }
 }

@@ -12,22 +12,8 @@ class LocalFolderTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Text('Local folder'),
-      subtitle: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          if (viewModel.loadFolder.running) {
-            return SizedBox.shrink();
-          }
-          return Text(
-            viewModel.folder ?? 'No folder selected',
-            style: Theme.of(context).textTheme.bodyMedium,
-          );
-        },
-      ),
-      trailing: IconButton(
-        onPressed: viewModel.setFolder.execute,
-        icon: Icon(Icons.edit),
-      ),
+      subtitle: Text(viewModel.folder ?? 'No folder selected'),
+      onTap: viewModel.setFolder.execute,
     );
   }
 }

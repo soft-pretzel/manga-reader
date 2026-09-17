@@ -12,18 +12,7 @@ class CacheSizeTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Text('Cache size'),
-      trailing: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          if (viewModel.loadCacheSize.running) {
-            return SizedBox.shrink();
-          }
-          return Text(
-            viewModel.cacheSize,
-            style: Theme.of(context).textTheme.bodyMedium,
-          );
-        },
-      ),
+      subtitle: Text(viewModel.cacheSize),
     );
   }
 }

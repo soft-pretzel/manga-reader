@@ -37,33 +37,28 @@ class ThemeColorTile extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: InkWell(
-                        onTap: (!viewModel.dynamicMode)
+                        onTap: !viewModel.dynamicMode
                             ? () => viewModel.setThemeColor.execute(color)
                             : null,
                         borderRadius: BorderRadius.circular(4),
-                        child: ListenableBuilder(
-                          listenable: viewModel,
-                          builder: (context, _) {
-                            return Container(
-                              width: 36,
-                              decoration: BoxDecoration(
-                                color: color,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimaryContainer,
-                                  width:
-                                      (viewModel.loadThemeColor.running ||
-                                          viewModel.dynamicMode)
-                                      ? 1
-                                      : viewModel.themeColor == color
-                                      ? 3
-                                      : 1,
-                                ),
-                              ),
-                            );
-                          },
+                        child: Container(
+                          width: 36,
+                          decoration: BoxDecoration(
+                            color: !viewModel.dynamicMode
+                                ? color
+                                : color.withAlpha(128),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                              width: viewModel.dynamicMode
+                                  ? 0
+                                  : viewModel.themeColor == color
+                                  ? 3
+                                  : 1,
+                            ),
+                          ),
                         ),
                       ),
                     ),

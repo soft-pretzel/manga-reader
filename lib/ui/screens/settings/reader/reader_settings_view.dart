@@ -19,17 +19,22 @@ class ReaderSettingsView extends StatelessWidget {
       children: [
         AppBar(title: Text('Reader')),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: viewModel.refresh.execute,
-            child: CardList(
-              children: [
-                AnimationsTile(viewModel: viewModel),
-                ReadingDirectionTile(viewModel: viewModel),
-                ReadingModeTile(viewModel: viewModel),
-                DoubleTapZoomTile(viewModel: viewModel),
-                ZoomLevelTile(viewModel: viewModel),
-              ],
-            ),
+          child: ListenableBuilder(
+            listenable: viewModel,
+            builder: (context, child) {
+              if (viewModel.load.running) {
+                return SizedBox.shrink();
+              }
+              return CardList(
+                children: [
+                  AnimationsTile(viewModel: viewModel),
+                  ReadingDirectionTile(viewModel: viewModel),
+                  ReadingModeTile(viewModel: viewModel),
+                  DoubleTapZoomTile(viewModel: viewModel),
+                  ZoomLevelTile(viewModel: viewModel),
+                ],
+              );
+            },
           ),
         ),
       ],

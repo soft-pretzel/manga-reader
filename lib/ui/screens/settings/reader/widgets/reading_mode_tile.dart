@@ -17,35 +17,28 @@ class ReadingModeTile extends StatelessWidget {
         padding: const EdgeInsets.only(top: 10, bottom: 4),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return ListenableBuilder(
-              listenable: viewModel,
-              builder: (context, _) {
-                return DropdownMenu(
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(
-                      value: ReadingMode.single,
-                      label: 'Single page',
-                    ),
-                    DropdownMenuEntry(
-                      value: ReadingMode.double,
-                      label: 'Double page',
-                    ),
-                    DropdownMenuEntry(
-                      value: ReadingMode.continuous,
-                      label: 'Continuous',
-                    ),
-                  ],
-                  initialSelection: (viewModel.loadReadingMode.running)
-                      ? null
-                      : viewModel.readingMode,
-                  onSelected: (value) {
-                    if (value != null) {
-                      viewModel.setReadingMode.execute(value);
-                    }
-                  },
-                  width: constraints.maxWidth,
-                );
+            return DropdownMenu(
+              dropdownMenuEntries: [
+                DropdownMenuEntry(
+                  value: ReadingMode.single,
+                  label: 'Single page',
+                ),
+                DropdownMenuEntry(
+                  value: ReadingMode.double,
+                  label: 'Double page',
+                ),
+                DropdownMenuEntry(
+                  value: ReadingMode.continuous,
+                  label: 'Continuous',
+                ),
+              ],
+              initialSelection: viewModel.readingMode,
+              onSelected: (value) {
+                if (value != null) {
+                  viewModel.setReadingMode.execute(value);
+                }
               },
+              width: constraints.maxWidth,
             );
           },
         ),

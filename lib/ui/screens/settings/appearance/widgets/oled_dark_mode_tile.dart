@@ -14,21 +14,13 @@ class OledDarkModeTile extends StatelessWidget {
       enabled: viewModel.themeMode != .light,
       subtitle: Text('Use a true black background'),
       title: Text('OLED dark mode'),
-      trailing: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          if (viewModel.loadOledDarkMode.running) {
-            return SizedBox.shrink();
-          }
-          return Switch(
-            value: viewModel.oledDarkMode,
-            onChanged: (viewModel.themeMode != .light)
-                ? (_) {
-                    viewModel.toggleOledDarkMode.execute();
-                  }
-                : null,
-          );
-        },
+      trailing: Switch(
+        value: viewModel.oledDarkMode,
+        onChanged: viewModel.themeMode != .light
+            ? (value) {
+                viewModel.toggleOledDarkMode.execute();
+              }
+            : null,
       ),
     );
   }

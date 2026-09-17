@@ -6,22 +6,20 @@ import '../../../../utils/result.dart';
 
 class GeneralSettingsViewModel extends ChangeNotifier {
   GeneralSettingsViewModel({required this._settingsRepository}) {
-    loadVersion = Command0(_loadVersion)..execute();
+    load = Command0(_load)..execute();
     openLink = Command1(_openLink);
-    refresh = Command0(_refresh);
   }
 
   final SettingsRepository _settingsRepository;
 
-  late Command0 loadVersion;
+  late Command0 load;
   late Command1<void, Uri> openLink;
-  late Command0 refresh;
 
   late String _version;
 
   String get version => _version;
 
-  Future<Result<void>> _refresh() async {
+  Future<Result<void>> _load() async {
     try {
       await Future.wait([_loadVersion()]);
       return Result.ok(null);

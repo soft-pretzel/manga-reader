@@ -13,18 +13,10 @@ class AnimationsTile extends StatelessWidget {
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       subtitle: Text('Toggle reader animations'),
       title: Text('Animations'),
-      trailing: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          if (viewModel.loadAnimations.running) {
-            return SizedBox.shrink();
-          }
-          return Switch(
-            value: viewModel.animations,
-            onChanged: (_) {
-              viewModel.toggleAnimations.execute();
-            },
-          );
+      trailing: Switch(
+        value: viewModel.animations,
+        onChanged: (_) {
+          viewModel.toggleAnimations.execute();
         },
       ),
     );

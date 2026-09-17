@@ -12,18 +12,7 @@ class VersionTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Text('Version'),
-      trailing: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, child) {
-          if (viewModel.loadVersion.running) {
-            return SizedBox.shrink();
-          }
-          return Text(
-            viewModel.version,
-            style: Theme.of(context).textTheme.bodyMedium,
-          );
-        },
-      ),
+      subtitle: Text(viewModel.version),
     );
   }
 }

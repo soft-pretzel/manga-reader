@@ -16,26 +16,19 @@ class ThemeModeTile extends StatelessWidget {
         padding: const EdgeInsets.only(top: 10, bottom: 4),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return ListenableBuilder(
-              listenable: viewModel,
-              builder: (context, _) {
-                return DropdownMenu(
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(value: ThemeMode.light, label: 'Light'),
-                    DropdownMenuEntry(value: ThemeMode.dark, label: 'Dark'),
-                    DropdownMenuEntry(value: ThemeMode.system, label: 'System'),
-                  ],
-                  initialSelection: (viewModel.loadThemeMode.running)
-                      ? null
-                      : viewModel.themeMode,
-                  onSelected: (value) {
-                    if (value != null) {
-                      viewModel.setThemeMode.execute(value);
-                    }
-                  },
-                  width: constraints.maxWidth,
-                );
+            return DropdownMenu(
+              dropdownMenuEntries: [
+                DropdownMenuEntry(value: ThemeMode.light, label: 'Light'),
+                DropdownMenuEntry(value: ThemeMode.dark, label: 'Dark'),
+                DropdownMenuEntry(value: ThemeMode.system, label: 'System'),
+              ],
+              initialSelection: viewModel.themeMode,
+              onSelected: (value) {
+                if (value != null) {
+                  viewModel.setThemeMode.execute(value);
+                }
               },
+              width: constraints.maxWidth,
             );
           },
         ),

@@ -20,16 +20,21 @@ class AppearanceSettingsView extends StatelessWidget {
       children: [
         AppBar(title: Text('Appearance')),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: viewModel.refresh.execute,
-            child: CardList(
-              children: [
-                ThemeModeTile(viewModel: viewModel),
-                if (!Platform.isIOS) DynamicColorTile(viewModel: viewModel),
-                ThemeColorTile(viewModel: viewModel),
-                OledDarkModeTile(viewModel: viewModel),
-              ],
-            ),
+          child: ListenableBuilder(
+            listenable: viewModel,
+            builder: (context, child) {
+              if (viewModel.load.running) {
+                return SizedBox.shrink();
+              }
+              return CardList(
+                children: [
+                  ThemeModeTile(viewModel: viewModel),
+                  if (!Platform.isIOS) DynamicColorTile(viewModel: viewModel),
+                  ThemeColorTile(viewModel: viewModel),
+                  OledDarkModeTile(viewModel: viewModel),
+                ],
+              );
+            },
           ),
         ),
       ],

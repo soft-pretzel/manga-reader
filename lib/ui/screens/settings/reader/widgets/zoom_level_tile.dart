@@ -15,28 +15,18 @@ class ZoomLevelTile extends StatelessWidget {
       title: Text('Zoom level'),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 10, bottom: 4),
-        child: ListenableBuilder(
-          listenable: viewModel,
-          builder: (context, _) {
-            if (viewModel.loadZoom.running) {
-              return SizedBox.shrink();
-            }
-            return TextFormField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
-              ),
-              initialValue: '${viewModel.zoom}',
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
-              ],
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              onFieldSubmitted: (value) {
-                viewModel.setZoom.execute(double.parse(value));
-              },
-            );
+        child: TextFormField(
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+            contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          ),
+          initialValue: '${viewModel.zoom}',
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
+          ],
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
+          onFieldSubmitted: (value) {
+            viewModel.setZoom.execute(double.parse(value));
           },
         ),
       ),

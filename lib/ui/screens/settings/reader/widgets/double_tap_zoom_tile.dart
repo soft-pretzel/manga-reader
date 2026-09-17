@@ -15,18 +15,10 @@ class DoubleTapZoomTile extends StatelessWidget {
         'Disabling double tap zoom allows for instant single tap feedback',
       ),
       title: Text('Double tap zoom'),
-      trailing: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          if (viewModel.loadDoubleTapZoom.running) {
-            return SizedBox.shrink();
-          }
-          return Switch(
-            value: viewModel.doubleTapZoom,
-            onChanged: (_) {
-              viewModel.toggleDoubleTapZoom.execute();
-            },
-          );
+      trailing: Switch(
+        value: viewModel.doubleTapZoom,
+        onChanged: (_) {
+          viewModel.toggleDoubleTapZoom.execute();
         },
       ),
     );

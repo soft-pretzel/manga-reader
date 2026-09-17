@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/card_list.dart';
 import 'general_settings_view_model.dart';
 import 'widget/language_tile.dart';
+import 'widget/source_tile.dart';
 import 'widget/version_tile.dart';
 
 class GeneralSettingsView extends StatelessWidget {
@@ -16,27 +17,20 @@ class GeneralSettingsView extends StatelessWidget {
       children: [
         AppBar(title: Text('General')),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: viewModel.refresh.execute,
-            child: CardList(
-              children: [
-                VersionTile(viewModel: viewModel),
-                LanguageTile(viewModel: viewModel),
-                ListTile(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  onTap: () {
-                    viewModel.openLink.execute(
-                      Uri.parse('https://github.com/soft-pretzel/manga-reader'),
-                    );
-                  },
-                  title: Text('Source code'),
-                  trailing: Icon(Icons.open_in_new),
-                ),
-              ],
-            ),
+          child: ListenableBuilder(
+            listenable: viewModel,
+            builder: (context, child) {
+              if (viewModel.load.running) {
+                return SizedBox.shrink();
+              }
+              return CardList(
+                children: [
+                  VersionTile(viewModel: viewModel),
+                  LanguageTile(viewModel: viewModel),
+                  SourceTile(viewModel: viewModel),
+                ],
+              );
+            },
           ),
         ),
       ],

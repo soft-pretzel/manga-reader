@@ -17,15 +17,20 @@ class StorageSettingsView extends StatelessWidget {
       children: [
         AppBar(title: Text("Local Storage")),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: viewModel.refresh.execute,
-            child: CardList(
-              children: [
-                LocalFolderTile(viewModel: viewModel),
-                CacheSizeTile(viewModel: viewModel),
-                DatabaseSizeTile(viewModel: viewModel),
-              ],
-            ),
+          child: ListenableBuilder(
+            listenable: viewModel,
+            builder: (context, child) {
+              if (viewModel.load.running) {
+                return SizedBox.shrink();
+              }
+              return CardList(
+                children: [
+                  LocalFolderTile(viewModel: viewModel),
+                  CacheSizeTile(viewModel: viewModel),
+                  DatabaseSizeTile(viewModel: viewModel),
+                ],
+              );
+            },
           ),
         ),
       ],
