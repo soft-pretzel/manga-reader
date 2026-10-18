@@ -47,15 +47,6 @@ class SettingsRepository {
     }
   }
 
-  Future<Result<void>> deleteFolder() async {
-    try {
-      await _sharedPreferencesService.deleteFolder();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
   Future<Result<bool>> getAnimations() async {
     try {
       final animations = await _sharedPreferencesService.getAnimations();
@@ -107,18 +98,6 @@ class SettingsRepository {
     try {
       final result = await _sharedPreferencesService.getDynamicMode();
       return Result.ok(result);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<String?>> getFolder() async {
-    try {
-      final folder = await _sharedPreferencesService.getFolder();
-      if (folder != null) {
-        return Result.ok(await _localStorageService.getName(folder));
-      }
-      return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -183,20 +162,6 @@ class SettingsRepository {
     try {
       await _utilsService.openLink(url);
       return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<String?>> setFolder() async {
-    try {
-      final folder = await _localStorageService.selectFolder();
-      if (folder != null) {
-        await _sharedPreferencesService.setFolder(folder);
-        return Result.ok(await _localStorageService.getName(folder));
-      } else {
-        return Result.ok(null);
-      }
     } on Exception catch (e) {
       return Result.error(e);
     }

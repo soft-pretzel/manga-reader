@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'series_item_count.dart';
-import 'series_menu.dart';
+import 'folder_item_count.dart';
+import 'folder_menu.dart';
 import 'thumbnail.dart';
 import '../library_view_model.dart';
-import '../../../../data/models/series.dart';
+import '../../../../data/models/folder.dart';
 import '../../../../routing/routes.dart';
 
-class SeriesTile extends StatefulWidget {
-  const SeriesTile({super.key, required this.series, required this.viewModel});
+class FolderTile extends StatefulWidget {
+  const FolderTile({super.key, required this.series, required this.viewModel});
 
-  final Series series;
+  final Folder series;
   final LibraryViewModel viewModel;
 
   @override
-  State<SeriesTile> createState() => _SeriesTileState();
+  State<FolderTile> createState() => _FolderTileState();
 }
 
-class _SeriesTileState extends State<SeriesTile> {
+class _FolderTileState extends State<FolderTile> {
   final _menuController = MenuController();
 
   void _handleLongPress(LongPressStartDetails details) {
@@ -42,13 +42,13 @@ class _SeriesTileState extends State<SeriesTile> {
                 );
               },
               onLongPressStart: _handleLongPress,
-              child: SeriesMenu(
+              child: FolderMenu(
                 menuController: _menuController,
                 viewModel: widget.viewModel,
                 child: Stack(
                   children: [
                     Thumbnail(item: widget.series, viewModel: widget.viewModel),
-                    SeriesItemCount(
+                    FolderItemCount(
                       series: widget.series,
                       viewModel: widget.viewModel,
                     ),

@@ -6,8 +6,7 @@ class Book extends Library {
   int currentPage;
   DateTime? lastRead;
   int? length;
-  final String path;
-  ReadingStatus readingStatus;
+  ReadingStatus status;
 
   Book({
     required super.id,
@@ -16,9 +15,9 @@ class Book extends Library {
     this.lastRead,
     this.length,
     required super.name,
-    required this.path,
-    this.readingStatus = .unread,
-    super.seriesId,
+    required super.parentId,
+    required super.path,
+    this.status = .unread,
     super.thumbnail,
   });
 
@@ -31,9 +30,9 @@ class Book extends Library {
       'last_read': lastRead.toString(),
       'length': length,
       'name': name,
+      'parent_id': parentId,
       'path': path,
-      'reading_status': readingStatus.index,
-      'series_id': seriesId,
+      'status': status.index,
       'thumbnail': thumbnail,
     };
   }
@@ -42,8 +41,6 @@ class Book extends Library {
     : currentPage = int.parse(map['current_page'].toString()),
       lastRead = DateTime.tryParse(map['last_read'].toString()),
       length = int.tryParse(map['length'].toString()),
-      path = map['path'].toString(),
-      readingStatus =
-          ReadingStatus.values[int.parse(map['reading_status'].toString())],
+      status = ReadingStatus.values[int.parse(map['status'].toString())],
       super.fromMap();
 }

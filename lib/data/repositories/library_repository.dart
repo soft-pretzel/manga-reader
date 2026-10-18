@@ -5,23 +5,20 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 
 import '../models/book.dart';
+import '../models/folder.dart';
 import '../models/library.dart';
-import '../models/series.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
-import '../services/shared_preferences_service.dart';
 import '../../utils/result.dart';
 
 class LibraryRepository {
   LibraryRepository({
     required this._databaseService,
     required this._localStorageService,
-    required this._sharedPreferencesService,
   });
 
   final DatabaseService _databaseService;
   final LocalStorageService _localStorageService;
-  final SharedPreferencesService _sharedPreferencesService;
 
   static List<String> comicTypes = ['cbt', 'cbz', 'tar', 'zip'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
@@ -55,30 +52,30 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<Library?>>> getLibrary(String? seriesId) async {
+  Future<Result<List<Library?>>> getLibrary(String? folderId) async {
     try {
-      final library = await _databaseService.getLibrary(seriesId);
+      final library = await _databaseService.getLibrary(folderId);
       return Result.ok(library);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<int>> getSeriesBookCount(Series series) async {
+  Future<Result<int>> getFolderBookCount(Folder folder) async {
     try {
-      final items = await _databaseService.getLibrary(series.id);
-      series.bookCount = items.length;
-      _databaseService.updateSeries(series);
+      final items = await _databaseService.getLibrary(folder.id);
+      folder.itemCount = items.length;
+      _databaseService.updateFolder(folder);
       return Result.ok(items.length);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<String>> getSeriesName(String id) async {
+  Future<Result<String>> getFolderName(String id) async {
     try {
-      final series = await _databaseService.getSeries(id);
-      return Result.ok(series.name);
+      final folder = await _databaseService.getFolder(id);
+      return Result.ok(folder.name);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -87,11 +84,11 @@ class LibraryRepository {
   Future<Result<String?>> getThumbnail(Library item) async {
     try {
       String? thumbnail;
-      if (item.runtimeType == Series) {
-        final series = item as Series;
-        thumbnail = await _getSeriesThumbnail(series);
-        series.thumbnail = thumbnail;
-        _databaseService.updateSeries(series);
+      if (item.runtimeType == Folder) {
+        final folder = item as Folder;
+        thumbnail = await _getFolderThumbnail(folder);
+        folder.thumbnail = thumbnail;
+        _databaseService.updateFolder(folder);
       } else {
         final book = item as Book;
         if (book.thumbnail == null ||
@@ -158,50 +155,47 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<void>> scanFolder() async {
+  Future<Result<void>> scanFolder(Folder folder) async {
     try {
-      final folder = await _sharedPreferencesService.getFolder();
-      if (folder != null) {
-        List<String> bookList = [];
-        List<String> dirList = [folder];
-        List<String?> seriesId = [null];
-        int i = 0;
-        while (i < dirList.length) {
-          final files = await _localStorageService.getFiles(dirList[i]);
-          for (final file in files) {
-            if (await _localStorageService.isDir(file)) {
-              if ((await _localStorageService.getFiles(file)).isNotEmpty) {
-                seriesId.add(await _saveSeries(file, seriesId[i]));
-                dirList.add(file);
-              }
-            } else {
-              if (comicTypes.contains(
-                await _localStorageService.getFileType(file),
-              )) {
-                await _saveBook(file, seriesId[i]);
-                bookList.add(file);
-              }
+      List<String> bookList = [];
+      List<String> dirList = [folder.path];
+      List<String?> folderId = [null];
+      int i = 0;
+      while (i < dirList.length) {
+        final files = await _localStorageService.getFiles(dirList[i]);
+        for (final file in files) {
+          if (await _localStorageService.isDir(file)) {
+            if ((await _localStorageService.getFiles(file)).isNotEmpty) {
+              folderId.add(await _saveFolder(file, folderId[i]));
+              dirList.add(file);
             }
-          }
-          i++;
-        }
-        final dbBooks = await _databaseService.getAllBooks();
-        if (dbBooks.isNotEmpty) {
-          for (final book in dbBooks) {
-            if (!bookList.contains(book!.path)) {
-              await _databaseService.deleteBook(book.id);
-              if (book.thumbnail != null) {
-                await _localStorageService.deleteFile(book.thumbnail!);
-              }
+          } else {
+            if (comicTypes.contains(
+              await _localStorageService.getFileType(file),
+            )) {
+              await _saveBook(file, folderId[i]);
+              bookList.add(file);
             }
           }
         }
-        final dbSeries = await _databaseService.getAllSeries();
-        if (dbSeries.isNotEmpty) {
-          for (final series in dbSeries) {
-            if (!seriesId.contains(series!.id)) {
-              await _databaseService.deleteSeries(series.id);
+        i++;
+      }
+      final dbBooks = await _databaseService.getAllBooks();
+      if (dbBooks.isNotEmpty) {
+        for (final book in dbBooks) {
+          if (!bookList.contains(book!.path)) {
+            await _databaseService.deleteBook(book.id);
+            if (book.thumbnail != null) {
+              await _localStorageService.deleteFile(book.thumbnail!);
             }
+          }
+        }
+      }
+      final dbFolder = await _databaseService.getAllFolders();
+      if (dbFolder.isNotEmpty) {
+        for (final folder in dbFolder) {
+          if (!folderId.contains(folder!.id)) {
+            await _databaseService.deleteFolder(folder.id);
           }
         }
       }
@@ -242,10 +236,10 @@ class LibraryRepository {
     }
   }
 
-  Future<String?> _getSeriesThumbnail(Series series) async {
+  Future<String?> _getFolderThumbnail(Folder folder) async {
     try {
       String? thumbnail;
-      final books = await _databaseService.getBooksBySeries(series.id);
+      final books = await _databaseService.getBooksByFolder(folder.id);
       books.sort((a, b) => a.name.compareTo(b.name));
       if (books.first.thumbnail == null) {
         thumbnail = await _getBookThumbnail(books.first);
@@ -260,38 +254,39 @@ class LibraryRepository {
     }
   }
 
-  Future<void> _saveBook(String path, String? seriesId) async {
+  Future<void> _saveBook(String path, String? parentId) async {
     final name = await _localStorageService.getName(path);
-    final existingBook = await _databaseService.getBookByNameAndSeries(
+    final existingBook = await _databaseService.getBookByNameAndFolder(
       name,
-      seriesId,
+      parentId,
     );
     if (existingBook == null) {
       final book = Book(
         id: await _databaseService.generateId(),
         dateAdded: DateTime.now(),
         name: await _localStorageService.getName(path),
+        parentId: parentId,
         path: path,
-        seriesId: seriesId,
       );
       await _databaseService.insertBook(book);
     }
   }
 
-  Future<String> _saveSeries(String path, String? seriesId) async {
+  Future<String> _saveFolder(String path, String? parentId) async {
     final name = await _localStorageService.getName(path);
-    final existingSeries = await _databaseService.getSeriesByName(name);
-    if (existingSeries == null) {
-      final newSeries = Series(
+    final existingFolder = await _databaseService.getFolderByName(name);
+    if (existingFolder == null) {
+      final newFolder = Folder(
         id: await _databaseService.generateId(),
         dateAdded: DateTime.now(),
         name: name,
-        seriesId: seriesId,
+        parentId: parentId,
+        path: path,
       );
-      await _databaseService.insertSeries(newSeries);
-      return newSeries.id;
+      await _databaseService.insertFolder(newFolder);
+      return newFolder.id;
     } else {
-      return existingSeries.id;
+      return existingFolder.id;
     }
   }
 }

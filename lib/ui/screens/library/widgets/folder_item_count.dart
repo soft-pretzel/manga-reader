@@ -1,41 +1,41 @@
 import 'package:flutter/material.dart';
 
 import '../library_view_model.dart';
-import '../../../../data/models/series.dart';
+import '../../../../data/models/folder.dart';
 
-class SeriesItemCount extends StatefulWidget {
-  const SeriesItemCount({
+class FolderItemCount extends StatefulWidget {
+  const FolderItemCount({
     super.key,
     required this.series,
     required this.viewModel,
   });
 
-  final Series series;
+  final Folder series;
   final LibraryViewModel viewModel;
 
   @override
-  State<SeriesItemCount> createState() => _SeriesItemCountState();
+  State<FolderItemCount> createState() => _FolderItemCountState();
 }
 
-class _SeriesItemCountState extends State<SeriesItemCount> {
+class _FolderItemCountState extends State<FolderItemCount> {
   @override
   void initState() {
     super.initState();
-    if (widget.series.bookCount == null) {
-      widget.viewModel.getSeriesItemCount.execute(widget.series);
+    if (widget.series.itemCount == null) {
+      widget.viewModel.getFolderItemCount.execute(widget.series);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.viewModel.getSeriesItemCount,
+      listenable: widget.viewModel.getFolderItemCount,
       builder: (context, child) {
-        if (widget.viewModel.getSeriesItemCount.running) {
+        if (widget.viewModel.getFolderItemCount.running) {
           return Center(child: CircularProgressIndicator());
         }
 
-        if (widget.viewModel.getSeriesItemCount.error) {
+        if (widget.viewModel.getFolderItemCount.error) {
           return Center(
             child: Icon(
               Icons.error_outline,
@@ -66,9 +66,9 @@ class _SeriesItemCountState extends State<SeriesItemCount> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
-                    text: (widget.series.bookCount == 1)
-                        ? '${widget.series.bookCount} item'
-                        : '${widget.series.bookCount} items',
+                    text: (widget.series.itemCount == 1)
+                        ? '${widget.series.itemCount} item'
+                        : '${widget.series.itemCount} items',
                     style: DefaultTextStyle.of(
                       context,
                     ).style.apply(color: Theme.of(context).colorScheme.primary),

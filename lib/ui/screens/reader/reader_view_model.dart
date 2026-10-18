@@ -237,13 +237,13 @@ class ReaderViewModel extends ChangeNotifier {
   Future<Result<void>> _setReadingStatus() async {
     try {
       if (_book.currentPage + 4 >= _pages.length) {
-        _book.readingStatus = .finished;
+        _book.status = .finished;
         _libraryRepository.deleteBookCache(_book.id);
       } else if (_book.currentPage == 1) {
-        _book.readingStatus = .unread;
+        _book.status = .unread;
         _libraryRepository.deleteBookCache(_book.id);
       } else {
-        _book.readingStatus = .inProgress;
+        _book.status = .inProgress;
       }
       _libraryRepository.updateBook(_book);
       return Result.ok(null);

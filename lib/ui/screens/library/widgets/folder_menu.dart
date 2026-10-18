@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../library_view_model.dart';
 
-class SeriesMenu extends StatefulWidget {
-  const SeriesMenu({
+class FolderMenu extends StatefulWidget {
+  const FolderMenu({
     super.key,
     required this.menuController,
     required this.viewModel,
@@ -15,10 +15,10 @@ class SeriesMenu extends StatefulWidget {
   final Widget child;
 
   @override
-  State<SeriesMenu> createState() => _SeriesMenuState();
+  State<FolderMenu> createState() => _FolderMenuState();
 }
 
-class _SeriesMenuState extends State<SeriesMenu> {
+class _FolderMenuState extends State<FolderMenu> {
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(

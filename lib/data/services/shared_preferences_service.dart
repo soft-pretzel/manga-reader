@@ -7,20 +7,12 @@ class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _dynamicModeKey = 'dynamic_mode';
-  static const _folderKey = 'folder';
   static const _oledDarkModeKey = 'oled_dark_mode';
   static const _readingDirectionKey = 'reading_direction';
   static const _readingModeKey = 'reading_mode';
   static const _themeColorKey = 'theme_color';
   static const _themeModeKey = 'theme_mode';
   static const _zoomKey = 'zoom';
-
-  Future<void> deleteFolder() async {
-    final prefs = await SharedPreferencesWithCache.create(
-      cacheOptions: SharedPreferencesWithCacheOptions(),
-    );
-    await prefs.remove(_folderKey);
-  }
 
   Future<bool> getAnimations() async {
     final prefs = await SharedPreferencesWithCache.create(
@@ -52,13 +44,6 @@ class SharedPreferencesService {
     );
     final value = prefs.getBool(_oledDarkModeKey);
     return value ?? false;
-  }
-
-  Future<String?> getFolder() async {
-    final prefs = await SharedPreferencesWithCache.create(
-      cacheOptions: SharedPreferencesWithCacheOptions(),
-    );
-    return prefs.getString(_folderKey);
   }
 
   Future<ReadingDirection> getReadingDirection() async {
@@ -101,13 +86,6 @@ class SharedPreferencesService {
     );
     final value = prefs.getDouble(_zoomKey);
     return value ?? 2.5;
-  }
-
-  Future<void> setFolder(String folder) async {
-    final prefs = await SharedPreferencesWithCache.create(
-      cacheOptions: SharedPreferencesWithCacheOptions(),
-    );
-    await prefs.setString(_folderKey, folder);
   }
 
   Future<void> setReadingDirection(ReadingDirection readingDirection) async {

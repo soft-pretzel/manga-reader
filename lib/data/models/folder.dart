@@ -1,14 +1,15 @@
 import 'library.dart';
 
-class Series extends Library {
-  int? bookCount;
+class Folder extends Library {
+  int? itemCount;
 
-  Series({
+  Folder({
     required super.id,
-    this.bookCount,
+    this.itemCount,
     required super.dateAdded,
     required super.name,
-    super.seriesId,
+    super.parentId,
+    required super.path,
     super.thumbnail,
   });
 
@@ -16,15 +17,16 @@ class Series extends Library {
   Map<String, Object?> toMap() {
     return {
       'id': id,
-      'book_count': bookCount,
+      'item_count': itemCount,
       'date_added': dateAdded.toString(),
       'name': name,
-      'series_id': seriesId,
+      'parent_id': parentId,
+      'path': path,
       'thumbnail': thumbnail,
     };
   }
 
-  Series.fromMap(super.map)
-    : bookCount = int.tryParse(map['book_count'].toString()),
+  Folder.fromMap(super.map)
+    : itemCount = int.tryParse(map['item_count'].toString()),
       super.fromMap();
 }

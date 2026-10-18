@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../data/models/book.dart';
 import '../../../data/models/library.dart';
-import '../../../data/models/series.dart';
+import '../../../data/models/folder.dart';
 import '../../../data/repositories/library_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../utils/command.dart';
@@ -13,10 +13,10 @@ import '../../../utils/result.dart';
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({
     required this._libraryRepository,
-    this._seriesId,
+    this._folderId,
     required this._settingsRepository,
   }) {
-    getSeriesItemCount = Command1(_getSeriesItemCount);
+    getFolderItemCount = Command1(_getFolderItemCount);
     getTitle = Command0(_getTitle);
     loadAnimations = Command0(_loadAnimations)..execute();
     loadLibrary = Command0(_loadLibrary)..execute();
@@ -24,14 +24,14 @@ class LibraryViewModel extends ChangeNotifier {
     markAsFinished = Command1(_markAsFinished);
     markAsUnread = Command1(_markAsUnread);
     refresh = Command0(_refresh);
-    scanFolder = Command0(_scanFolder);
+    scanFolder = Command1(_scanFolder);
   }
 
   final LibraryRepository _libraryRepository;
-  final String? _seriesId;
+  final String? _folderId;
   final SettingsRepository _settingsRepository;
 
-  late final Command1<void, Series> getSeriesItemCount;
+  late final Command1<void, Folder> getFolderItemCount;
   late final Command0 getTitle;
   late final Command0 loadAnimations;
   late final Command0 loadLibrary;
@@ -39,7 +39,7 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command1<void, Book> markAsFinished;
   late final Command1<void, Book> markAsUnread;
   late final Command0 refresh;
-  late final Command0 scanFolder;
+  late final Command1<void, Folder> scanFolder;
 
   late bool _animations;
   List<Library?> _library = [];
@@ -62,7 +62,7 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _loadLibrary() async {
-    final result = await _libraryRepository.getLibrary(_seriesId);
+    final result = await _libraryRepository.getLibrary(_folderId);
     switch (result) {
       case Ok():
         _library = result.value;
@@ -93,11 +93,11 @@ class LibraryViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
-  Future<Result<void>> _getSeriesItemCount(Series series) async {
-    final result = await _libraryRepository.getSeriesBookCount(series);
+  Future<Result<void>> _getFolderItemCount(Folder folder) async {
+    final result = await _libraryRepository.getFolderBookCount(folder);
     switch (result) {
       case Ok():
-        series.bookCount = result.value;
+        folder.itemCount = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -106,8 +106,8 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _getTitle() async {
-    if (_seriesId != null) {
-      final result = await _libraryRepository.getSeriesName(_seriesId);
+    if (_folderId != null) {
+      final result = await _libraryRepository.getFolderName(_folderId);
       switch (result) {
         case Ok():
           _title = result.value;
@@ -122,7 +122,7 @@ class LibraryViewModel extends ChangeNotifier {
 
   Future<Result<void>> _markAsFinished(Book book) async {
     try {
-      book.readingStatus = .finished;
+      book.status = .finished;
       notifyListeners();
       _libraryRepository.deleteBookCache(book.id);
       _libraryRepository.updateBook(book);
@@ -134,7 +134,7 @@ class LibraryViewModel extends ChangeNotifier {
 
   Future<Result<void>> _markAsUnread(Book book) async {
     try {
-      book.readingStatus = .unread;
+      book.status = .unread;
       notifyListeners();
       _libraryRepository.deleteBookCache(book.id);
       _libraryRepository.updateBook(book);
@@ -154,8 +154,8 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _scanFolder() async {
-    final result = await _libraryRepository.scanFolder();
+  Future<Result<void>> _scanFolder(Folder folder) async {
+    final result = await _libraryRepository.scanFolder(folder);
     switch (result) {
       case Ok():
         _refresh();

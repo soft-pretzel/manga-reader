@@ -48,7 +48,7 @@ class _BookTileState extends State<BookTile> {
                 child: Stack(
                   children: [
                     Thumbnail(item: widget.book, viewModel: widget.viewModel),
-                    (widget.book.readingStatus == ReadingStatus.inProgress)
+                    (widget.book.status == ReadingStatus.inProgress)
                         ? Align(
                             alignment: AlignmentGeometry.bottomCenter,
                             child: LinearProgressIndicator(
@@ -57,7 +57,7 @@ class _BookTileState extends State<BookTile> {
                             ),
                           )
                         : SizedBox(),
-                    (widget.book.readingStatus == ReadingStatus.finished)
+                    (widget.book.status == ReadingStatus.finished)
                         ? Align(
                             alignment: AlignmentGeometry.bottomRight,
                             child: ClipPath(
