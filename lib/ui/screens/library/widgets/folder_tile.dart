@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'folder_item_count.dart';
 import 'folder_menu.dart';
-import 'thumbnail.dart';
 import '../library_view_model.dart';
 import '../../../../data/models/folder.dart';
 import '../../../../routing/routes.dart';
 
 class FolderTile extends StatefulWidget {
-  const FolderTile({super.key, required this.series, required this.viewModel});
+  const FolderTile({super.key, required this.folder, required this.viewModel});
 
-  final Folder series;
+  final Folder folder;
   final LibraryViewModel viewModel;
 
   @override
@@ -28,55 +26,41 @@ class _FolderTileState extends State<FolderTile> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Flexible(
-          flex: 4,
+        Expanded(
           child: Card(
-            margin: EdgeInsets.all(0),
             clipBehavior: Clip.antiAlias,
+            margin: EdgeInsets.all(0),
             child: GestureDetector(
               onTap: () {
                 context.pushNamed(
-                  RouteNames.series,
-                  pathParameters: {'seriesId': widget.series.id},
+                  RouteNames.folder,
+                  pathParameters: {'folderId': widget.folder.id},
                 );
               },
               onLongPressStart: _handleLongPress,
               child: FolderMenu(
                 menuController: _menuController,
                 viewModel: widget.viewModel,
-                child: Stack(
-                  children: [
-                    Thumbnail(item: widget.series, viewModel: widget.viewModel),
-                    FolderItemCount(
-                      series: widget.series,
-                      viewModel: widget.viewModel,
-                    ),
-                  ],
-                ),
+                child: Center(child: Icon(Icons.folder_outlined)),
               ),
             ),
           ),
         ),
-        Flexible(
-          flex: 1,
-          child: Align(
-            alignment: AlignmentGeometry.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(2),
-              child: Wrap(
-                children: [
-                  RichText(
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      text: widget.series.name,
-                    ),
-                  ),
-                ],
+        Padding(
+          padding: const EdgeInsets.all(2),
+          child: Wrap(
+            children: [
+              RichText(
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  style: DefaultTextStyle.of(context).style,
+                  text: widget.folder.name,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ],

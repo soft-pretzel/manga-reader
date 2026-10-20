@@ -27,30 +27,30 @@ class _BookMenuState extends State<BookMenu> {
     return MenuAnchor(
       controller: widget.menuController,
       menuChildren: [
-        if (widget.book.status == ReadingStatus.unread)
+        if (widget.book.readingStatus == ReadingStatus.unread)
           MenuItemButton(
             onPressed: () {
-              widget.viewModel.markAsFinished.execute(widget.book);
+              // widget.viewModel.markAsFinished.execute(widget.book);
             },
             child: Text('Mark as finished'),
           )
-        else if (widget.book.status == ReadingStatus.inProgress) ...[
+        else if (widget.book.readingStatus == ReadingStatus.inProgress) ...[
           MenuItemButton(
             onPressed: () {
-              widget.viewModel.markAsFinished.execute(widget.book);
+              // widget.viewModel.markAsFinished.execute(widget.book);
             },
             child: Text('Mark as finished'),
           ),
           MenuItemButton(
             onPressed: () {
-              widget.viewModel.markAsUnread.execute(widget.book);
+              // widget.viewModel.markAsUnread.execute(widget.book);
             },
             child: Text('Mark as unread'),
           ),
         ] else
           MenuItemButton(
             onPressed: () {
-              widget.viewModel.markAsUnread.execute(widget.book);
+              // widget.viewModel.markAsUnread.execute(widget.book);
             },
             child: Text('Mark as unread'),
           ),

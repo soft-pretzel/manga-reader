@@ -23,7 +23,7 @@ class BookCard extends StatelessWidget {
             margin: EdgeInsets.only(right: 8),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              child: Image.file(File(book.thumbnail!)),
+              // child: Image.file(File(book.thumbnail!)),
               onTap: () {
                 context.pushNamed(
                   RouteNames.reader,

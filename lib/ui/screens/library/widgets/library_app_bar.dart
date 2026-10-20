@@ -11,7 +11,15 @@ class LibraryAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text('Library'),
+      title: ListenableBuilder(
+        listenable: viewModel,
+        builder: (context, child) {
+          if (viewModel.load.running) {
+            return SizedBox.shrink();
+          }
+          return Text(viewModel.title);
+        },
+      ),
       actions: [
         MenuAnchor(
           controller: _menuController,
@@ -21,7 +29,7 @@ class LibraryAppBar extends StatelessWidget {
                 MenuItemButton(
                   onPressed: () async {
                     await viewModel.addLocalFolder.execute();
-                    viewModel.refresh.execute();
+                    viewModel.load.execute();
                   },
                   trailingIcon: Icon(Icons.folder_outlined),
                   child: Text('Local folder'),

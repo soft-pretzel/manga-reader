@@ -4,7 +4,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/book.dart';
-import '../models/library.dart';
 import '../models/folder.dart';
 
 final uuid = Uuid();
@@ -44,23 +43,7 @@ class DatabaseService {
     return Book.fromMap(mapList.single);
   }
 
-  Future<Book?> getBookByNameAndFolder(String name, String? parentId) async {
-    final db = await _database();
-    final mapList = await db.query(
-      'books',
-      where: parentId != null
-          ? 'name = ? AND parent_id = ?'
-          : 'name = ? AND parent_id IS NULL',
-      whereArgs: parentId != null ? [name, parentId] : [name],
-    );
-    if (mapList.isEmpty) {
-      return null;
-    } else {
-      return Book.fromMap(mapList.single);
-    }
-  }
-
-  Future<List<Book>> getBooksByFolder(String parentId) async {
+  Future<List<Book>> getBooksByParentId(String parentId) async {
     final db = await _database();
     final mapList = await db.query(
       'books',
@@ -182,7 +165,7 @@ length INTEGER,
 name TEXT NOT NULL,
 parent_id TEXT NOT NULL,
 path TEXT NOT NULL,
-status INTEGER,
+reading_status INTEGER,
 thumbnail TEXT,
 FOREIGN KEY(parent_id) REFERENCES folders(id)
 ) WITHOUT ROWID;

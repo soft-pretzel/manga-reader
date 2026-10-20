@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../data/models/book.dart';
+import '../../../data/models/folder.dart';
 import 'library_view_model.dart';
 import '../../widgets/error_screen.dart';
+import 'widgets/book_tile.dart';
+import 'widgets/book_tile_2.dart';
 import 'widgets/empty_library_screen.dart';
+import 'widgets/folder_tile.dart';
 import 'widgets/library_app_bar.dart';
 
 class LibraryView extends StatelessWidget {
@@ -18,16 +22,16 @@ class LibraryView extends StatelessWidget {
         LibraryAppBar(viewModel: viewModel),
         Expanded(
           child: RefreshIndicator(
-            onRefresh: viewModel.refresh.execute,
+            onRefresh: viewModel.load.execute,
             child: ListenableBuilder(
               listenable: viewModel,
               builder: (context, child) {
-                if (viewModel.refresh.running) {
+                if (viewModel.load.running) {
                   return SizedBox.shrink();
                 }
-                if (viewModel.refresh.error) {
+                if (viewModel.load.error) {
                   return ErrorScreen(
-                    function: viewModel.refresh.execute,
+                    function: viewModel.load.execute,
                     text: 'Error loading Library',
                   );
                 }
@@ -41,21 +45,13 @@ class LibraryView extends StatelessWidget {
                   padding: EdgeInsets.all(16),
                   children: [
                     for (final library in viewModel.library)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Card(
-                              margin: EdgeInsets.all(0),
-                              child: Center(child: Icon(Icons.folder_outlined)),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(2, 2, 2, 0),
-                            child: Text(library.name),
-                          ),
-                        ],
-                      ),
+                      if (library.runtimeType == Folder)
+                        FolderTile(
+                          folder: library as Folder,
+                          viewModel: viewModel,
+                        )
+                      else
+                        BookTile2(book: library as Book, viewModel: viewModel),
                   ],
                 );
               },

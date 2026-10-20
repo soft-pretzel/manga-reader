@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'book_menu.dart';
-import 'thumbnail.dart';
 import '../library_view_model.dart';
 import '../../../../data/models/book.dart';
 import '../../../../routing/routes.dart';
+import 'thumbnail.dart';
 
 class BookTile extends StatefulWidget {
   const BookTile({super.key, required this.book, required this.viewModel});
@@ -47,8 +47,8 @@ class _BookTileState extends State<BookTile> {
                 viewModel: widget.viewModel,
                 child: Stack(
                   children: [
-                    Thumbnail(item: widget.book, viewModel: widget.viewModel),
-                    (widget.book.status == ReadingStatus.inProgress)
+                    // Thumbnail(item: widget.book, viewModel: widget.viewModel),
+                    (widget.book.readingStatus == ReadingStatus.inProgress)
                         ? Align(
                             alignment: AlignmentGeometry.bottomCenter,
                             child: LinearProgressIndicator(
@@ -57,7 +57,7 @@ class _BookTileState extends State<BookTile> {
                             ),
                           )
                         : SizedBox(),
-                    (widget.book.status == ReadingStatus.finished)
+                    (widget.book.readingStatus == ReadingStatus.finished)
                         ? Align(
                             alignment: AlignmentGeometry.bottomRight,
                             child: ClipPath(

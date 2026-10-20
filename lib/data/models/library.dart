@@ -4,7 +4,6 @@ abstract class Library {
   String name;
   final String? parentId;
   final String path;
-  String? thumbnail;
 
   Library({
     required this.id,
@@ -12,7 +11,6 @@ abstract class Library {
     required this.name,
     this.parentId,
     required this.path,
-    this.thumbnail,
   });
 
   Map<String, Object?> toMap() {
@@ -22,7 +20,6 @@ abstract class Library {
       'name': name,
       'parent_id': parentId,
       'path': path,
-      'thumbnail': thumbnail,
     };
   }
 
@@ -31,6 +28,5 @@ abstract class Library {
       dateAdded = DateTime.parse(map['date_added'].toString()),
       name = map['name'].toString(),
       parentId = map['parent_id']?.toString(),
-      path = map['path'].toString(),
-      thumbnail = map['thumbnail']?.toString();
+      path = map['path'].toString();
 }
