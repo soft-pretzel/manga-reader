@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../ui/screens/library/folder/folder_view.dart';
+import '../ui/screens/library/folder/folder_view_model.dart';
 import 'routes.dart';
 import '../ui/screens/settings/appearance/appearance_settings_view.dart';
 import '../ui/screens/settings/appearance/appearance_settings_view_model.dart';
@@ -67,12 +69,12 @@ final router = GoRouter(
                   name: RouteNames.series,
                   path: RoutePaths.series,
                   builder: (context, state) {
-                    final viewModel = LibraryViewModel(
-                      folderId: state.pathParameters['seriesId'],
+                    final viewModel = FolderViewModel(
+                      folderId: state.pathParameters['folderId']!,
                       libraryRepository: context.read(),
                       settingsRepository: context.read(),
                     );
-                    return LibraryView(viewModel: viewModel);
+                    return FolderView(viewModel: viewModel);
                   },
                 ),
               ],

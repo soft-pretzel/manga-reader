@@ -1,32 +1,34 @@
 import 'library.dart';
 
-class Folder extends Library {
-  int? itemCount;
+class Folder {
+  final String id;
+  final DateTime dateAdded;
+  String name;
+  final String? parentId;
+  final String path;
 
   Folder({
-    required super.id,
-    this.itemCount,
-    required super.dateAdded,
-    required super.name,
-    super.parentId,
-    required super.path,
-    super.thumbnail,
+    required this.id,
+    required this.dateAdded,
+    required this.name,
+    this.parentId,
+    required this.path,
   });
 
-  @override
   Map<String, Object?> toMap() {
     return {
       'id': id,
-      'item_count': itemCount,
       'date_added': dateAdded.toString(),
       'name': name,
       'parent_id': parentId,
       'path': path,
-      'thumbnail': thumbnail,
     };
   }
 
-  Folder.fromMap(super.map)
-    : itemCount = int.tryParse(map['item_count'].toString()),
-      super.fromMap();
+  Folder.fromMap(Map<String, Object?> map)
+    : id = map['id'].toString(),
+      dateAdded = DateTime.parse(map['date_added'].toString()),
+      name = map['name'].toString(),
+      parentId = map['parent_id']?.toString(),
+      path = map['path'].toString();
 }

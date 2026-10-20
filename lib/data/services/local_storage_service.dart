@@ -5,8 +5,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:saf_stream/saf_stream.dart';
+import 'package:unseal/unseal.dart';
 
 class LocalStorageService {
+  Future<Book> openBook(String path) async {
+    if (Platform.isAndroid) {
+      final safStream = SafStream();
+      return (await BookSession.open(await safStream.readFileBytes(path))).book;
+    } else {
+      return (await BookSession.openFile(path)).book;
+    }
+  }
+
   Future<Archive?> decodeArchive(String path) async {
     InputStream stream;
     if (Platform.isAndroid) {

@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  convert:
+    dependency: transitive
+    description:
+      name: convert
+      sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
   cross_file:
     dependency: transitive
     description:
@@ -105,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
+  csslib:
+    dependency: transitive
+    description:
+      name: csslib
+      sha256: "09bad715f418841f976c77db72d5398dc1253c21fb9c0c7f0b0b985860b2d58e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   cupertino_ui:
     dependency: transitive
     description:
@@ -245,6 +261,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  glob:
+    dependency: transitive
+    description:
+      name: glob
+      sha256: "218aeb56050c714f62a3182775320dfa04602b55074873e24e31bbd39bda96fb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   go_router:
     dependency: "direct main"
     description:
@@ -261,6 +285,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  html:
+    dependency: transitive
+    description:
+      name: html
+      sha256: "43b67b8f43321ab066817dfac5619596c98bb1b61624e77203bb4351785f9699"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.15.7"
   http:
     dependency: transitive
     description:
@@ -325,6 +357,70 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.12.0"
+  koni_archive:
+    dependency: transitive
+    description:
+      name: koni_archive
+      sha256: fc63ef9271f6d5ab5f6e866b8fb41e63ffa35786f0c9cf201537f04cb8091335
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
+  koni_archive_core:
+    dependency: transitive
+    description:
+      name: koni_archive_core
+      sha256: f323296866d6224725839e2b8ef25dfeba5e0c2476877fa7726f4b966a4c7a84
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
+  koni_codecs:
+    dependency: transitive
+    description:
+      name: koni_codecs
+      sha256: "0a0ffa23f62f627bc50db6de79e88a6a41e019d3a21c6a455ac5ae7c1677a8bd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
+  koni_gzip:
+    dependency: transitive
+    description:
+      name: koni_gzip
+      sha256: d54df658949a1209891c1c8d6716edc2e7650c40ad419d39a793e8b91b3f7f91
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
+  koni_rar:
+    dependency: transitive
+    description:
+      name: koni_rar
+      sha256: c8f1a5b2f1b9d8f6cfd981c67e8c34298f722806f7288f06faabb40004362f56
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
+  koni_sevenz:
+    dependency: transitive
+    description:
+      name: koni_sevenz
+      sha256: "058428e9328361849aea9f4b1f75803473248b33dbdc434ffbcc205c83c82d4b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
+  koni_tar:
+    dependency: transitive
+    description:
+      name: koni_tar
+      sha256: "79120cb336e21a8f8ba5348a07811c37a38881b9d2be5c9e56d190057c6873e9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
+  koni_zip:
+    dependency: transitive
+    description:
+      name: koni_zip
+      sha256: a0b234fd56678a2a277e0fc52987396a1ded52a04224de49bf5257ffca29700f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -365,6 +461,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  markdown:
+    dependency: transitive
+    description:
+      name: markdown
+      sha256: "935e23e1ff3bc02d390bad4d4be001208ee92cc217cb5b5a6c19bc14aaa318c1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.3.0"
   matcher:
     dependency: transitive
     description:
@@ -517,6 +621,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      sha256: "92aa3841d083cc4b0f4709b5c74fd6409a3e6ba833ffc7dc6a8fee096366acf5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   posix:
     dependency: transitive
     description:
@@ -794,6 +906,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  unseal:
+    dependency: "direct main"
+    description:
+      name: unseal
+      sha256: d97655e8b6858833eb692bac38a32d020388456ade5f8ee1243441cee5fa7f3c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
   url_launcher:
     dependency: "direct main"
     description:

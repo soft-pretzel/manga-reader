@@ -7,6 +7,7 @@ class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _dynamicModeKey = 'dynamic_mode';
+  static const _localFoldersKey = 'local_folders';
   static const _oledDarkModeKey = 'oled_dark_mode';
   static const _readingDirectionKey = 'reading_direction';
   static const _readingModeKey = 'reading_mode';
@@ -14,36 +15,48 @@ class SharedPreferencesService {
   static const _themeModeKey = 'theme_mode';
   static const _zoomKey = 'zoom';
 
+  Future<void> addLocalFolder(String folder) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final folders = prefs.getStringList(_localFoldersKey) ?? [];
+    folders.add(folder);
+    await prefs.setStringList(_localFoldersKey, folders);
+  }
+
   Future<bool> getAnimations() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final value = prefs.getBool(_animationsKey);
-    return value ?? true;
+    return prefs.getBool(_animationsKey) ?? true;
   }
 
   Future<bool> getDoubleTapZoom() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final value = prefs.getBool(_doubleTapZoomKey);
-    return value ?? true;
+    return prefs.getBool(_doubleTapZoomKey) ?? true;
   }
 
   Future<bool> getDynamicMode() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final value = prefs.getBool(_dynamicModeKey);
-    return value ?? false;
+    return prefs.getBool(_dynamicModeKey) ?? false;
+  }
+
+  Future<List<String>> getLocalFolders() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    return prefs.getStringList(_localFoldersKey) ?? [];
   }
 
   Future<bool> getOledDarkMode() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final value = prefs.getBool(_oledDarkModeKey);
-    return value ?? false;
+    return prefs.getBool(_oledDarkModeKey) ?? false;
   }
 
   Future<ReadingDirection> getReadingDirection() async {
@@ -84,8 +97,7 @@ class SharedPreferencesService {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final value = prefs.getDouble(_zoomKey);
-    return value ?? 2.5;
+    return prefs.getDouble(_zoomKey) ?? 2.5;
   }
 
   Future<void> setReadingDirection(ReadingDirection readingDirection) async {
@@ -127,7 +139,7 @@ class SharedPreferencesService {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final current = await getAnimations();
+    final current = prefs.getBool(_animationsKey) ?? true;
     prefs.setBool(_animationsKey, !current);
     return !current;
   }
@@ -136,7 +148,7 @@ class SharedPreferencesService {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final current = await getDynamicMode();
+    final current = prefs.getBool(_dynamicModeKey) ?? false;
     prefs.setBool(_dynamicModeKey, !current);
     return !current;
   }
@@ -145,7 +157,7 @@ class SharedPreferencesService {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final current = await getDoubleTapZoom();
+    final current = prefs.getBool(_doubleTapZoomKey) ?? true;
     prefs.setBool(_doubleTapZoomKey, !current);
     return !current;
   }
@@ -154,7 +166,7 @@ class SharedPreferencesService {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final current = await getOledDarkMode();
+    final current = prefs.getBool(_oledDarkModeKey) ?? false;
     prefs.setBool(_oledDarkModeKey, !current);
     return !current;
   }

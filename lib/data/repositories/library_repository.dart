@@ -10,18 +10,39 @@ import '../models/library.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../../utils/result.dart';
+import '../services/shared_preferences_service.dart';
 
 class LibraryRepository {
   LibraryRepository({
     required this._databaseService,
     required this._localStorageService,
+    required this._sharedPreferencesService,
   });
 
   final DatabaseService _databaseService;
   final LocalStorageService _localStorageService;
+  final SharedPreferencesService _sharedPreferencesService;
 
   static List<String> comicTypes = ['cbt', 'cbz', 'tar', 'zip'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
+
+  Future<Result<void>> addLocalFolder() async {
+    try {
+      final path = await _localStorageService.selectFolder();
+      if (path != null) {
+        final folder = Folder(
+          id: await _databaseService.generateId(),
+          dateAdded: DateTime.now(),
+          name: await _localStorageService.getName(path),
+          path: path,
+        );
+        await _databaseService.insertFolder(folder);
+      }
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
 
   Future<Result<void>> deleteBookCache(String id) async {
     try {
@@ -52,60 +73,69 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<Library?>>> getLibrary(String? folderId) async {
+  Future<Result<List<Folder>>> getLibrary() async {
     try {
-      final library = await _databaseService.getLibrary(folderId);
+      final library = await _databaseService.getFoldersByParentId(null);
       return Result.ok(library);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<int>> getFolderBookCount(Folder folder) async {
+  // Future<Result<List<Library?>>> getLibrary(String? folderId) async {
+  //   try {
+  //     final library = await _databaseService.getLibrary(folderId);
+  //     return Result.ok(library);
+  //   } on Exception catch (e) {
+  //     return Result.error(e);
+  //   }
+  // }
+
+  // Future<Result<int>> getFolderBookCount(Folder folder) async {
+  //   try {
+  //     final items = await _databaseService.getLibrary(folder.id);
+  //     folder.itemCount = items.length;
+  //     _databaseService.updateFolder(folder);
+  //     return Result.ok(items.length);
+  //   } on Exception catch (e) {
+  //     return Result.error(e);
+  //   }
+  // }
+
+  Future<Result<String>> getName(String path) async {
     try {
-      final items = await _databaseService.getLibrary(folder.id);
-      folder.itemCount = items.length;
-      _databaseService.updateFolder(folder);
-      return Result.ok(items.length);
+      final name = await _localStorageService.getName(path);
+      return Result.ok(name);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<String>> getFolderName(String id) async {
-    try {
-      final folder = await _databaseService.getFolder(id);
-      return Result.ok(folder.name);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<String?>> getThumbnail(Library item) async {
-    try {
-      String? thumbnail;
-      if (item.runtimeType == Folder) {
-        final folder = item as Folder;
-        thumbnail = await _getFolderThumbnail(folder);
-        folder.thumbnail = thumbnail;
-        _databaseService.updateFolder(folder);
-      } else {
-        final book = item as Book;
-        if (book.thumbnail == null ||
-            (book.thumbnail != null &&
-                File(book.thumbnail!).existsSync() == false)) {
-          thumbnail = await _getBookThumbnail(book);
-          book.thumbnail = thumbnail;
-          _databaseService.updateBook(book);
-        } else {
-          thumbnail = book.thumbnail;
-        }
-      }
-      return Result.ok(thumbnail);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
+  // Future<Result<String?>> getThumbnail(Library item) async {
+  //   try {
+  //     String? thumbnail;
+  //     if (item.runtimeType == Folder) {
+  //       final folder = item as Folder;
+  //       thumbnail = await _getFolderThumbnail(folder);
+  //       folder.thumbnail = thumbnail;
+  //       _databaseService.updateFolder(folder);
+  //     } else {
+  //       final book = item as Book;
+  //       if (book.thumbnail == null ||
+  //           (book.thumbnail != null &&
+  //               File(book.thumbnail!).existsSync() == false)) {
+  //         thumbnail = await _getBookThumbnail(book);
+  //         book.thumbnail = thumbnail;
+  //         _databaseService.updateBook(book);
+  //       } else {
+  //         thumbnail = book.thumbnail;
+  //       }
+  //     }
+  //     return Result.ok(thumbnail);
+  //   } on Exception catch (e) {
+  //     return Result.error(e);
+  //   }
+  // }
 
   Future<Result<List<String>>> openBook(String id) async {
     try {
@@ -117,7 +147,6 @@ class LibraryRepository {
         final bookCache = Directory(
           '${cache.path}${Platform.pathSeparator}${book.id}',
         );
-
         List<String> pages = [];
         if (await bookCache.exists()) {
           await for (final file in bookCache.list()) {
@@ -128,7 +157,6 @@ class LibraryRepository {
         } else {
           await bookCache.create(recursive: true);
         }
-
         final archive = await _localStorageService.decodeArchive(book.path);
         if (archive != null) {
           var i = 1;
@@ -145,10 +173,8 @@ class LibraryRepository {
             }
           }
         }
-
         return pages;
       });
-
       return Result.ok(pages);
     } on Exception catch (e) {
       return Result.error(e);

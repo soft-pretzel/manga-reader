@@ -19,13 +19,14 @@ class ScaffoldWithNavigation extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _goBranch,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
           NavigationDestination(icon: Icon(Icons.menu_book), label: 'Library'),
           NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
         ],
+        maintainBottomViewPadding: true,
+        onDestinationSelected: _goBranch,
+        selectedIndex: navigationShell.currentIndex,
       ),
     );
   }
