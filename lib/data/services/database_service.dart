@@ -148,6 +148,7 @@ class DatabaseService {
         await db.execute('''
 CREATE TABLE books (
 id TEXT PRIMARY KEY,
+cover BLOB,
 current_page INTEGER,
 date_added TEXT NOT NULL,
 last_read TEXT,

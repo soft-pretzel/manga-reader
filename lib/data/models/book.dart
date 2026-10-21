@@ -28,6 +28,7 @@ class Book extends Library {
   Map<String, Object?> toMap() {
     return {
       'id': id,
+      'cover': cover,
       'current_page': currentPage,
       'date_added': dateAdded.toString(),
       'last_read': lastRead.toString(),
@@ -40,7 +41,8 @@ class Book extends Library {
   }
 
   Book.fromMap(super.map)
-    : currentPage = int.parse(map['current_page'].toString()),
+    : cover = map['cover'] != null ? map['cover'] as Uint8List : null,
+      currentPage = int.parse(map['current_page'].toString()),
       lastRead = DateTime.tryParse(map['last_read'].toString()),
       length = int.tryParse(map['length'].toString()),
       readingStatus =

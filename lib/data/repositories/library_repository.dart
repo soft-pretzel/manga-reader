@@ -220,9 +220,9 @@ class LibraryRepository {
           await _databaseService.insertFolder(nestedFolder);
           await parseFolder(nestedFolder);
         } else {
-          final cover = await _localStorageService.extractCover(file);
           final book = Book(
             id: await _databaseService.generateId(),
+            cover: await _localStorageService.extractCover(file),
             dateAdded: DateTime.now(),
             name: await _localStorageService.getName(file),
             parentId: folder.id,
