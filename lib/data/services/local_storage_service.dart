@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,13 +9,17 @@ import 'package:saf_stream/saf_stream.dart';
 import 'package:unseal/unseal.dart';
 
 class LocalStorageService {
-  Future<Book> openBook(String path) async {
+  Future<Uint8List?> extractCover(String path) async {
+    BookSession session;
     if (Platform.isAndroid) {
       final safStream = SafStream();
-      return (await BookSession.open(await safStream.readFileBytes(path))).book;
+      session = await BookSession.open(await safStream.readFileBytes(path));
     } else {
-      return (await BookSession.openFile(path)).book;
+      session = await BookSession.openFile(path);
     }
+    final cover = session.book.metadata.cover?.bytes;
+    session.dispose();
+    return cover;
   }
 
   Future<Archive?> decodeArchive(String path) async {

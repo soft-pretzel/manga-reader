@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'library.dart';
 
 enum ReadingStatus { unread, inProgress, finished }
 
 class Book extends Library {
+  Uint8List? cover;
   int currentPage;
   DateTime? lastRead;
   int? length;
@@ -10,6 +13,7 @@ class Book extends Library {
 
   Book({
     required super.id,
+    this.cover,
     this.currentPage = 1,
     required super.dateAdded,
     this.lastRead,
@@ -39,6 +43,7 @@ class Book extends Library {
     : currentPage = int.parse(map['current_page'].toString()),
       lastRead = DateTime.tryParse(map['last_read'].toString()),
       length = int.tryParse(map['length'].toString()),
-      readingStatus = ReadingStatus.values[int.parse(map['status'].toString())],
+      readingStatus =
+          ReadingStatus.values[int.parse(map['reading_status'].toString())],
       super.fromMap();
 }

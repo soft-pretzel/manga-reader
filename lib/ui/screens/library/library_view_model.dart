@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../data/models/book.dart';
 import '../../../data/models/folder.dart';
 import '../../../data/models/library.dart';
 import '../../../data/repositories/library_repository.dart';
@@ -39,10 +40,30 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _load() async {
     try {
       await Future.wait([_loadFolder(), _loadLibrary()]);
+      await _loadCovers();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
+  }
+
+  Future<Result<void>> _loadCovers() async {
+    for (final item in _library) {
+      if (item.runtimeType == Book) {
+        final book = item as Book;
+        if (book.cover == null) {
+          final result = await _libraryRepository.getCover(book.path);
+          switch (result) {
+            case Ok():
+              book.cover = result.value;
+              notifyListeners();
+            case Error():
+              return Result.error(result.error);
+          }
+        }
+      }
+    }
+    return Result.ok(null);
   }
 
   Future<Result<void>> _loadLibrary() async {

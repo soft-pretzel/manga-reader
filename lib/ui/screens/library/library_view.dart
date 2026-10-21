@@ -44,14 +44,11 @@ class LibraryView extends StatelessWidget {
                   mainAxisSpacing: 8,
                   padding: EdgeInsets.all(16),
                   children: [
-                    for (final library in viewModel.library)
-                      if (library.runtimeType == Folder)
-                        FolderTile(
-                          folder: library as Folder,
-                          viewModel: viewModel,
-                        )
+                    for (final item in viewModel.library)
+                      if (item.runtimeType == Folder)
+                        FolderTile(folder: item as Folder, viewModel: viewModel)
                       else
-                        BookTile2(book: library as Book, viewModel: viewModel),
+                        BookTile2(book: item as Book, viewModel: viewModel),
                   ],
                 );
               },

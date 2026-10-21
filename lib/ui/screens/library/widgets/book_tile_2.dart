@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../data/models/book.dart';
 import '../library_view_model.dart';
@@ -11,6 +11,12 @@ class BookTile2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Card(
+      child: () {
+        if (book.cover != null) {
+          return Image.memory(book.cover!);
+        }
+      }(),
+    );
   }
 }

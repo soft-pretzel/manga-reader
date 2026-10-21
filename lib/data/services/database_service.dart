@@ -45,12 +45,12 @@ class DatabaseService {
 
   Future<List<Book>> getBooksByParentId(String parentId) async {
     final db = await _database();
-    final mapList = await db.query(
+    final books = await db.query(
       'books',
       where: 'parent_id = ?',
       whereArgs: [parentId],
     );
-    return [for (final map in mapList) Book.fromMap(map)];
+    return books.map((book) => Book.fromMap(book)).toList();
   }
 
   Future<FileStat> getDatabaseInfo() async {
@@ -68,27 +68,6 @@ class DatabaseService {
     );
     return [for (final map in mapList) Book.fromMap(map)];
   }
-
-  // Future<List<Library?>> getLibrary(String? parentId) async {
-  //   final db = await _database();
-  //   List<Library?> libraryList = [];
-  //   final bookList = await db.query(
-  //     'books',
-  //     where: parentId != null ? 'parent_id = ?' : 'parent_id IS NULL',
-  //     whereArgs: parentId != null ? [parentId] : null,
-  //   );
-  //   libraryList.addAll(bookList.map((book) => Book.fromMap(book)));
-  //   final folderList = await db.query(
-  //     'folders',
-  //     where: parentId != null ? 'parent_id = ?' : 'parent_id IS NULL',
-  //     whereArgs: parentId != null ? [parentId] : null,
-  //   );
-  //   libraryList.addAll(folderList.map((folder) => Folder.fromMap(folder)));
-  //   if (libraryList.length > 1) {
-  //     libraryList.sort((a, b) => a!.name.compareTo(b!.name));
-  //   }
-  //   return libraryList;
-  // }
 
   Future<Folder> getFolderById(String id) async {
     final db = await _database();
@@ -112,12 +91,12 @@ class DatabaseService {
 
   Future<List<Folder>> getFoldersByParentId(String? parentId) async {
     final db = await _database();
-    final folderList = await db.query(
+    final folders = await db.query(
       'folders',
       where: parentId != null ? 'parent_id = ?' : 'parent_id IS NULL',
       whereArgs: parentId != null ? [parentId] : null,
     );
-    return folderList.map((folder) => Folder.fromMap(folder)).toList();
+    return folders.map((folder) => Folder.fromMap(folder)).toList();
   }
 
   Future<void> insertBook(Book book) async {
@@ -127,7 +106,18 @@ class DatabaseService {
 
   Future<void> insertFolder(Folder folder) async {
     final db = await _database();
-    await db.insert('folders', folder.toMap());
+    final existingFolder = await db.query(
+      'folders',
+      where: folder.parentId != null
+          ? 'name = ? AND parent_id = ?'
+          : 'name = ? AND parent_id IS NULL',
+      whereArgs: folder.parentId != null
+          ? [folder.name, folder.parentId]
+          : [folder.name],
+    );
+    if (existingFolder.isEmpty) {
+      await db.insert('folders', folder.toMap());
+    }
   }
 
   Future<void> updateBook(Book book) async {
@@ -166,7 +156,6 @@ name TEXT NOT NULL,
 parent_id TEXT NOT NULL,
 path TEXT NOT NULL,
 reading_status INTEGER,
-thumbnail TEXT,
 FOREIGN KEY(parent_id) REFERENCES folders(id)
 ) WITHOUT ROWID;
 ''');

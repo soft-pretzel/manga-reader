@@ -62,6 +62,19 @@ class LibraryRepository {
     }
   }
 
+  Future<Result<Uint8List?>> getCover(String path) async {
+    try {
+      final token = RootIsolateToken.instance;
+      final cover = await Isolate.run(() async {
+        BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
+        return await _localStorageService.extractCover(path);
+      });
+      return Result.ok(cover);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<List<Book?>>> getInProgressBooks() async {
     try {
       final books = await _databaseService.getInProgressBooks();
@@ -207,6 +220,7 @@ class LibraryRepository {
           await _databaseService.insertFolder(nestedFolder);
           await parseFolder(nestedFolder);
         } else {
+          final cover = await _localStorageService.extractCover(file);
           final book = Book(
             id: await _databaseService.generateId(),
             dateAdded: DateTime.now(),
@@ -217,45 +231,6 @@ class LibraryRepository {
           await _databaseService.insertBook(book);
         }
       }
-      // List<String> bookList = [];
-      // List<String> dirList = [folder.path];
-      // List<String?> folderId = [null];
-      // int i = 0;
-      // while (i < dirList.length) {
-      //   final files = await _localStorageService.getFiles(dirList[i]);
-      //   for (final file in files) {
-      //     if (await _localStorageService.isDir(file)) {
-      //       if ((await _localStorageService.getFiles(file)).isNotEmpty) {
-      //         folderId.add(await _saveFolder(file, folderId[i]));
-      //         dirList.add(file);
-      //       }
-      //     } else {
-      //       if (comicTypes.contains(
-      //         await _localStorageService.getFileType(file),
-      //       )) {
-      //         // await _saveBook(file, folderId[i]);
-      //         bookList.add(file);
-      //       }
-      //     }
-      //   }
-      //   i++;
-      // }
-      // final dbBooks = await _databaseService.getAllBooks();
-      // if (dbBooks.isNotEmpty) {
-      //   for (final book in dbBooks) {
-      //     if (!bookList.contains(book!.path)) {
-      //       await _databaseService.deleteBook(book.id);
-      //     }
-      //   }
-      // }
-      // final dbFolder = await _databaseService.getAllFolders();
-      // if (dbFolder.isNotEmpty) {
-      //   for (final folder in dbFolder) {
-      //     if (!folderId.contains(folder!.id)) {
-      //       await _databaseService.deleteFolder(folder.id);
-      //     }
-      //   }
-      // }
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
