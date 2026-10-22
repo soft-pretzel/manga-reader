@@ -27,10 +27,7 @@ class LibraryAppBar extends StatelessWidget {
             SubmenuButton(
               menuChildren: [
                 MenuItemButton(
-                  onPressed: () async {
-                    await viewModel.addLocalFolder.execute();
-                    viewModel.load.execute();
-                  },
+                  onPressed: () => viewModel.addLocalFolder.execute(),
                   trailingIcon: Icon(Icons.folder_outlined),
                   child: Text('Local folder'),
                 ),

@@ -39,9 +39,10 @@ class LibraryView extends StatelessWidget {
                   return EmptyLibraryScreen();
                 }
                 return GridView.count(
+                  childAspectRatio: 0.53,
                   crossAxisCount: 3,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                   padding: EdgeInsets.all(16),
                   children: [
                     for (final item in viewModel.library)

@@ -9,19 +9,6 @@ import 'package:saf_stream/saf_stream.dart';
 import 'package:unseal/unseal.dart';
 
 class LocalStorageService {
-  Future<Uint8List?> extractCover(String path) async {
-    BookSession session;
-    if (Platform.isAndroid) {
-      final safStream = SafStream();
-      session = await BookSession.open(await safStream.readFileBytes(path));
-    } else {
-      session = await BookSession.openFile(path);
-    }
-    final cover = session.book.metadata.cover?.bytes;
-    session.dispose();
-    return cover;
-  }
-
   Future<Archive?> decodeArchive(String path) async {
     InputStream stream;
     if (Platform.isAndroid) {
@@ -50,6 +37,27 @@ class LocalStorageService {
     return archive;
   }
 
+  Future<String?> extractCover(String path, String id) async {
+    BookSession session;
+    if (Platform.isAndroid) {
+      final safStream = SafStream();
+      session = await BookSession.open(await safStream.readFileBytes(path));
+    } else {
+      session = await BookSession.openFile(path);
+    }
+    final cover = session.book.metadata.cover;
+    session.dispose();
+    final cache = await getCoversCache();
+    if (cover != null) {
+      final file = File(
+        '${cache.path}${Platform.pathSeparator}$id.${cover.fileExtension}',
+      );
+      file.writeAsBytes(cover.bytes);
+      return file.path;
+    }
+    return null;
+  }
+
   Future<void> deleteFile(String path) async {
     final file = File(path);
     if (file.existsSync()) {
@@ -60,6 +68,17 @@ class LocalStorageService {
   Future<FileStat> getCacheInfo() async {
     final cache = await getApplicationCacheDirectory();
     return await cache.stat();
+  }
+
+  Future<Directory> getCoversCache() async {
+    final cache = await getApplicationCacheDirectory();
+    final coversCache = Directory(
+      '${cache.path}${Platform.pathSeparator}covers',
+    );
+    if (!await coversCache.exists()) {
+      await coversCache.create(recursive: true);
+    }
+    return coversCache;
   }
 
   Future<List<String>> getFiles(String path) async {
@@ -106,15 +125,17 @@ class LocalStorageService {
     }
   }
 
-  Future<Directory> getThumbnailCache() async {
-    final cache = await getApplicationCacheDirectory();
-    final thumbnailCache = Directory(
-      '${cache.path}${Platform.pathSeparator}thumbnails',
-    );
-    if (!await thumbnailCache.exists()) {
-      await thumbnailCache.create(recursive: true);
+  Future<int> getPageCount(String path) async {
+    BookSession session;
+    if (Platform.isAndroid) {
+      final safStream = SafStream();
+      session = await BookSession.open(await safStream.readFileBytes(path));
+    } else {
+      session = await BookSession.openFile(path);
     }
-    return thumbnailCache;
+    final pageCount = session.book.files.images.length;
+    session.dispose();
+    return pageCount;
   }
 
   Future<Directory> getReadingCache() async {

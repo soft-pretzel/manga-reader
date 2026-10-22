@@ -8,6 +8,7 @@ import '../../../utils/result.dart';
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({required this._libraryRepository, this._folderId}) {
     addLocalFolder = Command0(_addLocalFolder);
+    deleteLocalFolder = Command1(_deleteLocalFolder);
     load = Command0(_load)..execute();
   }
 
@@ -15,6 +16,7 @@ class LibraryViewModel extends ChangeNotifier {
   final String? _folderId;
 
   late final Command0 addLocalFolder;
+  late final Command1<void, String> deleteLocalFolder;
   late final Command0 load;
 
   List<Library> _library = [];
@@ -27,6 +29,18 @@ class LibraryViewModel extends ChangeNotifier {
     final result = await _libraryRepository.addLocalFolder();
     switch (result) {
       case Ok():
+        await _loadLibrary();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _deleteLocalFolder(String id) async {
+    final result = await _libraryRepository.deleteLocalFolder(id);
+    switch (result) {
+      case Ok():
+        await _loadLibrary();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);

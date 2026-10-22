@@ -148,26 +148,29 @@ class DatabaseService {
         await db.execute('''
 CREATE TABLE books (
 id TEXT PRIMARY KEY,
-cover BLOB,
+cover TEXT,
 current_page INTEGER,
 date_added TEXT NOT NULL,
 last_read TEXT,
 length INTEGER,
 name TEXT NOT NULL,
+page_count INTEGER NOT NULL,
 parent_id TEXT NOT NULL,
 path TEXT NOT NULL,
 reading_status INTEGER,
-FOREIGN KEY(parent_id) REFERENCES folders(id)
+FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 ''');
         await db.execute('''
 CREATE TABLE folders (
 id TEXT PRIMARY KEY,
+cover TEXT,
 date_added TEXT NOT NULL,
+item_count INTEGER NOT NULL,
 name TEXT NOT NULL,
 parent_id TEXT,
 path TEXT NOT NULL,
-FOREIGN KEY(parent_id) REFERENCES folders(id)
+FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 ''');
       },
