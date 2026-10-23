@@ -10,6 +10,8 @@ class LibraryViewModel extends ChangeNotifier {
     addLocalFolder = Command0(_addLocalFolder);
     deleteLocalFolder = Command1(_deleteLocalFolder);
     load = Command0(_load)..execute();
+    markAsFinished = Command1(_markAsFinished);
+    markAsUnread = Command1(_markAsUnread);
   }
 
   final LibraryRepository _libraryRepository;
@@ -18,6 +20,8 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command0 addLocalFolder;
   late final Command1<void, String> deleteLocalFolder;
   late final Command0 load;
+  late final Command1<void, String> markAsFinished;
+  late final Command1<void, String> markAsUnread;
 
   List<Library> _library = [];
   String _title = 'Library';
@@ -80,5 +84,27 @@ class LibraryViewModel extends ChangeNotifier {
       }
     }
     return Result.ok(null);
+  }
+
+  Future<Result<void>> _markAsFinished(String id) async {
+    final result = await _libraryRepository.markAsFinished(id);
+    switch (result) {
+      case Ok():
+        await _loadLibrary();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _markAsUnread(String id) async {
+    final result = await _libraryRepository.markAsUnread(id);
+    switch (result) {
+      case Ok():
+        await _loadLibrary();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
   }
 }

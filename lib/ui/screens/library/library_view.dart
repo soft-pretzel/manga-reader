@@ -5,7 +5,6 @@ import '../../../data/models/folder.dart';
 import 'library_view_model.dart';
 import '../../widgets/error_screen.dart';
 import 'widgets/book_tile.dart';
-import 'widgets/book_tile_2.dart';
 import 'widgets/empty_library_screen.dart';
 import 'widgets/folder_tile.dart';
 import 'widgets/library_app_bar.dart';
@@ -49,7 +48,7 @@ class LibraryView extends StatelessWidget {
                       if (item.runtimeType == Folder)
                         FolderTile(folder: item as Folder, viewModel: viewModel)
                       else
-                        BookTile2(book: item as Book, viewModel: viewModel),
+                        BookTile(book: item as Book, viewModel: viewModel),
                   ],
                 );
               },

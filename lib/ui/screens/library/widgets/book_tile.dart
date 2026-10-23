@@ -1,23 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'book_menu.dart';
-import '../library_view_model.dart';
 import '../../../../data/models/book.dart';
 import '../../../../routing/routes.dart';
-import 'thumbnail.dart';
+import '../../../widgets/triangle_clipper.dart';
+import '../library_view_model.dart';
 
-class BookTile extends StatefulWidget {
-  const BookTile({super.key, required this.book, required this.viewModel});
+class BookTile extends StatelessWidget {
+  BookTile({super.key, required this.book, required this.viewModel});
 
   final Book book;
   final LibraryViewModel viewModel;
-
-  @override
-  State<BookTile> createState() => _BookTileState();
-}
-
-class _BookTileState extends State<BookTile> {
   final _menuController = MenuController();
 
   void _handleLongPress(LongPressStartDetails details) {
@@ -26,125 +21,146 @@ class _BookTileState extends State<BookTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Flexible(
-          flex: 4,
-          child: Card(
-            margin: EdgeInsets.all(0),
-            clipBehavior: Clip.antiAlias,
+    return Center(
+      child: Column(
+        crossAxisAlignment: .start,
+        children: [
+          Expanded(
+            flex: 9,
             child: GestureDetector(
+              onLongPressStart: (details) => _handleLongPress(details),
               onTap: () {
                 context.pushNamed(
                   RouteNames.reader,
-                  pathParameters: {'bookId': widget.book.id},
+                  pathParameters: {'bookId': book.id},
                 );
               },
-              onLongPressStart: _handleLongPress,
-              child: BookMenu(
-                book: widget.book,
-                menuController: _menuController,
-                viewModel: widget.viewModel,
-                child: Stack(
-                  children: [
-                    // Thumbnail(item: widget.book, viewModel: widget.viewModel),
-                    (widget.book.readingStatus == ReadingStatus.inProgress)
-                        ? Align(
-                            alignment: AlignmentGeometry.bottomCenter,
-                            child: LinearProgressIndicator(
-                              value:
-                                  widget.book.currentPage / widget.book.length!,
-                            ),
-                          )
-                        : SizedBox(),
-                    (widget.book.readingStatus == ReadingStatus.finished)
-                        ? Align(
-                            alignment: AlignmentGeometry.bottomRight,
-                            child: ClipPath(
-                              clipper: TriangleClipper(),
+              child: MenuAnchor(
+                animated: true,
+                controller: _menuController,
+                menuChildren: [
+                  MenuItemButton(
+                    onPressed: () => book.readingStatus != .finished
+                        ? viewModel.markAsFinished.execute(book.id)
+                        : viewModel.markAsUnread.execute(book.id),
+                    child: Text(
+                      book.readingStatus != .finished
+                          ? 'Mark as finished'
+                          : 'Mark as unread',
+                    ),
+                  ),
+                  MenuItemButton(child: Text('Details')),
+                ],
+                child: Card(
+                  clipBehavior: .hardEdge,
+                  margin: EdgeInsets.all(0),
+                  child: Stack(
+                    children: [
+                      book.cover != null
+                          ? Image.file(File(book.cover!))
+                          : SizedBox.expand(),
+                      book.readingStatus == .inProgress
+                          ? Align(
+                              alignment: .bottomCenter,
                               child: Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
-                                    begin: Alignment.bottomRight,
-                                    end: Alignment.topLeft,
+                                    begin: .bottomCenter,
                                     colors: [
-                                      Theme.of(
+                                      ColorScheme.of(
                                         context,
-                                      ).colorScheme.surface.withAlpha(224),
-                                      Theme.of(
+                                      ).surface.withAlpha(224),
+                                      ColorScheme.of(
                                         context,
-                                      ).colorScheme.surface.withAlpha(0),
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.surface.withAlpha(0),
+                                      ).surface.withAlpha(0),
                                     ],
+                                    end: .topStart,
                                   ),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(
-                                    64,
+                                    4,
                                     64,
                                     4,
                                     4,
                                   ),
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
+                                  child: LinearProgressIndicator(
+                                    value: book.currentPage / book.length!,
                                   ),
                                 ),
                               ),
-                            ),
-                          )
-                        : SizedBox(),
-                  ],
+                            )
+                          : SizedBox.shrink(),
+                      book.readingStatus == .finished
+                          ? Align(
+                              alignment: .bottomRight,
+                              child: ClipPath(
+                                clipper: TriangleClipper(),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: .bottomRight,
+                                      colors: [
+                                        ColorScheme.of(
+                                          context,
+                                        ).surface.withAlpha(224),
+                                        ColorScheme.of(
+                                          context,
+                                        ).surface.withAlpha(0),
+                                        ColorScheme.of(
+                                          context,
+                                        ).surface.withAlpha(0),
+                                      ],
+                                      end: .topLeft,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsetsGeometry.fromLTRB(
+                                      64,
+                                      64,
+                                      4,
+                                      4,
+                                    ),
+                                    child: Icon(
+                                      Icons.task_alt,
+                                      color: ColorScheme.of(context).primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : SizedBox.shrink(),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Align(
-            alignment: AlignmentGeometry.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(2),
-              child: Wrap(
-                children: [
-                  RichText(
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      text: widget.book.name,
-                    ),
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: .start,
+              mainAxisAlignment: .end,
+              children: [
+                RichText(
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  text: TextSpan(
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    text: book.name,
                   ),
-                ],
-              ),
+                ),
+                Text(
+                  book.pageCount == 1
+                      ? '${book.pageCount} page'
+                      : '${book.pageCount} pages',
+                  style: TextStyle(color: ColorScheme.of(context).outline),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
-  }
-}
-
-class TriangleClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-
-    path.moveTo(0, size.height);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return false; // No need to redraw the shape unless it changes.
   }
 }

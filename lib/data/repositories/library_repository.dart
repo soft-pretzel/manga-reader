@@ -112,6 +112,28 @@ class LibraryRepository {
     }
   }
 
+  Future<Result<void>> markAsFinished(String id) async {
+    try {
+      final book = await _databaseService.getBook(id);
+      book.readingStatus = .finished;
+      await _databaseService.updateBook(book);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> markAsUnread(String id) async {
+    try {
+      final book = await _databaseService.getBook(id);
+      book.readingStatus = .unread;
+      await _databaseService.updateBook(book);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<List<String>>> openBook(String id) async {
     try {
       final token = RootIsolateToken.instance;

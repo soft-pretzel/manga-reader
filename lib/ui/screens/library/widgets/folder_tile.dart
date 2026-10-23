@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'folder_menu.dart';
 import '../library_view_model.dart';
 import '../../../../data/models/folder.dart';
 import '../../../../routing/routes.dart';
@@ -67,32 +66,53 @@ class FolderTile extends StatelessWidget {
                 child: Card(
                   clipBehavior: .hardEdge,
                   margin: EdgeInsets.all(0),
-                  child: () {
-                    if (folder.cover != null) {
-                      return Image.file(File(folder.cover!));
-                    }
-                  }(),
+                  child: Stack(
+                    children: [
+                      folder.cover != null
+                          ? Image.file(File(folder.cover!))
+                          : SizedBox.expand(),
+                      Align(
+                        alignment: .bottomCenter,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                ColorScheme.of(context).surface.withAlpha(224),
+                                ColorScheme.of(context).surface.withAlpha(0),
+                              ],
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(8, 64, 0, 4),
+                            child: Text(
+                              folder.itemCount == 1
+                                  ? '${folder.itemCount} item'
+                                  : '${folder.itemCount} items',
+                              style: TextStyle(
+                                color: ColorScheme.of(context).primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Column(
-              crossAxisAlignment: .start,
-              mainAxisAlignment: .end,
-              children: [
-                RichText(
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  text: TextSpan(text: folder.name),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: RichText(
+                maxLines: 2,
+                overflow: .ellipsis,
+                text: TextSpan(
+                  style: TextStyle(fontWeight: .bold),
+                  text: folder.name,
                 ),
-                Text(
-                  folder.itemCount == 1
-                      ? '${folder.itemCount} item'
-                      : '${folder.itemCount} items',
-                ),
-              ],
+              ),
             ),
           ),
         ],
