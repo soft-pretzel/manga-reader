@@ -164,7 +164,7 @@ FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
         await db.execute('''
 CREATE TABLE folders (
 id TEXT PRIMARY KEY,
-cover TEXT,
+covers TEXT,
 date_added TEXT NOT NULL,
 item_count INTEGER NOT NULL,
 name TEXT NOT NULL,

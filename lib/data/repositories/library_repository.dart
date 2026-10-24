@@ -215,7 +215,7 @@ class LibraryRepository {
         await _databaseService.insertFolder(nestedFolder);
         await parseFolder(nestedFolder);
       }
-      await updateFolderCover(folder);
+      await updateFolderCovers(folder);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -226,7 +226,7 @@ class LibraryRepository {
     await _databaseService.updateBook(book);
   }
 
-  Future<void> updateFolderCover(Folder folder) async {
+  Future<void> updateFolderCovers(Folder folder) async {
     final result = await getLibrary(folder.id);
     switch (result) {
       case Ok():
@@ -234,7 +234,22 @@ class LibraryRepository {
         if (library.length > 1) {
           library.sort((a, b) => a.name.compareTo(b.name));
         }
-        folder.cover = library.first.cover;
+        final iterator = library.iterator;
+        Library? item;
+        final List<String?> covers = [];
+        while (covers.length < 3) {
+          if (iterator.moveNext()) {
+            item = iterator.current;
+          }
+          if (item.runtimeType == Folder) {
+            final nestedFolder = item as Folder;
+            covers.add(nestedFolder.covers.first);
+          } else {
+            final nestedBook = item as Book;
+            covers.add(nestedBook.cover);
+          }
+        }
+        folder.covers = covers;
         await _databaseService.updateFolder(folder);
       case Error():
         throw result.error;

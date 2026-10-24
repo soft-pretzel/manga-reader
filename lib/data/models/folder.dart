@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'library.dart';
 
 class Folder extends Library {
+  List<String?> covers;
   int itemCount;
 
   Folder({
     required super.id,
+    this.covers = const [],
     required super.dateAdded,
     required this.itemCount,
     required super.name,
@@ -16,7 +20,7 @@ class Folder extends Library {
   Map<String, Object?> toMap() {
     return {
       'id': id,
-      'cover': cover,
+      'covers': covers.join(","),
       'date_added': dateAdded.toString(),
       'item_count': itemCount,
       'name': name,
@@ -26,6 +30,7 @@ class Folder extends Library {
   }
 
   Folder.fromMap(super.map)
-    : itemCount = int.parse(map['item_count'].toString()),
+    : covers = map['covers'].toString().split(","),
+      itemCount = int.parse(map['item_count'].toString()),
       super.fromMap();
 }

@@ -21,12 +21,11 @@ class BookTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        crossAxisAlignment: .start,
-        children: [
-          Expanded(
-            flex: 9,
+    return Column(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: .bottomCenter,
             child: GestureDetector(
               onLongPressStart: (details) => _handleLongPress(details),
               onTap: () {
@@ -52,54 +51,21 @@ class BookTile extends StatelessWidget {
                   MenuItemButton(child: Text('Details')),
                 ],
                 child: Card(
-                  clipBehavior: .hardEdge,
-                  margin: EdgeInsets.all(0),
+                  clipBehavior: .antiAlias,
+                  margin: .all(0),
                   child: Stack(
                     children: [
                       book.cover != null
                           ? Image.file(File(book.cover!))
                           : SizedBox.expand(),
                       book.readingStatus == .inProgress
-                          ? Align(
-                              alignment: .bottomCenter,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: .bottomCenter,
-                                    colors: [
-                                      ColorScheme.of(
-                                        context,
-                                      ).surface.withAlpha(224),
-                                      ColorScheme.of(
-                                        context,
-                                      ).surface.withAlpha(0),
-                                    ],
-                                    end: .topStart,
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    4,
-                                    64,
-                                    4,
-                                    4,
-                                  ),
-                                  child: LinearProgressIndicator(
-                                    value: book.currentPage / book.length!,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : SizedBox.shrink(),
-                      book.readingStatus == .finished
-                          ? Align(
-                              alignment: .bottomRight,
-                              child: ClipPath(
-                                clipper: TriangleClipper(),
+                          ? Positioned.fill(
+                              child: Align(
+                                alignment: .bottomCenter,
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      begin: .bottomRight,
+                                      begin: .bottomCenter,
                                       colors: [
                                         ColorScheme.of(
                                           context,
@@ -107,23 +73,58 @@ class BookTile extends StatelessWidget {
                                         ColorScheme.of(
                                           context,
                                         ).surface.withAlpha(0),
-                                        ColorScheme.of(
-                                          context,
-                                        ).surface.withAlpha(0),
                                       ],
-                                      end: .topLeft,
+                                      end: .topCenter,
                                     ),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsetsGeometry.fromLTRB(
-                                      64,
-                                      64,
-                                      4,
-                                      4,
+                                    padding: const .fromLTRB(8, 48, 8, 8),
+                                    child: Directionality(
+                                      textDirection:
+                                          viewModel.readingDirection ==
+                                              .rightToLeft
+                                          ? .rtl
+                                          : .ltr,
+                                      child: LinearProgressIndicator(
+                                        borderRadius: .all(.circular(2)),
+                                        value: book.currentPage / book.length!,
+                                      ),
                                     ),
-                                    child: Icon(
-                                      Icons.task_alt,
-                                      color: ColorScheme.of(context).primary,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : SizedBox.shrink(),
+                      book.readingStatus == .finished
+                          ? Positioned.fill(
+                              child: Align(
+                                alignment: .topRight,
+                                child: ClipPath(
+                                  clipper: TriangleClipper(),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: .topRight,
+                                        colors: [
+                                          ColorScheme.of(
+                                            context,
+                                          ).surface.withAlpha(224),
+                                          ColorScheme.of(
+                                            context,
+                                          ).surface.withAlpha(0),
+                                          ColorScheme.of(
+                                            context,
+                                          ).surface.withAlpha(0),
+                                        ],
+                                        end: .bottomLeft,
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const .fromLTRB(48, 4, 4, 48),
+                                      child: Icon(
+                                        Icons.task_alt,
+                                        color: ColorScheme.of(context).primary,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -136,31 +137,39 @@ class BookTile extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
+        ),
+        Padding(
+          padding: const .only(top: 4),
+          child: SizedBox(
+            width: .infinity,
             child: Column(
               crossAxisAlignment: .start,
-              mainAxisAlignment: .end,
               children: [
                 RichText(
                   maxLines: 1,
                   overflow: .ellipsis,
                   text: TextSpan(
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: DefaultTextStyle.of(context).style,
                     text: book.name,
                   ),
                 ),
-                Text(
-                  book.pageCount == 1
-                      ? '${book.pageCount} page'
-                      : '${book.pageCount} pages',
-                  style: TextStyle(color: ColorScheme.of(context).outline),
+                RichText(
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(
+                      context,
+                    ).style.apply(color: ColorScheme.of(context).outline),
+                    text: book.pageCount == 1
+                        ? '${book.pageCount} page'
+                        : '${book.pageCount} pages',
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

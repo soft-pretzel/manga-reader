@@ -7,6 +7,7 @@ class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _dynamicModeKey = 'dynamic_mode';
+  static const _libraryDisplayDensityKey = 'library_grid_display_density';
   static const _localFoldersKey = 'local_folders';
   static const _oledDarkModeKey = 'oled_dark_mode';
   static const _readingDirectionKey = 'reading_direction';
@@ -45,6 +46,14 @@ class SharedPreferencesService {
     return prefs.getBool(_dynamicModeKey) ?? false;
   }
 
+  Future<LibraryDisplayDensity> getLibraryDisplayDensity() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final index = prefs.getInt(_libraryDisplayDensityKey);
+    return index != null ? .values[index] : .normal;
+  }
+
   Future<List<String>> getLocalFolders() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
@@ -64,9 +73,7 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     final index = prefs.getInt(_readingDirectionKey);
-    return index != null
-        ? ReadingDirection.values[index]
-        : ReadingDirection.leftToRight;
+    return index != null ? .values[index] : .leftToRight;
   }
 
   Future<ReadingMode> getReadingMode() async {
@@ -74,7 +81,7 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     final index = prefs.getInt(_readingModeKey);
-    return index != null ? ReadingMode.values[index] : ReadingMode.single;
+    return index != null ? .values[index] : .single;
   }
 
   Future<Color> getThemeColor() async {
@@ -98,6 +105,15 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     return prefs.getDouble(_zoomKey) ?? 2.5;
+  }
+
+  Future<void> setLibraryDisplayDensity(
+    LibraryDisplayDensity libraryDisplayDensity,
+  ) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setInt(_libraryDisplayDensityKey, libraryDisplayDensity.index);
   }
 
   Future<void> setReadingDirection(ReadingDirection readingDirection) async {

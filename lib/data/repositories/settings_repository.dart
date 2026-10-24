@@ -103,6 +103,16 @@ class SettingsRepository {
     }
   }
 
+  Future<Result<LibraryDisplayDensity>> getLibraryDisplayDensity() async {
+    try {
+      final libraryDisplayDensity = await _sharedPreferencesService
+          .getLibraryDisplayDensity();
+      return Result.ok(libraryDisplayDensity);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<bool>> getOledDarkMode() async {
     try {
       final oledDarkMode = await _sharedPreferencesService.getOledDarkMode();
@@ -161,6 +171,19 @@ class SettingsRepository {
   Future<Result<void>> openLink(Uri url) async {
     try {
       await _utilsService.openLink(url);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setLibraryDisplayDensity(
+    LibraryDisplayDensity libraryDisplayDensity,
+  ) async {
+    try {
+      await _sharedPreferencesService.setLibraryDisplayDensity(
+        libraryDisplayDensity,
+      );
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

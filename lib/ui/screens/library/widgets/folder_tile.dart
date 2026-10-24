@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -20,12 +21,11 @@ class FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 9,
+    return Column(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: .bottomCenter,
             child: GestureDetector(
               onLongPressStart: (details) => _handleLongPress(details),
               onTap: () {
@@ -64,59 +64,87 @@ class FolderTile extends StatelessWidget {
                   ),
                 ],
                 child: Card(
-                  clipBehavior: .hardEdge,
-                  margin: EdgeInsets.all(0),
+                  // clipBehavior: .antiAlias,
+                  margin: .all(0),
                   child: Stack(
                     children: [
-                      folder.cover != null
-                          ? Image.file(File(folder.cover!))
-                          : SizedBox.expand(),
-                      Align(
-                        alignment: .bottomCenter,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                ColorScheme.of(context).surface.withAlpha(224),
-                                ColorScheme.of(context).surface.withAlpha(0),
-                              ],
-                            ),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(8, 64, 0, 4),
-                            child: Text(
-                              folder.itemCount == 1
-                                  ? '${folder.itemCount} item'
-                                  : '${folder.itemCount} items',
-                              style: TextStyle(
-                                color: ColorScheme.of(context).primary,
+                      folder.covers[2] != null
+                          ? Transform.rotate(
+                              angle: (pi / 180) * -4,
+                              child: Card(
+                                clipBehavior: .antiAlias,
+                                margin: .all(0),
+                                child: Image.file(
+                                  File(folder.covers[2]!),
+                                  isAntiAlias: true,
+                                  opacity: AlwaysStoppedAnimation(0.4),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
+                            )
+                          : SizedBox.expand(),
+                      folder.covers[1] != null
+                          ? Transform.rotate(
+                              angle: (pi / 180) * 4,
+                              child: Card(
+                                clipBehavior: .antiAlias,
+                                margin: .all(0),
+                                child: Image.file(
+                                  File(folder.covers[1]!),
+                                  isAntiAlias: true,
+                                  opacity: AlwaysStoppedAnimation(0.7),
+                                ),
+                              ),
+                            )
+                          : SizedBox.expand(),
+                      folder.covers[0] != null
+                          ? Card(
+                              clipBehavior: .antiAlias,
+                              margin: .all(0),
+                              child: Image.file(
+                                File(folder.covers[0]!),
+                                isAntiAlias: true,
+                              ),
+                            )
+                          : SizedBox.expand(),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: RichText(
-                maxLines: 2,
-                overflow: .ellipsis,
-                text: TextSpan(
-                  style: TextStyle(fontWeight: .bold),
-                  text: folder.name,
+        ),
+        Padding(
+          padding: const .only(top: 4),
+          child: SizedBox(
+            width: .infinity,
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                RichText(
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    text: folder.name,
+                  ),
                 ),
-              ),
+                RichText(
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(
+                      context,
+                    ).style.apply(color: ColorScheme.of(context).outline),
+                    text: folder.itemCount == 1
+                        ? '${folder.itemCount} item'
+                        : '${folder.itemCount} items',
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

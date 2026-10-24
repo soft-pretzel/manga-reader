@@ -38,8 +38,18 @@ class LibraryView extends StatelessWidget {
                   return EmptyLibraryScreen();
                 }
                 return GridView.count(
-                  childAspectRatio: 0.53,
-                  crossAxisCount: 3,
+                  childAspectRatio:
+                      viewModel.libraryDisplayDensity == .comfortable
+                      ? 0.55
+                      : viewModel.libraryDisplayDensity == .normal
+                      ? 0.511
+                      : 0.474,
+                  crossAxisCount:
+                      viewModel.libraryDisplayDensity == .comfortable
+                      ? 2
+                      : viewModel.libraryDisplayDensity == .normal
+                      ? 3
+                      : 4,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   padding: EdgeInsets.all(16),
