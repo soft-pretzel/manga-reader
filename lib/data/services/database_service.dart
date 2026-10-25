@@ -58,15 +58,15 @@ class DatabaseService {
     return await File(path).stat();
   }
 
-  Future<List<Book?>> getInProgressBooks() async {
+  Future<List<Book>> getInProgressBooks() async {
     final db = await _database();
-    final mapList = await db.query(
+    final books = await db.query(
       'books',
       where: 'reading_status = ?',
       whereArgs: [1],
       orderBy: 'last_read DESC',
     );
-    return [for (final map in mapList) Book.fromMap(map)];
+    return books.map((book) => Book.fromMap(book)).toList();
   }
 
   Future<Folder> getFolderById(String id) async {

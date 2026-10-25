@@ -13,10 +13,10 @@ class EmptyLibraryScreen extends StatelessWidget {
             height: constraints.maxHeight,
             width: constraints.maxWidth,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: [
                 Icon(
-                  Icons.menu_book_outlined,
+                  Icons.menu_book_rounded,
                   color: Theme.of(context).colorScheme.primary,
                   size: 64,
                 ),
@@ -24,7 +24,7 @@ class EmptyLibraryScreen extends StatelessWidget {
                 Text('Add a library to get started'),
                 SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: .center,
                   children: [
                     Text('Tap the'),
                     Icon(
@@ -37,7 +37,7 @@ class EmptyLibraryScreen extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: 'Add new library',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(fontWeight: .bold),
                           ),
                         ],
                       ),

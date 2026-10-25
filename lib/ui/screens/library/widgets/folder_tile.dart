@@ -111,9 +111,7 @@ class FolderTile extends StatelessWidget {
                               File(folder.covers[0]!),
                               isAntiAlias: true,
                             )
-                          : SizedBox.expand(
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
+                          : SizedBox.expand(),
                     ),
                   ],
                 ),

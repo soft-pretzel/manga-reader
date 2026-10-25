@@ -34,6 +34,9 @@ class LibraryView extends StatelessWidget {
                     text: 'Error loading Library',
                   );
                 }
+                if (viewModel.addLocalFolder.running) {
+                  return Center(child: CircularProgressIndicator());
+                }
                 if (viewModel.library.isEmpty) {
                   return EmptyLibraryScreen();
                 }
@@ -52,7 +55,7 @@ class LibraryView extends StatelessWidget {
                       : 4,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  padding: EdgeInsets.all(16),
+                  padding: .all(16),
                   children: [
                     for (final item in viewModel.library)
                       if (item.runtimeType == Folder)

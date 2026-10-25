@@ -35,7 +35,7 @@ class LibraryRepository {
           path: path,
         );
         await _databaseService.insertFolder(folder);
-        parseFolder(folder);
+        await parseFolder(folder);
       }
       return Result.ok(null);
     } on Exception catch (e) {
@@ -72,7 +72,7 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<Book?>>> getInProgressBooks() async {
+  Future<Result<List<Book>>> getInProgressBooks() async {
     try {
       final books = await _databaseService.getInProgressBooks();
       return Result.ok(books);
