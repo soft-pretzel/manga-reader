@@ -40,9 +40,9 @@ class LibraryView extends StatelessWidget {
                 return GridView.count(
                   childAspectRatio:
                       viewModel.libraryDisplayDensity == .comfortable
-                      ? 0.55
+                      ? 0.543
                       : viewModel.libraryDisplayDensity == .normal
-                      ? 0.511
+                      ? 0.506
                       : 0.474,
                   crossAxisCount:
                       viewModel.libraryDisplayDensity == .comfortable

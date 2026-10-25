@@ -31,11 +31,11 @@ class LibraryRepository {
           id: await _databaseService.generateId(),
           dateAdded: DateTime.now(),
           itemCount: (await _localStorageService.getFiles(path)).length,
-          name: await _localStorageService.getName(path),
+          name: await _localStorageService.getFileName(path),
           path: path,
         );
         await _databaseService.insertFolder(folder);
-        await parseFolder(folder);
+        parseFolder(folder);
       }
       return Result.ok(null);
     } on Exception catch (e) {
@@ -105,7 +105,7 @@ class LibraryRepository {
 
   Future<Result<String>> getName(String path) async {
     try {
-      final name = await _localStorageService.getName(path);
+      final name = await _localStorageService.getFileName(path);
       return Result.ok(name);
     } on Exception catch (e) {
       return Result.error(e);
@@ -192,12 +192,22 @@ class LibraryRepository {
       }
       for (final path in bookPaths) {
         final id = await _databaseService.generateId();
+        final structure = await _localStorageService.getBookStructure(path);
+        final cache = await _localStorageService.getCoversCache();
+        final coverPath =
+            '${cache.path}${Platform.pathSeparator}$id.${structure.metadata.cover!.fileExtension}';
+        _localStorageService.saveBookCover(
+          structure.metadata.cover!,
+          coverPath,
+        );
         final book = Book(
           id: id,
-          cover: await _localStorageService.extractCover(path, id),
+          cover: coverPath,
           dateAdded: DateTime.now(),
-          name: await _localStorageService.getName(path),
-          pageCount: await _localStorageService.getPageCount(path),
+          name:
+              structure.metadata.title ??
+              await _localStorageService.getFileName(path),
+          pageCount: structure.files.images.length,
           parentId: folder.id,
           path: path,
         );
@@ -208,7 +218,7 @@ class LibraryRepository {
           id: await _databaseService.generateId(),
           dateAdded: DateTime.now(),
           itemCount: (await _localStorageService.getFiles(path)).length,
-          name: await _localStorageService.getName(path),
+          name: await _localStorageService.getFileName(path),
           parentId: folder.id,
           path: path,
         );
@@ -227,32 +237,28 @@ class LibraryRepository {
   }
 
   Future<void> updateFolderCovers(Folder folder) async {
-    final result = await getLibrary(folder.id);
-    switch (result) {
-      case Ok():
-        final library = result.value;
-        if (library.length > 1) {
-          library.sort((a, b) => a.name.compareTo(b.name));
-        }
-        final iterator = library.iterator;
-        Library? item;
-        final List<String?> covers = [];
-        while (covers.length < 3) {
-          if (iterator.moveNext()) {
-            item = iterator.current;
-          }
-          if (item.runtimeType == Folder) {
-            final nestedFolder = item as Folder;
-            covers.add(nestedFolder.covers.first);
-          } else {
-            final nestedBook = item as Book;
-            covers.add(nestedBook.cover);
-          }
-        }
-        folder.covers = covers;
-        await _databaseService.updateFolder(folder);
-      case Error():
-        throw result.error;
+    final List<Library> library = [];
+    library.addAll(await _databaseService.getFoldersByParentId(folder.id));
+    library.addAll(await _databaseService.getBooksByParentId(folder.id));
+    if (library.length > 1) {
+      library.sort((a, b) => a.name.compareTo(b.name));
     }
+    final List<String?> covers = [];
+    final iterator = library.iterator;
+    while (covers.length <= 3 && iterator.moveNext()) {
+      if (iterator.current.runtimeType == Folder) {
+        final childFolder = iterator.current as Folder;
+        if (childFolder.covers.isNotEmpty) {
+          covers.add(childFolder.covers.first);
+        }
+      } else {
+        final childBook = iterator.current as Book;
+        if (childBook.cover != null) {
+          covers.add(childBook.cover);
+        }
+      }
+    }
+    folder.covers = covers;
+    await _databaseService.updateFolder(folder);
   }
 }

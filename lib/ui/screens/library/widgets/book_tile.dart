@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../data/models/book.dart';
 import '../../../../routing/routes.dart';
-import '../../../widgets/triangle_clipper.dart';
 import '../library_view_model.dart';
 
 class BookTile extends StatelessWidget {
@@ -62,31 +61,33 @@ class BookTile extends StatelessWidget {
                           ? Positioned.fill(
                               child: Align(
                                 alignment: .bottomCenter,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: .bottomCenter,
-                                      colors: [
-                                        ColorScheme.of(
-                                          context,
-                                        ).surface.withAlpha(224),
-                                        ColorScheme.of(
-                                          context,
-                                        ).surface.withAlpha(0),
-                                      ],
-                                      end: .topCenter,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const .fromLTRB(8, 48, 8, 8),
-                                    child: Directionality(
-                                      textDirection:
-                                          viewModel.readingDirection ==
-                                              .rightToLeft
-                                          ? .rtl
-                                          : .ltr,
+                                child: Padding(
+                                  padding: .all(8),
+                                  child: Directionality(
+                                    textDirection:
+                                        viewModel.readingDirection ==
+                                            .rightToLeft
+                                        ? .rtl
+                                        : .ltr,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: .all(.circular(6)),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            blurRadius: 16,
+                                            color: ColorScheme.of(
+                                              context,
+                                            ).surface.withAlpha(153),
+                                            spreadRadius: 4,
+                                          ),
+                                        ],
+                                      ),
                                       child: LinearProgressIndicator(
+                                        backgroundColor: ColorScheme.of(
+                                          context,
+                                        ).surface.withAlpha(153),
                                         borderRadius: .all(.circular(2)),
+                                        color: ColorScheme.of(context).primary,
                                         value: book.currentPage / book.length!,
                                       ),
                                     ),
@@ -99,32 +100,24 @@ class BookTile extends StatelessWidget {
                           ? Positioned.fill(
                               child: Align(
                                 alignment: .topRight,
-                                child: ClipPath(
-                                  clipper: TriangleClipper(),
+                                child: Padding(
+                                  padding: .all(4),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: .topRight,
-                                        colors: [
-                                          ColorScheme.of(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          blurRadius: 16,
+                                          color: ColorScheme.of(
                                             context,
-                                          ).surface.withAlpha(224),
-                                          ColorScheme.of(
-                                            context,
-                                          ).surface.withAlpha(0),
-                                          ColorScheme.of(
-                                            context,
-                                          ).surface.withAlpha(0),
-                                        ],
-                                        end: .bottomLeft,
-                                      ),
+                                          ).surface.withAlpha(153),
+                                          spreadRadius: 4,
+                                        ),
+                                      ],
+                                      shape: BoxShape.circle,
                                     ),
-                                    child: Padding(
-                                      padding: const .fromLTRB(48, 4, 4, 48),
-                                      child: Icon(
-                                        Icons.task_alt,
-                                        color: ColorScheme.of(context).primary,
-                                      ),
+                                    child: Icon(
+                                      Icons.task_alt,
+                                      color: ColorScheme.of(context).primary,
                                     ),
                                   ),
                                 ),
@@ -139,7 +132,13 @@ class BookTile extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const .only(top: 4),
+          padding: .only(
+            top: viewModel.libraryDisplayDensity == .comfortable
+                ? 8
+                : viewModel.libraryDisplayDensity == .normal
+                ? 6
+                : 4,
+          ),
           child: SizedBox(
             width: .infinity,
             child: Column(

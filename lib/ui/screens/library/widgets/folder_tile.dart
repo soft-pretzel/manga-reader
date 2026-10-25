@@ -63,58 +63,72 @@ class FolderTile extends StatelessWidget {
                     child: Text('Delete'),
                   ),
                 ],
-                child: Card(
-                  // clipBehavior: .antiAlias,
-                  margin: .all(0),
-                  child: Stack(
-                    children: [
-                      folder.covers[2] != null
-                          ? Transform.rotate(
-                              angle: (pi / 180) * -4,
-                              child: Card(
-                                clipBehavior: .antiAlias,
-                                margin: .all(0),
-                                child: Image.file(
-                                  File(folder.covers[2]!),
-                                  isAntiAlias: true,
-                                  opacity: AlwaysStoppedAnimation(0.4),
-                                ),
-                              ),
-                            )
-                          : SizedBox.expand(),
-                      folder.covers[1] != null
-                          ? Transform.rotate(
-                              angle: (pi / 180) * 4,
-                              child: Card(
-                                clipBehavior: .antiAlias,
-                                margin: .all(0),
-                                child: Image.file(
-                                  File(folder.covers[1]!),
-                                  isAntiAlias: true,
-                                  opacity: AlwaysStoppedAnimation(0.7),
-                                ),
-                              ),
-                            )
-                          : SizedBox.expand(),
-                      folder.covers[0] != null
-                          ? Card(
-                              clipBehavior: .antiAlias,
-                              margin: .all(0),
-                              child: Image.file(
-                                File(folder.covers[0]!),
+                child: Stack(
+                  children: [
+                    Transform.rotate(
+                      angle: (pi / 180) * -4,
+                      child: Card(
+                        clipBehavior: .antiAlias,
+                        margin: .all(0),
+                        child: folder.covers.elementAtOrNull(2) != null
+                            ? Image.file(
+                                File(folder.covers[2]!),
                                 isAntiAlias: true,
+                                opacity: AlwaysStoppedAnimation(0.4),
+                              )
+                            : Container(
+                                color: ColorScheme.of(
+                                  context,
+                                ).surfaceBright.withAlpha(102),
+                                child: SizedBox.expand(),
                               ),
+                      ),
+                    ),
+                    Transform.rotate(
+                      angle: (pi / 180) * 4,
+                      child: Card(
+                        clipBehavior: .antiAlias,
+                        margin: .all(0),
+                        child: folder.covers.elementAtOrNull(1) != null
+                            ? Image.file(
+                                File(folder.covers[1]!),
+                                isAntiAlias: true,
+                                opacity: AlwaysStoppedAnimation(0.7),
+                              )
+                            : Container(
+                                color: ColorScheme.of(
+                                  context,
+                                ).surfaceBright.withAlpha(178),
+                                child: SizedBox.expand(),
+                              ),
+                      ),
+                    ),
+                    Card(
+                      clipBehavior: .antiAlias,
+                      margin: .all(0),
+                      child: folder.covers.elementAtOrNull(0) != null
+                          ? Image.file(
+                              File(folder.covers[0]!),
+                              isAntiAlias: true,
                             )
-                          : SizedBox.expand(),
-                    ],
-                  ),
+                          : SizedBox.expand(
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
         Padding(
-          padding: const .only(top: 4),
+          padding: .only(
+            top: viewModel.libraryDisplayDensity == .comfortable
+                ? 8
+                : viewModel.libraryDisplayDensity == .normal
+                ? 6
+                : 4,
+          ),
           child: SizedBox(
             width: .infinity,
             child: Column(

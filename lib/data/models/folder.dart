@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'library.dart';
 
 class Folder extends Library {
@@ -20,7 +18,7 @@ class Folder extends Library {
   Map<String, Object?> toMap() {
     return {
       'id': id,
-      'covers': covers.join(","),
+      if (covers.isNotEmpty) 'covers': covers.join(","),
       'date_added': dateAdded.toString(),
       'item_count': itemCount,
       'name': name,
@@ -30,7 +28,7 @@ class Folder extends Library {
   }
 
   Folder.fromMap(super.map)
-    : covers = map['covers'].toString().split(","),
+    : covers = map['covers'] != null ? map['covers'].toString().split(",") : [],
       itemCount = int.parse(map['item_count'].toString()),
       super.fromMap();
 }

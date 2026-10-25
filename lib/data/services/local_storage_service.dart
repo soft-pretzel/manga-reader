@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,25 +36,9 @@ class LocalStorageService {
     return archive;
   }
 
-  Future<String?> extractCover(String path, String id) async {
-    BookSession session;
-    if (Platform.isAndroid) {
-      final safStream = SafStream();
-      session = await BookSession.open(await safStream.readFileBytes(path));
-    } else {
-      session = await BookSession.openFile(path);
-    }
-    final cover = session.book.metadata.cover;
-    session.dispose();
-    final cache = await getCoversCache();
-    if (cover != null) {
-      final file = File(
-        '${cache.path}${Platform.pathSeparator}$id.${cover.fileExtension}',
-      );
-      file.writeAsBytes(cover.bytes);
-      return file.path;
-    }
-    return null;
+  Future<void> saveBookCover(BookCover cover, String path) async {
+    final file = File(path);
+    file.writeAsBytes(cover.bytes, flush: true);
   }
 
   Future<void> deleteFile(String path) async {
@@ -63,6 +46,19 @@ class LocalStorageService {
     if (file.existsSync()) {
       await File(path).delete();
     }
+  }
+
+  Future<Book> getBookStructure(String path) async {
+    BookSession session;
+    if (Platform.isAndroid) {
+      final safStream = SafStream();
+      session = await BookSession.open(await safStream.readFileBytes(path));
+    } else {
+      session = await BookSession.openFile(path);
+    }
+    final book = session.book;
+    session.dispose();
+    return book;
   }
 
   Future<FileStat> getCacheInfo() async {
@@ -104,7 +100,7 @@ class LocalStorageService {
     }
   }
 
-  Future<String> getName(String path) async {
+  Future<String> getFileName(String path) async {
     if (Platform.isAndroid) {
       final safUtil = SafUtil();
       final file = await safUtil.stat(path, null);
