@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../../data/models/book.dart';
@@ -58,8 +60,11 @@ class LibraryView extends StatelessWidget {
                   padding: .all(16),
                   children: [
                     for (final item in viewModel.library)
-                      if (item.runtimeType == Folder)
-                        FolderTile(folder: item as Folder, viewModel: viewModel)
+                      if (item.runtimeType == Directory)
+                        FolderTile(
+                          folder: item as Directory,
+                          viewModel: viewModel,
+                        )
                       else
                         BookTile(book: item as Book, viewModel: viewModel),
                   ],

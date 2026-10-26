@@ -18,6 +18,7 @@ List<SingleChildWidget> get providers {
       create: (context) => LibraryRepository(
         databaseService: context.read(),
         localStorageService: context.read(),
+        sharedPreferencesService: context.read(),
       ),
     ),
     Provider(
