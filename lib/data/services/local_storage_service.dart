@@ -77,21 +77,17 @@ class LocalStorageService {
     return coversCache;
   }
 
-  Future<List<FileSystemEntity>> getFiles(String path) async {
-    final List<FileSystemEntity> files = [];
+  Future<List<String>> getFiles(String path) async {
     if (Platform.isAndroid) {
       final safUtil = SafUtil();
-      final contents = await safUtil.list(path);
-      for (final item in contents) {
-        final file = await toFileSystemEntity(item.uri);
-        if (file != null) files.add(file);
-      }
+      final files = await safUtil.list(path);
+      return files.map((file) => file.uri).toList();
     } else {
-      files.addAll(
-        Directory(path).listSync(recursive: false, followLinks: false),
-      );
+      final files = Directory(
+        path,
+      ).listSync(recursive: false, followLinks: false);
+      return files.map((file) => file.path).toList();
     }
-    return files;
   }
 
   Future<String> getFileType(String path) async {
@@ -170,32 +166,6 @@ class LocalStorageService {
     } else {
       return await FilePicker.getDirectoryPath();
     }
-  }
-
-  Future<FileSystemEntity?> toFileSystemEntity(String path) async {
-    if (Platform.isAndroid) {
-      final safUtil = SafUtil();
-      final safStream = SafStream();
-      final item = await safUtil.documentFileFromUri(path, null);
-      if (item != null) {
-        if (item.isDir) {
-          return Directory.fromRawPath(await safStream.readFileBytes(item.uri));
-        } else {
-          return File.fromRawPath(await safStream.readFileBytes(item.uri));
-        }
-      }
-    } else {
-      final type = await FileSystemEntity.type(path);
-      switch (type) {
-        case .directory:
-          return Directory(path);
-        case .file:
-          return File(path);
-        default:
-          return null;
-      }
-    }
-    return null;
   }
 
   Future<String> writeArchiveFile(

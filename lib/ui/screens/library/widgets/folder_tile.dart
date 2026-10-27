@@ -11,7 +11,7 @@ import '../../../../routing/routes.dart';
 class FolderTile extends StatelessWidget {
   FolderTile({super.key, required this.folder, required this.viewModel});
 
-  final Directory folder;
+  final Folder folder;
   final LibraryViewModel viewModel;
   final _menuController = MenuController();
 
@@ -29,10 +29,10 @@ class FolderTile extends StatelessWidget {
             child: GestureDetector(
               onLongPressStart: (details) => _handleLongPress(details),
               onTap: () {
-                // context.pushNamed(
-                //   RouteNames.folder,
-                //   pathParameters: {'folderId': folder.id},
-                // );
+                context.pushNamed(
+                  RouteNames.folder,
+                  pathParameters: {'folderId': folder.id},
+                );
               },
               child: MenuAnchor(
                 animated: true,
@@ -49,8 +49,8 @@ class FolderTile extends StatelessWidget {
                     child: Text('Rescan'),
                   ),
                   MenuItemButton(
-                    // onPressed: () =>
-                    // viewModel.deleteLocalFolder.execute(folder.id),
+                    onPressed: () =>
+                        viewModel.deleteLocalFolder.execute(folder.id),
                     style: ButtonStyle(
                       foregroundColor: WidgetStatePropertyAll(
                         ColorScheme.of(context).error,
@@ -63,58 +63,58 @@ class FolderTile extends StatelessWidget {
                     child: Text('Delete'),
                   ),
                 ],
-                // child: Stack(
-                //   children: [
-                //     Transform.rotate(
-                //       angle: (pi / 180) * -4,
-                //       child: Card(
-                //         clipBehavior: .antiAlias,
-                //         margin: .all(0),
-                //         child: folder.covers.elementAtOrNull(2) != null
-                //             ? Image.file(
-                //                 File(folder.covers[2]!),
-                //                 isAntiAlias: true,
-                //                 opacity: AlwaysStoppedAnimation(0.4),
-                //               )
-                //             : Container(
-                //                 color: ColorScheme.of(
-                //                   context,
-                //                 ).surfaceBright.withAlpha(102),
-                //                 child: SizedBox.expand(),
-                //               ),
-                //       ),
-                //     ),
-                //     Transform.rotate(
-                //       angle: (pi / 180) * 4,
-                //       child: Card(
-                //         clipBehavior: .antiAlias,
-                //         margin: .all(0),
-                //         child: folder.covers.elementAtOrNull(1) != null
-                //             ? Image.file(
-                //                 File(folder.covers[1]!),
-                //                 isAntiAlias: true,
-                //                 opacity: AlwaysStoppedAnimation(0.7),
-                //               )
-                //             : Container(
-                //                 color: ColorScheme.of(
-                //                   context,
-                //                 ).surfaceBright.withAlpha(178),
-                //                 child: SizedBox.expand(),
-                //               ),
-                //       ),
-                //     ),
-                //     Card(
-                //       clipBehavior: .antiAlias,
-                //       margin: .all(0),
-                //       child: folder.covers.elementAtOrNull(0) != null
-                //           ? Image.file(
-                //               File(folder.covers[0]!),
-                //               isAntiAlias: true,
-                //             )
-                //           : SizedBox.expand(),
-                //     ),
-                //   ],
-                // ),
+                child: Stack(
+                  children: [
+                    Transform.rotate(
+                      angle: (pi / 180) * -4,
+                      child: Card(
+                        clipBehavior: .antiAlias,
+                        margin: .all(0),
+                        child: folder.covers.elementAtOrNull(2) != null
+                            ? Image.file(
+                                File(folder.covers[2]!),
+                                isAntiAlias: true,
+                                opacity: AlwaysStoppedAnimation(0.4),
+                              )
+                            : Container(
+                                color: ColorScheme.of(
+                                  context,
+                                ).surfaceBright.withAlpha(102),
+                                child: SizedBox.expand(),
+                              ),
+                      ),
+                    ),
+                    Transform.rotate(
+                      angle: (pi / 180) * 4,
+                      child: Card(
+                        clipBehavior: .antiAlias,
+                        margin: .all(0),
+                        child: folder.covers.elementAtOrNull(1) != null
+                            ? Image.file(
+                                File(folder.covers[1]!),
+                                isAntiAlias: true,
+                                opacity: AlwaysStoppedAnimation(0.7),
+                              )
+                            : Container(
+                                color: ColorScheme.of(
+                                  context,
+                                ).surfaceBright.withAlpha(178),
+                                child: SizedBox.expand(),
+                              ),
+                      ),
+                    ),
+                    Card(
+                      clipBehavior: .antiAlias,
+                      margin: .all(0),
+                      child: folder.covers.elementAtOrNull(0) != null
+                          ? Image.file(
+                              File(folder.covers[0]!),
+                              isAntiAlias: true,
+                            )
+                          : SizedBox.expand(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -137,7 +137,7 @@ class FolderTile extends StatelessWidget {
                   overflow: .ellipsis,
                   text: TextSpan(
                     style: DefaultTextStyle.of(context).style,
-                    text: folder.uri.pathSegments.last,
+                    text: folder.name,
                   ),
                 ),
                 RichText(
@@ -147,13 +147,9 @@ class FolderTile extends StatelessWidget {
                     style: DefaultTextStyle.of(
                       context,
                     ).style.apply(color: ColorScheme.of(context).outline),
-                    text:
-                        folder
-                                .listSync(recursive: false, followLinks: false)
-                                .length ==
-                            1
-                        ? '${folder.listSync(recursive: false, followLinks: false).length} item'
-                        : '${folder.listSync(recursive: false, followLinks: false).length} items',
+                    text: folder.itemCount == 1
+                        ? '${folder.itemCount} item'
+                        : '${folder.itemCount} items',
                   ),
                 ),
               ],

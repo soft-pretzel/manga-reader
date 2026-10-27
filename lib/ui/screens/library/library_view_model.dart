@@ -32,12 +32,12 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command1<void, String> markAsUnread;
   late final Command1<void, LibraryDisplayDensity> setLibraryDisplayDensity;
 
-  List<dynamic> _library = [];
+  List<Library> _library = [];
   late LibraryDisplayDensity _libraryDisplayDensity;
   late ReadingDirection _readingDirection;
   String _title = 'Library';
 
-  List<dynamic> get library => _library;
+  List<Library> get library => _library;
   LibraryDisplayDensity get libraryDisplayDensity => _libraryDisplayDensity;
   ReadingDirection get readingDirection => _readingDirection;
   String get title => _title;

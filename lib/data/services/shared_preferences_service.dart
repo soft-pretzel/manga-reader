@@ -7,7 +7,7 @@ class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _dynamicModeKey = 'dynamic_mode';
-  static const _libraryDisplayDensityKey = 'library_display_density';
+  static const _libraryDisplayDensityKey = 'library_grid_display_density';
   static const _localFoldersKey = 'local_folders';
   static const _oledDarkModeKey = 'oled_dark_mode';
   static const _readingDirectionKey = 'reading_direction';

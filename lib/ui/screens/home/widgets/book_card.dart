@@ -73,7 +73,9 @@ class BookCard extends StatelessWidget {
                   style: DefaultTextStyle.of(
                     context,
                   ).style.apply(color: ColorScheme.of(context).outline),
-                  text: '${(book.currentPage / book.pageCount * 100).round()}%',
+                  text: book.pageCount == 1
+                      ? '${book.pageCount} page'
+                      : '${book.pageCount} pages',
                 ),
               ),
             ],
