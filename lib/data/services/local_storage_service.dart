@@ -36,16 +36,32 @@ class LocalStorageService {
     return archive;
   }
 
-  Future<void> saveBookCover(BookCover cover, String path) async {
-    final file = File(path);
-    file.writeAsBytes(cover.bytes, flush: true);
-  }
-
   Future<void> deleteFile(String path) async {
     final file = File(path);
     if (file.existsSync()) {
       await File(path).delete();
     }
+  }
+
+  Future<String?> extractBookCover(String bookPath, String id) async {
+    BookSession session;
+    if (Platform.isAndroid) {
+      final safStream = SafStream();
+      session = await BookSession.open(await safStream.readFileBytes(bookPath));
+    } else {
+      session = await BookSession.openFile(bookPath);
+    }
+    final cover = session.book.metadata.cover;
+    session.dispose();
+    if (cover != null) {
+      final cache = await getCoversCache();
+      final file = File(
+        '${cache.path}${Platform.pathSeparator}$id.${cover.fileExtension}',
+      );
+      file.writeAsBytes(cover.bytes, flush: true);
+      return file.path;
+    }
+    return null;
   }
 
   Future<Book> getBookStructure(String path) async {

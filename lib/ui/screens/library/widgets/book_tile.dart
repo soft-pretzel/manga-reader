@@ -20,6 +20,13 @@ class BookTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (book.cover == null) {
+      viewModel.getBookCover.execute(book);
+    } else if (book.cover != '') {
+      if (!File(book.cover!).existsSync()) {
+        viewModel.getBookCover.execute(book);
+      }
+    }
     return Column(
       children: [
         Expanded(
@@ -54,9 +61,13 @@ class BookTile extends StatelessWidget {
                   margin: .all(0),
                   child: Stack(
                     children: [
-                      book.cover != null
-                          ? Image.file(File(book.cover!))
-                          : SizedBox.expand(),
+                      viewModel.getBookCover.running
+                          ? SizedBox.expand(
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : book.cover == ''
+                          ? SizedBox.expand()
+                          : Image.file(File(book.cover!)),
                       book.readingStatus == .inProgress
                           ? Positioned.fill(
                               child: Align(

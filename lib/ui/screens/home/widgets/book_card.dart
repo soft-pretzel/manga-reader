@@ -47,7 +47,7 @@ class BookCard extends StatelessWidget {
                 child: Card(
                   clipBehavior: .antiAlias,
                   margin: .all(0),
-                  child: Image.file(File(book.cover!)),
+                  // child: Image.file(File(book.cover!)),
                 ),
               ),
             ),

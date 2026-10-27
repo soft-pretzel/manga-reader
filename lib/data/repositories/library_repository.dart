@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/services.dart';
+import 'package:unseal/unseal.dart' as unseal;
 
 import '../models/book.dart';
 import '../models/folder.dart';
@@ -23,7 +24,7 @@ class LibraryRepository {
   static List<String> comicTypes = ['cbt', 'cbz', 'tar', 'zip'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
 
-  Future<Result<void>> addLocalFolder() async {
+  Future<Result<Folder?>> addLocalFolder() async {
     try {
       final path = await _localStorageService.selectFolder();
       if (path != null) {
@@ -35,7 +36,7 @@ class LibraryRepository {
           path: path,
         );
         await _databaseService.insertFolder(folder);
-        await parseFolder(folder);
+        return Result.ok(folder);
       }
       return Result.ok(null);
     } on Exception catch (e) {
@@ -67,6 +68,15 @@ class LibraryRepository {
     try {
       final book = await _databaseService.getBook(id);
       return Result.ok(book);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<String>> getBookCover(String path, String id) async {
+    try {
+      final cover = await _localStorageService.extractBookCover(path, id);
+      return Result.ok(cover ?? '');
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -178,54 +188,36 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<void>> parseFolder(Folder folder) async {
+  Future<Result<void>> parseLocalFolder(Folder folder) async {
     try {
-      List<String> dirPaths = [];
-      List<String> bookPaths = [];
-      final files = await _localStorageService.getFiles(folder.path);
-      for (final file in files) {
-        if (await _localStorageService.isDir(file)) {
-          dirPaths.add(file);
+      final items = await _localStorageService.getFiles(folder.path);
+      for (final item in items) {
+        if (await _localStorageService.isDir(item)) {
+          final newFolder = Folder(
+            id: await _databaseService.generateId(),
+            dateAdded: DateTime.now(),
+            itemCount: (await _localStorageService.getFiles(item)).length,
+            name: await _localStorageService.getFileName(item),
+            parentId: folder.id,
+            path: item,
+          );
+          await _databaseService.insertFolder(newFolder);
+          await parseLocalFolder(newFolder);
         } else {
-          bookPaths.add(file);
+          final structure = await _localStorageService.getBookStructure(item);
+          final newBook = Book(
+            id: await _databaseService.generateId(),
+            dateAdded: DateTime.now(),
+            name:
+                structure.metadata.title ??
+                await _localStorageService.getFileName(item),
+            pageCount: structure.files.images.length,
+            parentId: folder.id,
+            path: item,
+          );
+          await _databaseService.insertBook(newBook);
         }
       }
-      for (final path in bookPaths) {
-        final id = await _databaseService.generateId();
-        final structure = await _localStorageService.getBookStructure(path);
-        final cache = await _localStorageService.getCoversCache();
-        final coverPath =
-            '${cache.path}${Platform.pathSeparator}$id.${structure.metadata.cover!.fileExtension}';
-        _localStorageService.saveBookCover(
-          structure.metadata.cover!,
-          coverPath,
-        );
-        final book = Book(
-          id: id,
-          cover: coverPath,
-          dateAdded: DateTime.now(),
-          name:
-              structure.metadata.title ??
-              await _localStorageService.getFileName(path),
-          pageCount: structure.files.images.length,
-          parentId: folder.id,
-          path: path,
-        );
-        await _databaseService.insertBook(book);
-      }
-      for (final path in dirPaths) {
-        final nestedFolder = Folder(
-          id: await _databaseService.generateId(),
-          dateAdded: DateTime.now(),
-          itemCount: (await _localStorageService.getFiles(path)).length,
-          name: await _localStorageService.getFileName(path),
-          parentId: folder.id,
-          path: path,
-        );
-        await _databaseService.insertFolder(nestedFolder);
-        await parseFolder(nestedFolder);
-      }
-      await updateFolderCovers(folder);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -236,29 +228,63 @@ class LibraryRepository {
     await _databaseService.updateBook(book);
   }
 
-  Future<void> updateFolderCovers(Folder folder) async {
+  Future<void> updateFolder(Folder folder) async {
+    await _databaseService.updateFolder(folder);
+  }
+
+  Future<Result<String>> getFolderCover(String id, int i) async {
     final List<Library> library = [];
-    library.addAll(await _databaseService.getFoldersByParentId(folder.id));
-    library.addAll(await _databaseService.getBooksByParentId(folder.id));
+    library.addAll(await _databaseService.getFoldersByParentId(id));
+    library.addAll(await _databaseService.getBooksByParentId(id));
+    if (library.length < i + 1) return Result.ok('');
     if (library.length > 1) {
       library.sort((a, b) => a.name.compareTo(b.name));
     }
-    final List<String?> covers = [];
-    final iterator = library.iterator;
-    while (covers.length <= 3 && iterator.moveNext()) {
-      if (iterator.current.runtimeType == Folder) {
-        final childFolder = iterator.current as Folder;
-        if (childFolder.covers.isNotEmpty) {
-          covers.add(childFolder.covers.first);
-        }
-      } else {
-        final childBook = iterator.current as Book;
-        if (childBook.cover != null) {
-          covers.add(childBook.cover);
+    final item = library[i];
+    if (item.runtimeType == Book) {
+      final book = item as Book;
+      if (book.cover == null) {
+        final cover = await _localStorageService.extractBookCover(
+          book.path,
+          book.id,
+        );
+        book.cover = cover;
+        _databaseService.updateBook(book);
+      } else if (book.cover != '') {
+        if (!File(book.cover!).existsSync()) {
+          final cover = await _localStorageService.extractBookCover(
+            book.path,
+            book.id,
+          );
+          book.cover = cover;
+          _databaseService.updateBook(book);
         }
       }
+      return Result.ok(book.cover!);
+    } else {
+      final folder = item as Folder;
+      if (folder.covers.firstOrNull == null) {
+        final result = await getFolderCover(folder.id, 0);
+        switch (result) {
+          case Ok():
+            folder.covers.add(result.value);
+            _databaseService.updateFolder(folder);
+          case Error():
+            return Result.error(result.error);
+        }
+      } else if (folder.covers.first != '') {
+        if (!File(folder.covers.first!).existsSync()) {
+          final result = await getFolderCover(folder.id, 0);
+          switch (result) {
+            case Ok():
+              folder.covers.add(result.value);
+              _databaseService.updateFolder(folder);
+            case Error():
+              return Result.error(result.error);
+          }
+        }
+      }
+      return Result.ok(folder.covers.first!);
     }
-    folder.covers = covers;
-    await _databaseService.updateFolder(folder);
   }
 }

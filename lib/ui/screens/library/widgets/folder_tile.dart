@@ -21,6 +21,30 @@ class FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!viewModel.parseLocalFolder.running) {
+      if (folder.covers.elementAtOrNull(0) == null) {
+        viewModel.getFolderCover1.execute(folder);
+      } else if (folder.covers[0] != '') {
+        if (!File(folder.covers[0]!).existsSync()) {
+          viewModel.getFolderCover1.execute(folder);
+        }
+      }
+      if (folder.covers.elementAtOrNull(1) == null) {
+        viewModel.getFolderCover2.execute(folder);
+      } else if (folder.covers[1] != '') {
+        if (!File(folder.covers[1]!).existsSync()) {
+          viewModel.getFolderCover2.execute(folder);
+        }
+      }
+      if (folder.covers.elementAtOrNull(2) == null) {
+        viewModel.getFolderCover3.execute(folder);
+      } else if (folder.covers[2] != '') {
+        if (!File(folder.covers[2]!).existsSync()) {
+          viewModel.getFolderCover3.execute(folder);
+        }
+      }
+    }
+    print(viewModel.parseLocalFolder.running);
     return Column(
       children: [
         Expanded(
@@ -69,18 +93,16 @@ class FolderTile extends StatelessWidget {
                       angle: (pi / 180) * -4,
                       child: Card(
                         clipBehavior: .antiAlias,
+                        color: ColorScheme.of(context).surfaceContainerLow,
                         margin: .all(0),
-                        child: folder.covers.elementAtOrNull(2) != null
-                            ? Image.file(
+                        child: viewModel.getFolderCover3.running
+                            ? SizedBox.expand()
+                            : folder.covers[2] == ''
+                            ? SizedBox.expand()
+                            : Image.file(
                                 File(folder.covers[2]!),
                                 isAntiAlias: true,
                                 opacity: AlwaysStoppedAnimation(0.4),
-                              )
-                            : Container(
-                                color: ColorScheme.of(
-                                  context,
-                                ).surfaceBright.withAlpha(102),
-                                child: SizedBox.expand(),
                               ),
                       ),
                     ),
@@ -88,30 +110,35 @@ class FolderTile extends StatelessWidget {
                       angle: (pi / 180) * 4,
                       child: Card(
                         clipBehavior: .antiAlias,
+                        color: ColorScheme.of(context).surfaceContainer,
                         margin: .all(0),
-                        child: folder.covers.elementAtOrNull(1) != null
-                            ? Image.file(
+                        child: viewModel.getFolderCover2.running
+                            ? SizedBox.expand()
+                            : folder.covers[1] == ''
+                            ? SizedBox.expand()
+                            : Image.file(
                                 File(folder.covers[1]!),
                                 isAntiAlias: true,
                                 opacity: AlwaysStoppedAnimation(0.7),
-                              )
-                            : Container(
-                                color: ColorScheme.of(
-                                  context,
-                                ).surfaceBright.withAlpha(178),
-                                child: SizedBox.expand(),
                               ),
                       ),
                     ),
                     Card(
                       clipBehavior: .antiAlias,
+                      color: ColorScheme.of(context).surfaceContainerHigh,
                       margin: .all(0),
-                      child: folder.covers.elementAtOrNull(0) != null
-                          ? Image.file(
+                      child:
+                          viewModel.getFolderCover1.running ||
+                              viewModel.parseLocalFolder.running
+                          ? SizedBox.expand(
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : folder.covers[0] == ''
+                          ? SizedBox.expand()
+                          : Image.file(
                               File(folder.covers[0]!),
                               isAntiAlias: true,
-                            )
-                          : SizedBox.expand(),
+                            ),
                     ),
                   ],
                 ),
