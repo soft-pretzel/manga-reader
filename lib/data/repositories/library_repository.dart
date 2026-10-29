@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/services.dart';
-import 'package:unseal/unseal.dart' as unseal;
 
 import '../models/book.dart';
 import '../models/folder.dart';
@@ -34,6 +33,7 @@ class LibraryRepository {
           itemCount: (await _localStorageService.getFiles(path)).length,
           name: await _localStorageService.getFileName(path),
           path: path,
+          parsing: true,
         );
         await _databaseService.insertFolder(folder);
         return Result.ok(folder);
@@ -44,9 +44,30 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<void>> deleteLocalFolder(String id) async {
+  Future<Result<void>> deleteLocalFolder(Folder folder) async {
     try {
-      await _databaseService.deleteFolder(id);
+      _databaseService.deleteFolder(folder.id);
+      _localStorageService.clearStorageAccess(folder.path);
+      final childFolders = await _databaseService.getFoldersByParentId(
+        folder.id,
+      );
+      for (final childFolder in childFolders) {
+        await deleteLocalFolder(childFolder);
+      }
+      final childBooks = await _databaseService.getBooksByParentId(folder.id);
+      for (final childBook in childBooks) {
+        _databaseService.deleteBook(childBook.id);
+        final cache = await _localStorageService.getCoversCache();
+        final files = cache.listSync(followLinks: false);
+        for (final file in files) {
+          final name = (file.path.split(Platform.pathSeparator).last)
+              .split('.')
+              .first;
+          if (name == childBook.id) {
+            file.delete();
+          }
+        }
+      }
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

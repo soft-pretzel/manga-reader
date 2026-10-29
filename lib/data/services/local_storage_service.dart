@@ -8,6 +8,19 @@ import 'package:saf_stream/saf_stream.dart';
 import 'package:unseal/unseal.dart';
 
 class LocalStorageService {
+  Future<void> clearStorageAccess(String path) async {
+    if (Platform.isAndroid) {
+      final safUtil = SafUtil();
+      if (await safUtil.hasPersistedPermission(
+        path,
+        checkRead: true,
+        checkWrite: true,
+      )) {
+        await safUtil.releasePersistedPermission(path, read: true, write: true);
+      }
+    }
+  }
+
   Future<Archive?> decodeArchive(String path) async {
     InputStream stream;
     if (Platform.isAndroid) {
@@ -99,9 +112,7 @@ class LocalStorageService {
       final files = await safUtil.list(path);
       return files.map((file) => file.uri).toList();
     } else {
-      final files = Directory(
-        path,
-      ).listSync(recursive: false, followLinks: false);
+      final files = Directory(path).listSync(followLinks: false);
       return files.map((file) => file.path).toList();
     }
   }

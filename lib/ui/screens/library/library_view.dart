@@ -43,9 +43,9 @@ class LibraryView extends StatelessWidget {
                 return GridView.count(
                   childAspectRatio:
                       viewModel.libraryDisplayDensity == .comfortable
-                      ? 0.543
+                      ? 0.534
                       : viewModel.libraryDisplayDensity == .normal
-                      ? 0.506
+                      ? 0.498
                       : 0.474,
                   crossAxisCount:
                       viewModel.libraryDisplayDensity == .comfortable
@@ -53,9 +53,25 @@ class LibraryView extends StatelessWidget {
                       : viewModel.libraryDisplayDensity == .normal
                       ? 3
                       : 4,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  padding: .all(16),
+                  crossAxisSpacing:
+                      viewModel.libraryDisplayDensity == .comfortable
+                      ? 28
+                      : viewModel.libraryDisplayDensity == .normal
+                      ? 22
+                      : 16,
+                  mainAxisSpacing:
+                      viewModel.libraryDisplayDensity == .comfortable
+                      ? 28
+                      : viewModel.libraryDisplayDensity == .normal
+                      ? 22
+                      : 16,
+                  padding: .all(
+                    viewModel.libraryDisplayDensity == .comfortable
+                        ? 28
+                        : viewModel.libraryDisplayDensity == .normal
+                        ? 22
+                        : 16,
+                  ),
                   children: [
                     for (final item in viewModel.library)
                       if (item.runtimeType == Folder)

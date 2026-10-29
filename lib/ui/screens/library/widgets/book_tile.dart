@@ -65,9 +65,9 @@ class BookTile extends StatelessWidget {
                           ? SizedBox.expand(
                               child: Center(child: CircularProgressIndicator()),
                             )
-                          : book.cover == ''
-                          ? SizedBox.expand()
-                          : Image.file(File(book.cover!)),
+                          : book.cover != null && book.cover != ''
+                          ? Image.file(File(book.cover!))
+                          : SizedBox.expand(),
                       book.readingStatus == .inProgress
                           ? Positioned.fill(
                               child: Align(

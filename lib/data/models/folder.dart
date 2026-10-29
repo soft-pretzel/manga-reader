@@ -3,6 +3,7 @@ import 'library.dart';
 class Folder extends Library {
   List<String?> covers;
   int itemCount;
+  bool parsing;
 
   Folder({
     required super.id,
@@ -12,6 +13,7 @@ class Folder extends Library {
     required super.name,
     super.parentId,
     required super.path,
+    this.parsing = false,
   });
 
   @override
@@ -30,5 +32,6 @@ class Folder extends Library {
   Folder.fromMap(super.map)
     : covers = map['covers'] != null ? map['covers'].toString().split(",") : [],
       itemCount = int.parse(map['item_count'].toString()),
+      parsing = false,
       super.fromMap();
 }

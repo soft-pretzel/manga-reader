@@ -21,7 +21,7 @@ class FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!viewModel.parseLocalFolder.running) {
+    if (!folder.parsing) {
       if (folder.covers.elementAtOrNull(0) == null) {
         viewModel.getFolderCover1.execute(folder);
       } else if (folder.covers[0] != '') {
@@ -44,7 +44,6 @@ class FolderTile extends StatelessWidget {
         }
       }
     }
-    print(viewModel.parseLocalFolder.running);
     return Column(
       children: [
         Expanded(
@@ -53,10 +52,15 @@ class FolderTile extends StatelessWidget {
             child: GestureDetector(
               onLongPressStart: (details) => _handleLongPress(details),
               onTap: () {
-                context.pushNamed(
-                  RouteNames.folder,
-                  pathParameters: {'folderId': folder.id},
-                );
+                if (!folder.parsing &&
+                    !viewModel.getFolderCover1.running &&
+                    !viewModel.getFolderCover2.running &&
+                    !viewModel.getFolderCover3.running) {
+                  context.pushNamed(
+                    RouteNames.folder,
+                    pathParameters: {'folderId': folder.id},
+                  );
+                }
               },
               child: MenuAnchor(
                 animated: true,
@@ -74,7 +78,7 @@ class FolderTile extends StatelessWidget {
                   ),
                   MenuItemButton(
                     onPressed: () =>
-                        viewModel.deleteLocalFolder.execute(folder.id),
+                        viewModel.deleteLocalFolder.execute(folder),
                     style: ButtonStyle(
                       foregroundColor: WidgetStatePropertyAll(
                         ColorScheme.of(context).error,
@@ -95,15 +99,15 @@ class FolderTile extends StatelessWidget {
                         clipBehavior: .antiAlias,
                         color: ColorScheme.of(context).surfaceContainerLow,
                         margin: .all(0),
-                        child: viewModel.getFolderCover3.running
-                            ? SizedBox.expand()
-                            : folder.covers[2] == ''
-                            ? SizedBox.expand()
-                            : Image.file(
+                        child:
+                            folder.covers.elementAtOrNull(2) != null &&
+                                folder.covers.elementAtOrNull(2) != ''
+                            ? Image.file(
                                 File(folder.covers[2]!),
                                 isAntiAlias: true,
                                 opacity: AlwaysStoppedAnimation(0.4),
-                              ),
+                              )
+                            : SizedBox.expand(),
                       ),
                     ),
                     Transform.rotate(
@@ -112,33 +116,32 @@ class FolderTile extends StatelessWidget {
                         clipBehavior: .antiAlias,
                         color: ColorScheme.of(context).surfaceContainer,
                         margin: .all(0),
-                        child: viewModel.getFolderCover2.running
-                            ? SizedBox.expand()
-                            : folder.covers[1] == ''
-                            ? SizedBox.expand()
-                            : Image.file(
+                        child:
+                            folder.covers.elementAtOrNull(1) != null &&
+                                folder.covers.elementAtOrNull(1) != ''
+                            ? Image.file(
                                 File(folder.covers[1]!),
                                 isAntiAlias: true,
                                 opacity: AlwaysStoppedAnimation(0.7),
-                              ),
+                              )
+                            : SizedBox.expand(),
                       ),
                     ),
                     Card(
                       clipBehavior: .antiAlias,
                       color: ColorScheme.of(context).surfaceContainerHigh,
                       margin: .all(0),
-                      child:
-                          viewModel.getFolderCover1.running ||
-                              viewModel.parseLocalFolder.running
+                      child: viewModel.getFolderCover1.running || folder.parsing
                           ? SizedBox.expand(
                               child: Center(child: CircularProgressIndicator()),
                             )
-                          : folder.covers[0] == ''
-                          ? SizedBox.expand()
-                          : Image.file(
+                          : folder.covers.elementAtOrNull(0) != null &&
+                                folder.covers.elementAtOrNull(0) != ''
+                          ? Image.file(
                               File(folder.covers[0]!),
                               isAntiAlias: true,
-                            ),
+                            )
+                          : SizedBox.expand(),
                     ),
                   ],
                 ),

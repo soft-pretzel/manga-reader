@@ -106,18 +106,7 @@ class DatabaseService {
 
   Future<void> insertFolder(Folder folder) async {
     final db = await _database();
-    final existingFolder = await db.query(
-      'folders',
-      where: folder.parentId != null
-          ? 'name = ? AND parent_id = ?'
-          : 'name = ? AND parent_id IS NULL',
-      whereArgs: folder.parentId != null
-          ? [folder.name, folder.parentId]
-          : [folder.name],
-    );
-    if (existingFolder.isEmpty) {
-      await db.insert('folders', folder.toMap());
-    }
+    await db.insert('folders', folder.toMap());
   }
 
   Future<void> updateBook(Book book) async {

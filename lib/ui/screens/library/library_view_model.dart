@@ -33,7 +33,7 @@ class LibraryViewModel extends ChangeNotifier {
   final SettingsRepository _settingsRepository;
 
   late final Command0 addLocalFolder;
-  late final Command1<void, String> deleteLocalFolder;
+  late final Command1<void, Folder> deleteLocalFolder;
   late final Command1<void, Book> getBookCover;
   late final Command1<void, Folder> getFolderCover1;
   late final Command1<void, Folder> getFolderCover2;
@@ -60,7 +60,8 @@ class LibraryViewModel extends ChangeNotifier {
       case Ok():
         if (result.value != null) {
           _parseLocalFolder(result.value!);
-          _loadLibrary();
+          _library.add(result.value!);
+          notifyListeners();
         }
         return Result.ok(null);
       case Error():
@@ -68,11 +69,11 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _deleteLocalFolder(String id) async {
-    final result = await _libraryRepository.deleteLocalFolder(id);
+  Future<Result<void>> _deleteLocalFolder(Folder folder) async {
+    final result = await _libraryRepository.deleteLocalFolder(folder);
     switch (result) {
       case Ok():
-        await _loadLibrary();
+        _loadLibrary();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
@@ -93,21 +94,8 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _getFolderCover1(Folder folder) async {
-    final result = await _libraryRepository.getFolderCover(folder.id, 0);
-    switch (result) {
-      case Ok():
-        folder.covers.add(result.value);
-        notifyListeners();
-        _libraryRepository.updateFolder(folder);
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _getFolderCover2(Folder folder) async {
-    if (folder.covers.elementAtOrNull(0) != null) {
-      final result = await _libraryRepository.getFolderCover(folder.id, 1);
+    if (!parseLocalFolder.running) {
+      final result = await _libraryRepository.getFolderCover(folder.id, 0);
       switch (result) {
         case Ok():
           folder.covers.add(result.value);
@@ -120,16 +108,35 @@ class LibraryViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
+  Future<Result<void>> _getFolderCover2(Folder folder) async {
+    if (!parseLocalFolder.running) {
+      if (folder.covers.elementAtOrNull(0) != null) {
+        final result = await _libraryRepository.getFolderCover(folder.id, 1);
+        switch (result) {
+          case Ok():
+            folder.covers.add(result.value);
+            notifyListeners();
+            _libraryRepository.updateFolder(folder);
+          case Error():
+            return Result.error(result.error);
+        }
+      }
+    }
+    return Result.ok(null);
+  }
+
   Future<Result<void>> _getFolderCover3(Folder folder) async {
-    if (folder.covers.elementAtOrNull(1) != null) {
-      final result = await _libraryRepository.getFolderCover(folder.id, 2);
-      switch (result) {
-        case Ok():
-          folder.covers.add(result.value);
-          notifyListeners();
-          _libraryRepository.updateFolder(folder);
-        case Error():
-          return Result.error(result.error);
+    if (!parseLocalFolder.running) {
+      if (folder.covers.elementAtOrNull(1) != null) {
+        final result = await _libraryRepository.getFolderCover(folder.id, 2);
+        switch (result) {
+          case Ok():
+            folder.covers.add(result.value);
+            notifyListeners();
+            _libraryRepository.updateFolder(folder);
+          case Error():
+            return Result.error(result.error);
+        }
       }
     }
     return Result.ok(null);
@@ -225,7 +232,7 @@ class LibraryViewModel extends ChangeNotifier {
     final result = await _libraryRepository.parseLocalFolder(folder);
     switch (result) {
       case Ok():
-        await _loadLibrary();
+        _loadLibrary();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
