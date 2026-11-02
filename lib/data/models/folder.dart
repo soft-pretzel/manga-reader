@@ -10,10 +10,10 @@ class Folder extends Library {
     this.covers = const [],
     required super.dateAdded,
     required this.itemCount,
-    required super.name,
     super.parentId,
     required super.path,
     this.parsing = false,
+    required super.title,
   });
 
   @override
@@ -23,9 +23,9 @@ class Folder extends Library {
       if (covers.isNotEmpty) 'covers': covers.join(","),
       'date_added': dateAdded.toString(),
       'item_count': itemCount,
-      'name': name,
       'parent_id': parentId,
       'path': path,
+      'title': title,
     };
   }
 

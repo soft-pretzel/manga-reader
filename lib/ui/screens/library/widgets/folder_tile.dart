@@ -107,6 +107,11 @@ class FolderTile extends StatelessWidget {
                                 isAntiAlias: true,
                                 opacity: AlwaysStoppedAnimation(0.4),
                               )
+                            : viewModel.coverAspectRatio != null
+                            ? AspectRatio(
+                                aspectRatio: viewModel.coverAspectRatio!,
+                                child: SizedBox.expand(),
+                              )
                             : SizedBox.expand(),
                       ),
                     ),
@@ -123,6 +128,11 @@ class FolderTile extends StatelessWidget {
                                 File(folder.covers[1]!),
                                 isAntiAlias: true,
                                 opacity: AlwaysStoppedAnimation(0.7),
+                              )
+                            : viewModel.coverAspectRatio != null
+                            ? AspectRatio(
+                                aspectRatio: viewModel.coverAspectRatio!,
+                                child: SizedBox.expand(),
                               )
                             : SizedBox.expand(),
                       ),
@@ -167,7 +177,7 @@ class FolderTile extends StatelessWidget {
                   overflow: .ellipsis,
                   text: TextSpan(
                     style: DefaultTextStyle.of(context).style,
-                    text: folder.name,
+                    text: folder.title,
                   ),
                 ),
                 RichText(

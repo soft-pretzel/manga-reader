@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:unseal/unseal.dart' as unseal;
 
 import '../../../data/models/book.dart';
 import '../../../data/models/settings.dart';
@@ -43,7 +44,7 @@ class ReaderViewModel extends ChangeNotifier {
   late bool _animations;
   late Book _book;
   late bool _doubleTapZoom;
-  late List<String> _pages = [];
+  List<Uint8List?> _pages = [];
   late ReadingDirection _readingDirection;
   late ReadingMode _readingMode;
   late double _zoom;
@@ -51,7 +52,7 @@ class ReaderViewModel extends ChangeNotifier {
   bool get animations => _animations;
   Book get book => _book;
   bool get doubleTapZoom => _doubleTapZoom;
-  List<String> get pages => _pages;
+  List<Uint8List?> get pages => _pages;
   ReadingDirection get readingDirection => _readingDirection;
   ReadingMode get readingMode => _readingMode;
   double get zoom => _zoom;
@@ -88,11 +89,12 @@ class ReaderViewModel extends ChangeNotifier {
       await Future.wait([
         _loadAnimations(),
         _loadDoubleTapZoom(),
-        _loadPages(),
+        // _loadPages(),
         _loadReadingDirection(),
         _loadReadingMode(),
         _loadZoom(),
       ]);
+      _loadPages();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -116,6 +118,7 @@ class ReaderViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _book = result.value;
+        _pages = List.filled(_book.pageCount, null);
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -139,12 +142,27 @@ class ReaderViewModel extends ChangeNotifier {
     final result = await _libraryRepository.openBook(_bookId);
     switch (result) {
       case Ok():
-        _pages = result.value;
-        notifyListeners();
-        if (_book.length == null) {
-          _book.length = _pages.length;
-          _libraryRepository.updateBook(book);
+        final session = result.value;
+        final pages = session.book.files.images;
+        Future<void> loadPage(int index) async {
+          _pages[index] = await session.loadResource(pages[index].path);
+          notifyListeners();
         }
+        int i = _book.currentPage - 1;
+        int j = i + 1;
+        final List<Future> futures = [];
+        while (futures.length < pages.length) {
+          if (i >= 0) {
+            futures.add(loadPage(i));
+            i--;
+          }
+          if (j < pages.length) {
+            futures.add(loadPage(j));
+            j++;
+          }
+        }
+        await Future.wait(futures);
+        session.dispose();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
@@ -236,12 +254,10 @@ class ReaderViewModel extends ChangeNotifier {
 
   Future<Result<void>> _setReadingStatus() async {
     try {
-      if (_book.currentPage + 4 >= _pages.length) {
+      if (_book.currentPage + 4 >= _book.pageCount) {
         _book.readingStatus = .finished;
-        _libraryRepository.deleteBookCache(_book.id);
       } else if (_book.currentPage == 1) {
         _book.readingStatus = .unread;
-        _libraryRepository.deleteBookCache(_book.id);
       } else {
         _book.readingStatus = .inProgress;
       }

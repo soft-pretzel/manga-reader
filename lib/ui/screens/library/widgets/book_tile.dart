@@ -99,7 +99,8 @@ class BookTile extends StatelessWidget {
                                         ).surface.withAlpha(153),
                                         borderRadius: .all(.circular(2)),
                                         color: ColorScheme.of(context).primary,
-                                        value: book.currentPage / book.length!,
+                                        value:
+                                            book.currentPage / book.pageCount,
                                       ),
                                     ),
                                   ),
@@ -160,7 +161,7 @@ class BookTile extends StatelessWidget {
                   overflow: .ellipsis,
                   text: TextSpan(
                     style: DefaultTextStyle.of(context).style,
-                    text: book.name,
+                    text: book.title,
                   ),
                 ),
                 RichText(

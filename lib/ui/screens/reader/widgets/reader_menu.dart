@@ -74,7 +74,7 @@ class ReaderMenu<T> extends PopupRoute<T> {
                       ..pop();
                   },
                 ),
-                Text(viewModel.book.name),
+                Text(viewModel.book.title),
                 Spacer(),
                 MenuAnchor(
                   builder: (context, controller, child) {

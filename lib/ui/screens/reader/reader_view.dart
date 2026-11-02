@@ -259,17 +259,29 @@ class _ReaderViewState extends State<ReaderView> with TickerProviderStateMixin {
                   controller: _pageController,
                   itemBuilder: (context, index) {
                     if (newOrientation == .portrait) {
-                      return Image.file(File(widget.viewModel.pages[index]));
+                      if (widget.viewModel.pages[index] == null) {
+                        return Center(child: CircularProgressIndicator());
+                      } else {
+                        return Image.memory(widget.viewModel.pages[index]!);
+                      }
                     } else {
                       if (index == 0) {
-                        return Image.file(File(widget.viewModel.pages.first));
+                        if (widget.viewModel.pages.first == null) {
+                          return Center(child: CircularProgressIndicator());
+                        } else {
+                          return Image.memory(widget.viewModel.pages.first!);
+                        }
                       } else {
                         index = index * 2;
+                        if (widget.viewModel.pages[index] == null ||
+                            widget.viewModel.pages[index - 1] == null) {
+                          return Center(child: CircularProgressIndicator());
+                        }
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.file(File(widget.viewModel.pages[index])),
-                            Image.file(File(widget.viewModel.pages[index - 1])),
+                            Image.memory(widget.viewModel.pages[index]!),
+                            Image.memory(widget.viewModel.pages[index - 1]!),
                           ],
                         );
                       }

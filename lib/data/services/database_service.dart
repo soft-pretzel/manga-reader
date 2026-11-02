@@ -75,12 +75,12 @@ class DatabaseService {
     return Folder.fromMap(mapList.single);
   }
 
-  Future<Folder?> getFolderByName(String name) async {
+  Future<Folder?> getFolderByTitle(String title) async {
     final db = await _database();
     final mapList = await db.query(
       'folders',
-      where: 'name = ?',
-      whereArgs: [name],
+      where: 'title = ?',
+      whereArgs: [title],
     );
     if (mapList.isEmpty) {
       return null;
@@ -137,16 +137,29 @@ class DatabaseService {
         await db.execute('''
 CREATE TABLE books (
 id TEXT PRIMARY KEY,
+author TEXT,
 cover TEXT,
 current_page INTEGER,
 date_added TEXT NOT NULL,
+description TEXT,
+format INTEGER,
+goodreads TEXT,
+isbn TEXT,
+language TEXT,
 last_read TEXT,
-length INTEGER,
-name TEXT NOT NULL,
+library_thing TEXT,
+open_library TEXT,
 page_count INTEGER NOT NULL,
 parent_id TEXT NOT NULL,
 path TEXT NOT NULL,
+publish_date TEXT,
+publisher TEXT,
 reading_status INTEGER,
+series TEXT,
+series_index REAL,
+subjects TEXT,
+subtitle TEXT,
+title TEXT NOT NULL,
 FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 ''');
@@ -156,9 +169,9 @@ id TEXT PRIMARY KEY,
 covers TEXT,
 date_added TEXT NOT NULL,
 item_count INTEGER NOT NULL,
-name TEXT NOT NULL,
 parent_id TEXT,
 path TEXT NOT NULL,
+title TEXT NOT NULL,
 FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 ''');

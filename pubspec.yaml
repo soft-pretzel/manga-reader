@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^18.0.0
+  http: ^1.6.0
   package_info_plus: ^10.2.1
   path: ^1.9.1
   path_provider: ^2.1.6

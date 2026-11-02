@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:archive/archive.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:saf_util/saf_util.dart';
@@ -57,24 +59,35 @@ class LocalStorageService {
   }
 
   Future<String?> extractBookCover(String bookPath, String id) async {
-    BookSession session;
-    if (Platform.isAndroid) {
-      final safStream = SafStream();
-      session = await BookSession.open(await safStream.readFileBytes(bookPath));
-    } else {
-      session = await BookSession.openFile(bookPath);
-    }
-    final cover = session.book.metadata.cover;
-    session.dispose();
-    if (cover != null) {
-      final cache = await getCoversCache();
-      final file = File(
-        '${cache.path}${Platform.pathSeparator}$id.${cover.fileExtension}',
-      );
-      file.writeAsBytes(cover.bytes, flush: true);
-      return file.path;
-    }
-    return null;
+    final token = RootIsolateToken.instance;
+    // final coverWithSize = CoverWithSize();
+    final cover = await Isolate.run(() async {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
+      BookSession session;
+      if (Platform.isAndroid) {
+        final safStream = SafStream();
+        session = await BookSession.open(
+          await safStream.readFileBytes(bookPath),
+        );
+      } else {
+        session = await BookSession.openFile(bookPath);
+      }
+      final cover = session.book.metadata.cover;
+      session.dispose();
+      if (cover != null) {
+        final cache = await getCoversCache();
+        final file = File(
+          '${cache.path}${Platform.pathSeparator}$id.${cover.fileExtension}',
+        );
+        await file.writeAsBytes(cover.bytes, flush: true);
+        return file.path;
+        // coverWithSize.cover = file.path;
+        // coverWithSize.height = cover.height;
+        // coverWithSize.width = cover.width;
+      }
+      return null;
+    });
+    return cover;
   }
 
   Future<Book> getBookStructure(String path) async {
@@ -180,6 +193,17 @@ class LocalStorageService {
     } else {
       return Directory(path).exists();
     }
+  }
+
+  Future<BookSession> openBook(String bookPath, String id) async {
+    BookSession session;
+    if (Platform.isAndroid) {
+      final safStream = SafStream();
+      session = await BookSession.open(await safStream.readFileBytes(bookPath));
+    } else {
+      session = await BookSession.openFile(bookPath);
+    }
+    return session;
   }
 
   Future<String?> selectFolder() async {

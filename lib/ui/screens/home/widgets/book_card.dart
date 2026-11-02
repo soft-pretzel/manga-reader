@@ -63,7 +63,7 @@ class BookCard extends StatelessWidget {
                 overflow: .ellipsis,
                 text: TextSpan(
                   style: DefaultTextStyle.of(context).style,
-                  text: book.name,
+                  text: book.title,
                 ),
               ),
               RichText(

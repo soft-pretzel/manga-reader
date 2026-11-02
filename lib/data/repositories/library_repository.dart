@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 
-import 'package:flutter/services.dart';
+import 'package:unseal/unseal.dart' as unseal;
 
 import '../models/book.dart';
 import '../models/folder.dart';
@@ -31,7 +30,7 @@ class LibraryRepository {
           id: await _databaseService.generateId(),
           dateAdded: DateTime.now(),
           itemCount: (await _localStorageService.getFiles(path)).length,
-          name: await _localStorageService.getFileName(path),
+          title: await _localStorageService.getFileName(path),
           path: path,
           parsing: true,
         );
@@ -68,17 +67,6 @@ class LibraryRepository {
           }
         }
       }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> deleteBookCache(String id) async {
-    try {
-      final cache = await _localStorageService.getReadingCache();
-      final bookCache = Directory('${cache.path}${Platform.pathSeparator}$id');
-      await bookCache.delete(recursive: true);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -165,45 +153,11 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<String>>> openBook(String id) async {
+  Future<Result<unseal.BookSession>> openBook(String id) async {
     try {
-      final token = RootIsolateToken.instance;
-      final pages = await Isolate.run(() async {
-        BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
-        final book = await _databaseService.getBook(id);
-        final cache = await _localStorageService.getReadingCache();
-        final bookCache = Directory(
-          '${cache.path}${Platform.pathSeparator}${book.id}',
-        );
-        List<String> pages = [];
-        if (await bookCache.exists()) {
-          await for (final file in bookCache.list()) {
-            pages.add(file.path);
-          }
-          pages.sort((a, b) => a.compareTo(b));
-          return pages;
-        } else {
-          await bookCache.create(recursive: true);
-        }
-        final archive = await _localStorageService.decodeArchive(book.path);
-        if (archive != null) {
-          var i = 1;
-          for (final file in archive) {
-            final fileType = file.name.split('.').last;
-            if (imgTypes.contains(fileType)) {
-              final page = await _localStorageService.writeArchiveFile(
-                file,
-                bookCache.path,
-                '${i.toString().padLeft(3, '0')}.$fileType',
-              );
-              pages.add(page);
-              i++;
-            }
-          }
-        }
-        return pages;
-      });
-      return Result.ok(pages);
+      final book = await _databaseService.getBook(id);
+      final session = await _localStorageService.openBook(book.path, book.id);
+      return Result.ok(session);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -218,7 +172,7 @@ class LibraryRepository {
             id: await _databaseService.generateId(),
             dateAdded: DateTime.now(),
             itemCount: (await _localStorageService.getFiles(item)).length,
-            name: await _localStorageService.getFileName(item),
+            title: await _localStorageService.getFileName(item),
             parentId: folder.id,
             path: item,
           );
@@ -228,13 +182,23 @@ class LibraryRepository {
           final structure = await _localStorageService.getBookStructure(item);
           final newBook = Book(
             id: await _databaseService.generateId(),
+            author: structure.metadata.authors.firstOrNull,
             dateAdded: DateTime.now(),
-            name:
-                structure.metadata.title ??
-                await _localStorageService.getFileName(item),
+            description: structure.metadata.description,
+            format: structure.format,
+            isbn: structure.metadata.isbn,
+            language: structure.metadata.languages.firstOrNull,
             pageCount: structure.files.images.length,
             parentId: folder.id,
             path: item,
+            publishDate: structure.metadata.publishedAt,
+            publisher: structure.metadata.publisher,
+            series: structure.metadata.series ?? folder.title,
+            seriesIndex: structure.metadata.seriesIndex,
+            subjects: structure.metadata.subjects,
+            title:
+                structure.metadata.title ??
+                await _localStorageService.getFileName(item),
           );
           await _databaseService.insertBook(newBook);
         }
@@ -259,7 +223,7 @@ class LibraryRepository {
     library.addAll(await _databaseService.getBooksByParentId(id));
     if (library.length < i + 1) return Result.ok('');
     if (library.length > 1) {
-      library.sort((a, b) => a.name.compareTo(b.name));
+      library.sort((a, b) => a.title.compareTo(b.title));
     }
     final item = library[i];
     if (item.runtimeType == Book) {
