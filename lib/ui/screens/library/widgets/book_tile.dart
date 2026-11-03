@@ -36,7 +36,7 @@ class BookTile extends StatelessWidget {
               onLongPressStart: (details) => _handleLongPress(details),
               onTap: () {
                 context.pushNamed(
-                  RouteNames.reader,
+                  RouteNames.book,
                   pathParameters: {'bookId': book.id},
                 );
               },

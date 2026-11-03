@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:unseal/unseal.dart' as unseal;
@@ -9,15 +10,18 @@ import '../models/library.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../../utils/result.dart';
+import '../services/utils_service.dart';
 
 class LibraryRepository {
   LibraryRepository({
     required this._databaseService,
     required this._localStorageService,
+    required this._utilsService,
   });
 
   final DatabaseService _databaseService;
   final LocalStorageService _localStorageService;
+  final UtilsService _utilsService;
 
   static List<String> comicTypes = ['cbt', 'cbz', 'tar', 'zip'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
@@ -67,6 +71,35 @@ class LibraryRepository {
           }
         }
       }
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> fetchMetadata(Book book) async {
+    try {
+      final uri = Uri.parse(
+        'https://openlibrary.org/search.json?title=${book.title.toLowerCase().replaceAll(' ', '+')}&lang=jpn&fields=author_name,first_publish_year,id_goodreads,id_librarything,key,language,subject,subtitle,title',
+      );
+      final result = await _utilsService.makeHttpRequest(uri);
+      final doc = result['docs'][0];
+      List<String> genres = [];
+      for (final String subject in doc['subject']) {
+        if (subject.contains('genre')) {
+          genres.add(subject.split(':').last);
+        }
+      }
+      book.author = doc['author_name'][0];
+      book.goodreads = doc['id_goodreads'].last;
+      book.language = doc['language'][0];
+      book.libraryThing = doc['id_librarything'].last;
+      book.openLibrary = doc['key'];
+      book.publishYear = doc['first_publish_year'];
+      book.genres = genres;
+      book.subtitle = doc['subtitle'];
+      book.title = doc['title'];
+      await _databaseService.updateBook(book);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -163,6 +196,15 @@ class LibraryRepository {
     }
   }
 
+  Future<Result<void>> openLink(Uri uri) async {
+    try {
+      await _utilsService.openLink(uri);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<void>> parseLocalFolder(Folder folder) async {
     try {
       final items = await _localStorageService.getFiles(folder.path);
@@ -191,11 +233,11 @@ class LibraryRepository {
             pageCount: structure.files.images.length,
             parentId: folder.id,
             path: item,
-            publishDate: structure.metadata.publishedAt,
+            publishYear: structure.metadata.publishedAt?.year,
             publisher: structure.metadata.publisher,
             series: structure.metadata.series ?? folder.title,
             seriesIndex: structure.metadata.seriesIndex,
-            subjects: structure.metadata.subjects,
+            genres: structure.metadata.subjects,
             title:
                 structure.metadata.title ??
                 await _localStorageService.getFileName(item),

@@ -10,6 +10,7 @@ class Book extends Library {
   int currentPage;
   String? description;
   BookFormat format;
+  List<String> genres;
   String? goodreads;
   String? isbn;
   String? language;
@@ -17,12 +18,11 @@ class Book extends Library {
   String? libraryThing;
   String? openLibrary;
   int pageCount;
-  DateTime? publishDate;
+  int? publishYear;
   String? publisher;
   ReadingStatus readingStatus;
   String? series;
   double? seriesIndex;
-  List<String> subjects;
   String? subtitle;
 
   Book({
@@ -33,6 +33,7 @@ class Book extends Library {
     required super.dateAdded,
     this.description,
     required this.format,
+    this.genres = const [],
     this.goodreads,
     this.isbn,
     this.language,
@@ -42,12 +43,11 @@ class Book extends Library {
     required this.pageCount,
     required super.parentId,
     required super.path,
-    this.publishDate,
+    this.publishYear,
     this.publisher,
     this.readingStatus = .unread,
     this.series,
     this.seriesIndex,
-    this.subjects = const [],
     this.subtitle,
     required super.title,
   });
@@ -62,6 +62,7 @@ class Book extends Library {
       'date_added': dateAdded.toString(),
       if (description != null) 'description': description,
       'format': format.index,
+      'genres': genres.join(","),
       if (goodreads != null) 'goodreads': goodreads,
       if (isbn != null) 'isbn': isbn,
       if (language != null) 'language': language,
@@ -71,12 +72,11 @@ class Book extends Library {
       'page_count': pageCount,
       'parent_id': parentId,
       'path': path,
-      if (publishDate != null) 'publish_date': publishDate.toString(),
+      if (publishYear != null) 'publish_year': publishYear,
       if (publisher != null) 'publisher': publisher,
       'reading_status': readingStatus.index,
       if (series != null) 'series': series,
       if (seriesIndex != null) 'series_index': seriesIndex,
-      'subjects': subjects.join(","),
       if (subtitle != null) 'subtitle': subtitle,
       'title': title,
     };
@@ -88,6 +88,7 @@ class Book extends Library {
       currentPage = int.parse(map['current_page'].toString()),
       description = map['description']?.toString(),
       format = BookFormat.values[int.parse(map['format'].toString())],
+      genres = map['genres'].toString().split(","),
       goodreads = map['goodreads']?.toString(),
       isbn = map['isbn']?.toString(),
       language = map['language']?.toString(),
@@ -95,13 +96,12 @@ class Book extends Library {
       libraryThing = map['library_thing']?.toString(),
       openLibrary = map['open_library']?.toString(),
       pageCount = int.parse(map['page_count'].toString()),
-      publishDate = DateTime.tryParse(map['publish_date'].toString()),
+      publishYear = int.tryParse(map['publish_year'].toString()),
       publisher = map['publisher']?.toString(),
       readingStatus =
           ReadingStatus.values[int.parse(map['reading_status'].toString())],
       series = map['series']?.toString(),
       seriesIndex = double.tryParse(map['series_index'].toString()),
-      subjects = map['subjects'].toString().split(","),
       subtitle = map['subtitle']?.toString(),
       super.fromMap();
 }

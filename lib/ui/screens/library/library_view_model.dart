@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 
 import '../../../data/models/book.dart';
 import '../../../data/models/folder.dart';
@@ -166,16 +163,6 @@ class LibraryViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _library = result.value;
-        Library item = _library.last;
-        if (item.runtimeType == Book) {
-          item = item as Book;
-          final uri = Uri.parse(
-            'https://openlibrary.org/search.json?title=${item.title.toLowerCase().replaceAll(' ', '+')}',
-          );
-          final info = await http.read(uri);
-          final jsonInfo = json.decode(info) as Map<String, dynamic>;
-          print(jsonInfo['docs'][0]['title']);
-        }
         notifyListeners();
         return Result.ok(null);
       case Error():

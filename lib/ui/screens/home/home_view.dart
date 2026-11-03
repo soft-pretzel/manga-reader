@@ -41,7 +41,7 @@ class HomeView extends StatelessWidget {
                         height: constraints.maxHeight,
                         width: constraints.maxWidth,
                         child: Padding(
-                          padding: const .all(16),
+                          padding: const .symmetric(horizontal: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -49,18 +49,24 @@ class HomeView extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: .start,
                                   children: [
-                                    Text('Continue Reading'),
+                                    Text(
+                                      'Continue Reading',
+                                      style: TextTheme.of(context).bodyLarge,
+                                    ),
                                     SizedBox(height: 12),
                                     Expanded(
                                       child: ListView(
-                                        // clipBehavior: .antiAlias,
+                                        clipBehavior: .none,
                                         scrollDirection: .horizontal,
                                         children: [
                                           for (final book
                                               in viewModel.inProgressBooks)
-                                            BookCard(
-                                              book: book,
-                                              viewModel: viewModel,
+                                            Padding(
+                                              padding: const .only(right: 16),
+                                              child: BookCard(
+                                                book: book,
+                                                viewModel: viewModel,
+                                              ),
                                             ),
                                         ],
                                       ),

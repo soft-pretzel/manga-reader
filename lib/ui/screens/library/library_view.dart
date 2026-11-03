@@ -10,9 +10,9 @@ import 'widgets/folder_tile.dart';
 import 'widgets/library_app_bar.dart';
 
 class LibraryView extends StatelessWidget {
-  const LibraryView({super.key, required this.viewModel});
-
   final LibraryViewModel viewModel;
+
+  const LibraryView({super.key, required this.viewModel});
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:proper_filesize/proper_filesize.dart';
 import 'package:screen_brightness/screen_brightness.dart';
@@ -37,9 +40,14 @@ class UtilsService {
     return (await PackageInfo.fromPlatform()).version;
   }
 
-  Future<void> openLink(Uri url) async {
-    if (!await launchUrl(url)) {
-      throw Exception('Could not launch $url');
+  Future<Map<String, dynamic>> makeHttpRequest(Uri uri) async {
+    final result = await http.read(uri);
+    return json.decode(result) as Map<String, dynamic>;
+  }
+
+  Future<void> openLink(Uri uri) async {
+    if (!await launchUrl(uri)) {
+      throw Exception('Could not launch $uri');
     }
   }
 }

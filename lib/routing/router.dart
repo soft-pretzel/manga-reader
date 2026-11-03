@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../ui/screens/book/book_view.dart';
+import '../ui/screens/book/book_view_model.dart';
 import 'routes.dart';
 import '../ui/screens/settings/appearance/appearance_settings_view.dart';
 import '../ui/screens/settings/appearance/appearance_settings_view_model.dart';
@@ -43,6 +45,7 @@ final router = GoRouter(
               builder: (context, state) {
                 final viewModel = HomeViewModel(
                   libraryRepository: context.read(),
+                  settingsRepository: context.read(),
                 );
                 return HomeView(viewModel: viewModel);
               },
@@ -135,6 +138,17 @@ final router = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      name: RouteNames.book,
+      path: RoutePaths.book,
+      builder: (context, state) {
+        final viewModel = BookViewModel(
+          bookId: state.pathParameters['bookId']!,
+          libraryRepository: context.read(),
+        );
+        return BookView(viewModel: viewModel);
+      },
     ),
     GoRoute(
       name: RouteNames.reader,
