@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../utils/command.dart';
-import '../book_view_model.dart';
 
 class LinkTile extends StatelessWidget {
   final String? info;

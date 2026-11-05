@@ -43,6 +43,12 @@ class DatabaseService {
     return Book.fromMap(mapList.single);
   }
 
+  Future<Book?> getBookByPath(String path) async {
+    final db = await _database();
+    final book = await db.query('books', where: 'path = ?', whereArgs: [path]);
+    return book.isNotEmpty ? Book.fromMap(book.single) : null;
+  }
+
   Future<List<Book>> getBooksByParentId(String parentId) async {
     final db = await _database();
     final books = await db.query(
@@ -87,6 +93,16 @@ class DatabaseService {
     } else {
       return Folder.fromMap(mapList.single);
     }
+  }
+
+  Future<Folder?> getFolderByPath(String path) async {
+    final db = await _database();
+    final folder = await db.query(
+      'folders',
+      where: 'path = ?',
+      whereArgs: [path],
+    );
+    return folder.isNotEmpty ? Folder.fromMap(folder.single) : null;
   }
 
   Future<List<Folder>> getFoldersByParentId(String? parentId) async {

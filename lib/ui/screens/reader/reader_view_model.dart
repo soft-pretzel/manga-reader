@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:unseal/unseal.dart' as unseal;
 
 import '../../../data/models/book.dart';
 import '../../../data/models/settings.dart';
@@ -89,7 +88,6 @@ class ReaderViewModel extends ChangeNotifier {
       await Future.wait([
         _loadAnimations(),
         _loadDoubleTapZoom(),
-        // _loadPages(),
         _loadReadingDirection(),
         _loadReadingMode(),
         _loadZoom(),

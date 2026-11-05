@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:unseal/unseal.dart' as unseal;
@@ -80,7 +79,7 @@ class LibraryRepository {
   Future<Result<void>> fetchMetadata(Book book) async {
     try {
       final uri = Uri.parse(
-        'https://openlibrary.org/search.json?title=${book.title.toLowerCase().replaceAll(' ', '+')}&lang=jpn&fields=author_name,first_publish_year,id_goodreads,id_librarything,key,language,subject,subtitle,title',
+        'https://openlibrary.org/search.json?title=${book.title.toLowerCase().replaceAll(' ', '+')}&fields=author_name,first_publish_year,id_goodreads,id_librarything,key,language,subject,subtitle,title',
       );
       final result = await _utilsService.makeHttpRequest(uri);
       final doc = result['docs'][0];
@@ -210,39 +209,71 @@ class LibraryRepository {
       final items = await _localStorageService.getFiles(folder.path);
       for (final item in items) {
         if (await _localStorageService.isDir(item)) {
-          final newFolder = Folder(
-            id: await _databaseService.generateId(),
-            dateAdded: DateTime.now(),
-            itemCount: (await _localStorageService.getFiles(item)).length,
-            title: await _localStorageService.getFileName(item),
-            parentId: folder.id,
-            path: item,
-          );
-          await _databaseService.insertFolder(newFolder);
-          await parseLocalFolder(newFolder);
+          final existingFolder = await _databaseService.getFolderByPath(item);
+          if (existingFolder == null) {
+            final newFolder = Folder(
+              id: await _databaseService.generateId(),
+              dateAdded: DateTime.now(),
+              itemCount: (await _localStorageService.getFiles(item)).length,
+              title: await _localStorageService.getFileName(item),
+              parentId: folder.id,
+              path: item,
+            );
+            await _databaseService.insertFolder(newFolder);
+            await parseLocalFolder(newFolder);
+          } else {
+            existingFolder.itemCount = (await _localStorageService.getFiles(
+              item,
+            )).length;
+            await _databaseService.updateFolder(existingFolder);
+            await parseLocalFolder(existingFolder);
+          }
         } else {
-          final structure = await _localStorageService.getBookStructure(item);
-          final newBook = Book(
-            id: await _databaseService.generateId(),
-            author: structure.metadata.authors.firstOrNull,
-            dateAdded: DateTime.now(),
-            description: structure.metadata.description,
-            format: structure.format,
-            isbn: structure.metadata.isbn,
-            language: structure.metadata.languages.firstOrNull,
-            pageCount: structure.files.images.length,
-            parentId: folder.id,
-            path: item,
-            publishYear: structure.metadata.publishedAt?.year,
-            publisher: structure.metadata.publisher,
-            series: structure.metadata.series ?? folder.title,
-            seriesIndex: structure.metadata.seriesIndex,
-            genres: structure.metadata.subjects,
-            title:
-                structure.metadata.title ??
-                await _localStorageService.getFileName(item),
-          );
-          await _databaseService.insertBook(newBook);
+          final existingBook = await _databaseService.getBookByPath(item);
+          if (existingBook == null) {
+            final structure = await _localStorageService.getBookStructure(item);
+            final newBook = Book(
+              id: await _databaseService.generateId(),
+              author: structure.metadata.authors.firstOrNull,
+              dateAdded: DateTime.now(),
+              description: structure.metadata.description,
+              format: structure.format,
+              isbn: structure.metadata.isbn,
+              language: structure.metadata.languages.firstOrNull,
+              pageCount: structure.files.images.length,
+              parentId: folder.id,
+              path: item,
+              publishYear: structure.metadata.publishedAt?.year,
+              publisher: structure.metadata.publisher,
+              series: structure.metadata.series ?? folder.title,
+              seriesIndex: structure.metadata.seriesIndex,
+              genres: structure.metadata.subjects,
+              title:
+                  structure.metadata.title ??
+                  await _localStorageService.getFileName(item),
+            );
+            await _databaseService.insertBook(newBook);
+          }
+        }
+      }
+      final List<Library> existingItems = [];
+      existingItems.addAll(
+        await _databaseService.getFoldersByParentId(folder.id),
+      );
+      existingItems.addAll(
+        await _databaseService.getBooksByParentId(folder.id),
+      );
+      for (final existingItem in existingItems) {
+        if (!items.contains(existingItem.path)) {
+          if (existingItem.runtimeType == Folder) {
+            await _databaseService.deleteFolder(existingItem.id);
+          } else {
+            final existingBook = existingItem as Book;
+            await _databaseService.deleteBook(existingItem.id);
+            if (existingBook.cover != null && existingBook.cover != '') {
+              await _localStorageService.deleteFile(existingItem.cover!);
+            }
+          }
         }
       }
       return Result.ok(null);
@@ -265,7 +296,11 @@ class LibraryRepository {
     library.addAll(await _databaseService.getBooksByParentId(id));
     if (library.length < i + 1) return Result.ok('');
     if (library.length > 1) {
-      library.sort((a, b) => a.title.compareTo(b.title));
+      library.sort(
+        (a, b) => int.parse(
+          a.title.replaceAll(RegExp(r'[^0-9]'), ''),
+        ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), ''))),
+      );
     }
     final item = library[i];
     if (item.runtimeType == Book) {

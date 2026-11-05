@@ -7,7 +7,9 @@ class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _dynamicModeKey = 'dynamic_mode';
-  static const _libraryDisplayDensityKey = 'library_grid_display_density';
+  static const _libraryDisplayModeKey = 'library_display_mode';
+  static const _libraryDisplaySpacingKey = 'library_display_spacing';
+  static const _librarySortKey = 'library_sort';
   static const _localFoldersKey = 'local_folders';
   static const _oledDarkModeKey = 'oled_dark_mode';
   static const _readingDirectionKey = 'reading_direction';
@@ -15,15 +17,6 @@ class SharedPreferencesService {
   static const _themeColorKey = 'theme_color';
   static const _themeModeKey = 'theme_mode';
   static const _zoomKey = 'zoom';
-
-  Future<void> addLocalFolder(String folder) async {
-    final prefs = await SharedPreferencesWithCache.create(
-      cacheOptions: SharedPreferencesWithCacheOptions(),
-    );
-    final folders = prefs.getStringList(_localFoldersKey) ?? [];
-    folders.add(folder);
-    await prefs.setStringList(_localFoldersKey, folders);
-  }
 
   Future<bool> getAnimations() async {
     final prefs = await SharedPreferencesWithCache.create(
@@ -46,12 +39,28 @@ class SharedPreferencesService {
     return prefs.getBool(_dynamicModeKey) ?? false;
   }
 
-  Future<LibraryDisplayDensity> getLibraryDisplayDensity() async {
+  Future<LibraryDisplayMode> getLibraryDisplayMode() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final index = prefs.getInt(_libraryDisplayDensityKey);
+    final index = prefs.getInt(_libraryDisplayModeKey);
+    return index != null ? .values[index] : .grid;
+  }
+
+  Future<LibraryDisplaySpacing> getLibraryDisplaySpacing() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final index = prefs.getInt(_libraryDisplaySpacingKey);
     return index != null ? .values[index] : .normal;
+  }
+
+  Future<LibrarySort> getLibrarySort() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    final index = prefs.getInt(_librarySortKey);
+    return index != null ? .values[index] : .alphabetical;
   }
 
   Future<List<String>> getLocalFolders() async {
@@ -107,13 +116,43 @@ class SharedPreferencesService {
     return prefs.getDouble(_zoomKey) ?? 2.5;
   }
 
-  Future<void> setLibraryDisplayDensity(
-    LibraryDisplayDensity libraryDisplayDensity,
+  Future<void> setDynamicMode(bool dynamicMode) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setBool(_dynamicModeKey, dynamicMode);
+  }
+
+  Future<void> setLibraryDisplayMode(
+    LibraryDisplayMode libraryDisplayMode,
   ) async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    await prefs.setInt(_libraryDisplayDensityKey, libraryDisplayDensity.index);
+    await prefs.setInt(_libraryDisplayModeKey, libraryDisplayMode.index);
+  }
+
+  Future<void> setLibraryDisplaySpacing(
+    LibraryDisplaySpacing libraryDisplaySpacing,
+  ) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setInt(_libraryDisplaySpacingKey, libraryDisplaySpacing.index);
+  }
+
+  Future<void> setLibrarySort(LibrarySort librarySort) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setInt(_librarySortKey, librarySort.index);
+  }
+
+  Future<void> setOledDarkMode(bool oledDarkMode) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setBool(_oledDarkModeKey, oledDarkMode);
   }
 
   Future<void> setReadingDirection(ReadingDirection readingDirection) async {
@@ -160,30 +199,12 @@ class SharedPreferencesService {
     return !current;
   }
 
-  Future<bool> toggleDynamicMode() async {
-    final prefs = await SharedPreferencesWithCache.create(
-      cacheOptions: SharedPreferencesWithCacheOptions(),
-    );
-    final current = prefs.getBool(_dynamicModeKey) ?? false;
-    prefs.setBool(_dynamicModeKey, !current);
-    return !current;
-  }
-
   Future<bool> toggleDoubleTapZoom() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     final current = prefs.getBool(_doubleTapZoomKey) ?? true;
     prefs.setBool(_doubleTapZoomKey, !current);
-    return !current;
-  }
-
-  Future<bool> toggleOledDarkMode() async {
-    final prefs = await SharedPreferencesWithCache.create(
-      cacheOptions: SharedPreferencesWithCacheOptions(),
-    );
-    final current = prefs.getBool(_oledDarkModeKey) ?? false;
-    prefs.setBool(_oledDarkModeKey, !current);
     return !current;
   }
 }

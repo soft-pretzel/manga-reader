@@ -128,7 +128,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     try {
       _dynamicMode = !_dynamicMode;
       notifyListeners();
-      await _settingsRepository.toggleDynamicMode();
+      await _settingsRepository.setDynamicMode(_dynamicMode);
       _themeProvider.loadDynamicMode();
       return Result.ok(null);
     } on Exception catch (e) {
@@ -140,7 +140,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     try {
       _oledDarkMode = !_oledDarkMode;
       notifyListeners();
-      await _settingsRepository.toggleOledDarkMode();
+      await _settingsRepository.setOledDarkMode(_oledDarkMode);
       _themeProvider.loadOledDarkMode();
       return Result.ok(null);
     } on Exception catch (e) {

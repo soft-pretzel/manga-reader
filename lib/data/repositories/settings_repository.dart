@@ -103,11 +103,30 @@ class SettingsRepository {
     }
   }
 
-  Future<Result<LibraryDisplayDensity>> getLibraryDisplayDensity() async {
+  Future<Result<LibraryDisplayMode>> getLibraryDisplayMode() async {
     try {
-      final libraryDisplayDensity = await _sharedPreferencesService
-          .getLibraryDisplayDensity();
-      return Result.ok(libraryDisplayDensity);
+      final libraryDisplayMode = await _sharedPreferencesService
+          .getLibraryDisplayMode();
+      return Result.ok(libraryDisplayMode);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<LibraryDisplaySpacing>> getLibraryDisplaySpacing() async {
+    try {
+      final libraryDisplaySpacing = await _sharedPreferencesService
+          .getLibraryDisplaySpacing();
+      return Result.ok(libraryDisplaySpacing);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<LibrarySort>> getLibrarySort() async {
+    try {
+      final librarySort = await _sharedPreferencesService.getLibrarySort();
+      return Result.ok(librarySort);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -177,13 +196,51 @@ class SettingsRepository {
     }
   }
 
-  Future<Result<void>> setLibraryDisplayDensity(
-    LibraryDisplayDensity libraryDisplayDensity,
+  Future<Result<void>> setDynamicMode(bool dynamicMode) async {
+    try {
+      await _sharedPreferencesService.setDynamicMode(dynamicMode);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setLibraryDisplayMode(
+    LibraryDisplayMode libraryDisplayMode,
   ) async {
     try {
-      await _sharedPreferencesService.setLibraryDisplayDensity(
-        libraryDisplayDensity,
+      await _sharedPreferencesService.setLibraryDisplayMode(libraryDisplayMode);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setLibraryDisplaySpacing(
+    LibraryDisplaySpacing libraryDisplaySpacing,
+  ) async {
+    try {
+      await _sharedPreferencesService.setLibraryDisplaySpacing(
+        libraryDisplaySpacing,
       );
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setLibrarySort(LibrarySort librarySort) async {
+    try {
+      await _sharedPreferencesService.setLibrarySort(librarySort);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setOledDarkMode(bool oledDarkMode) async {
+    try {
+      await _sharedPreferencesService.setOledDarkMode(oledDarkMode);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -246,27 +303,9 @@ class SettingsRepository {
     }
   }
 
-  Future<Result<bool>> toggleDynamicMode() async {
-    try {
-      final result = await _sharedPreferencesService.toggleDynamicMode();
-      return Result.ok(result);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
   Future<Result<bool>> toggleDoubleTapZoom() async {
     try {
       final result = await _sharedPreferencesService.toggleDoubleTapZoom();
-      return Result.ok(result);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<bool>> toggleOledDarkMode() async {
-    try {
-      final result = await _sharedPreferencesService.toggleOledDarkMode();
       return Result.ok(result);
     } on Exception catch (e) {
       return Result.error(e);

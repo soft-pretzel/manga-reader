@@ -62,14 +62,14 @@ class BookCard extends StatelessWidget {
                                   : .ltr,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: .all(.circular(6)),
+                                  borderRadius: .all(.circular(10)),
                                   boxShadow: [
                                     BoxShadow(
-                                      blurRadius: 16,
+                                      blurRadius: 8,
                                       color: ColorScheme.of(
                                         context,
                                       ).surface.withAlpha(153),
-                                      spreadRadius: 4,
+                                      spreadRadius: 8,
                                     ),
                                   ],
                                 ),

@@ -6,11 +6,18 @@ import 'package:go_router/go_router.dart';
 import '../../../../data/models/book.dart';
 import '../../../../routing/routes.dart';
 import '../library_view_model.dart';
+import 'book_menu.dart';
 
-class BookTile extends StatelessWidget {
-  BookTile({super.key, required this.book, required this.viewModel});
+class BookGridTile extends StatelessWidget {
+  BookGridTile({
+    super.key,
+    required this.book,
+    required this.index,
+    required this.viewModel,
+  });
 
   final Book book;
+  final int index;
   final LibraryViewModel viewModel;
   final _menuController = MenuController();
 
@@ -33,29 +40,24 @@ class BookTile extends StatelessWidget {
           child: Align(
             alignment: .bottomCenter,
             child: GestureDetector(
-              onLongPressStart: (details) => _handleLongPress(details),
-              onTap: () {
-                context.pushNamed(
-                  RouteNames.book,
-                  pathParameters: {'bookId': book.id},
-                );
+              onLongPressStart: (details) {
+                if (!viewModel.isSelectionMode) _handleLongPress(details);
               },
-              child: MenuAnchor(
-                animated: true,
-                controller: _menuController,
-                menuChildren: [
-                  MenuItemButton(
-                    onPressed: () => book.readingStatus != .finished
-                        ? viewModel.markAsFinished.execute(book.id)
-                        : viewModel.markAsUnread.execute(book.id),
-                    child: Text(
-                      book.readingStatus != .finished
-                          ? 'Mark as finished'
-                          : 'Mark as unread',
-                    ),
-                  ),
-                  MenuItemButton(child: Text('Details')),
-                ],
+              onTap: () {
+                if (viewModel.isSelectionMode) {
+                  viewModel.toggleSelect.execute(index);
+                } else {
+                  context.pushNamed(
+                    RouteNames.reader,
+                    pathParameters: {'bookId': book.id},
+                  );
+                }
+              },
+              child: BookMenu(
+                book: book,
+                index: index,
+                menuController: _menuController,
+                viewModel: viewModel,
                 child: Card(
                   clipBehavior: .antiAlias,
                   margin: .all(0),
@@ -82,14 +84,14 @@ class BookTile extends StatelessWidget {
                                         : .ltr,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: .all(.circular(6)),
+                                        borderRadius: .all(.circular(10)),
                                         boxShadow: [
                                           BoxShadow(
-                                            blurRadius: 16,
+                                            blurRadius: 8,
                                             color: ColorScheme.of(
                                               context,
                                             ).surface.withAlpha(153),
-                                            spreadRadius: 4,
+                                            spreadRadius: 8,
                                           ),
                                         ],
                                       ),
@@ -113,22 +115,22 @@ class BookTile extends StatelessWidget {
                               child: Align(
                                 alignment: .topRight,
                                 child: Padding(
-                                  padding: .all(4),
+                                  padding: .all(8),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       boxShadow: [
                                         BoxShadow(
-                                          blurRadius: 16,
+                                          blurRadius: 8,
                                           color: ColorScheme.of(
                                             context,
                                           ).surface.withAlpha(153),
-                                          spreadRadius: 4,
+                                          spreadRadius: 8,
                                         ),
                                       ],
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
-                                      Icons.task_alt,
+                                      Icons.task_alt_rounded,
                                       color: ColorScheme.of(context).primary,
                                     ),
                                   ),
@@ -136,6 +138,20 @@ class BookTile extends StatelessWidget {
                               ),
                             )
                           : SizedBox.shrink(),
+                      if (viewModel.selected[index])
+                        Positioned.fill(
+                          child: Container(
+                            color: ColorScheme.of(
+                              context,
+                            ).surface.withAlpha(128),
+                            child: Center(
+                              child: Icon(
+                                Icons.check_circle,
+                                color: ColorScheme.of(context).primary,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -145,9 +161,9 @@ class BookTile extends StatelessWidget {
         ),
         Padding(
           padding: .only(
-            top: viewModel.libraryDisplayDensity == .comfortable
+            top: viewModel.libraryDisplaySpacing == .comfortable
                 ? 8
-                : viewModel.libraryDisplayDensity == .normal
+                : viewModel.libraryDisplaySpacing == .normal
                 ? 6
                 : 4,
           ),

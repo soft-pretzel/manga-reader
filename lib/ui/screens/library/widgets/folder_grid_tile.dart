@@ -7,11 +7,18 @@ import 'package:go_router/go_router.dart';
 import '../library_view_model.dart';
 import '../../../../data/models/folder.dart';
 import '../../../../routing/routes.dart';
+import 'folder_menu.dart';
 
-class FolderTile extends StatelessWidget {
-  FolderTile({super.key, required this.folder, required this.viewModel});
+class FolderGridTile extends StatelessWidget {
+  FolderGridTile({
+    super.key,
+    required this.folder,
+    required this.index,
+    required this.viewModel,
+  });
 
   final Folder folder;
+  final int index;
   final LibraryViewModel viewModel;
   final _menuController = MenuController();
 
@@ -50,7 +57,9 @@ class FolderTile extends StatelessWidget {
           child: Align(
             alignment: .bottomCenter,
             child: GestureDetector(
-              onLongPressStart: (details) => _handleLongPress(details),
+              onLongPressStart: (details) {
+                if (!viewModel.isSelectionMode) _handleLongPress(details);
+              },
               onTap: () {
                 if (!folder.parsing &&
                     !viewModel.getFolderCover1.running &&
@@ -62,42 +71,18 @@ class FolderTile extends StatelessWidget {
                   );
                 }
               },
-              child: MenuAnchor(
-                animated: true,
-                controller: _menuController,
-                menuChildren: [
-                  MenuItemButton(
-                    onPressed: () {},
-                    trailingIcon: Icon(Icons.more_horiz),
-                    child: Text('Details'),
-                  ),
-                  MenuItemButton(
-                    onPressed: () {},
-                    trailingIcon: Icon(Icons.cached),
-                    child: Text('Rescan'),
-                  ),
-                  MenuItemButton(
-                    onPressed: () =>
-                        viewModel.deleteLocalFolder.execute(folder),
-                    style: ButtonStyle(
-                      foregroundColor: WidgetStatePropertyAll(
-                        ColorScheme.of(context).error,
-                      ),
-                      iconColor: WidgetStatePropertyAll(
-                        ColorScheme.of(context).error,
-                      ),
-                    ),
-                    trailingIcon: Icon(Icons.delete_outline),
-                    child: Text('Delete'),
-                  ),
-                ],
+              child: FolderMenu(
+                folder: folder,
+                index: index,
+                menuController: _menuController,
+                viewModel: viewModel,
                 child: Stack(
                   children: [
                     Transform.rotate(
                       angle: (pi / 180) * -4,
                       child: Card(
                         clipBehavior: .antiAlias,
-                        color: ColorScheme.of(context).surfaceContainerLow,
+                        color: ColorScheme.of(context).surfaceContainer,
                         margin: .all(0),
                         child:
                             folder.covers.elementAtOrNull(2) != null &&
@@ -119,7 +104,7 @@ class FolderTile extends StatelessWidget {
                       angle: (pi / 180) * 4,
                       child: Card(
                         clipBehavior: .antiAlias,
-                        color: ColorScheme.of(context).surfaceContainer,
+                        color: ColorScheme.of(context).surfaceContainerHigh,
                         margin: .all(0),
                         child:
                             folder.covers.elementAtOrNull(1) != null &&
@@ -139,7 +124,7 @@ class FolderTile extends StatelessWidget {
                     ),
                     Card(
                       clipBehavior: .antiAlias,
-                      color: ColorScheme.of(context).surfaceContainerHigh,
+                      color: ColorScheme.of(context).surfaceContainerHighest,
                       margin: .all(0),
                       child: viewModel.getFolderCover1.running || folder.parsing
                           ? SizedBox.expand(
@@ -161,9 +146,9 @@ class FolderTile extends StatelessWidget {
         ),
         Padding(
           padding: .only(
-            top: viewModel.libraryDisplayDensity == .comfortable
+            top: viewModel.libraryDisplaySpacing == .comfortable
                 ? 8
-                : viewModel.libraryDisplayDensity == .normal
+                : viewModel.libraryDisplaySpacing == .normal
                 ? 6
                 : 4,
           ),
