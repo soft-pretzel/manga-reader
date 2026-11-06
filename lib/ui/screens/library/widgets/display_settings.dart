@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../../../data/models/book.dart';
-import '../../../../data/models/settings.dart';
 import '../library_view_model.dart';
 
 class DisplaySettings extends StatelessWidget {

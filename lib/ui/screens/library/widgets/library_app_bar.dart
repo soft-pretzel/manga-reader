@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../data/models/book.dart';
-import '../../../../data/models/settings.dart';
 import '../library_view_model.dart';
 import 'display_settings.dart';
 
