@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/book.dart';
 import '../models/settings.dart';
 
 class SharedPreferencesService {
   static const _animationsKey = 'animations';
   static const _doubleTapZoomKey = 'double_tap_zoom';
   static const _dynamicModeKey = 'dynamic_mode';
+  static const _filterKey = 'filter';
   static const _libraryDisplayModeKey = 'library_display_mode';
   static const _libraryDisplaySpacingKey = 'library_display_spacing';
   static const _librarySortKey = 'library_sort';
@@ -37,6 +39,18 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     return prefs.getBool(_dynamicModeKey) ?? false;
+  }
+
+  Future<List<ReadingStatus>> getFilter() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    List<ReadingStatus> filter = [];
+    final list = prefs.getStringList(_filterKey);
+    if (list != null) {
+      filter.addAll(list.map((item) => .values[int.parse(item)]));
+    }
+    return filter;
   }
 
   Future<LibraryDisplayMode> getLibraryDisplayMode() async {
@@ -121,6 +135,16 @@ class SharedPreferencesService {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
     await prefs.setBool(_dynamicModeKey, dynamicMode);
+  }
+
+  Future<void> setFilter(List<ReadingStatus> filter) async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(),
+    );
+    await prefs.setStringList(
+      _filterKey,
+      filter.map((item) => item.index.toString()).toList(),
+    );
   }
 
   Future<void> setLibraryDisplayMode(

@@ -37,7 +37,8 @@ class _ReaderSliderState extends State<ReaderSlider> {
         return Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const .only(top: 0),
+              // padding: const .only(top: 16),
               child: Text(
                 '${_value.toInt()} / ${widget.viewModel.pages.length}',
               ),

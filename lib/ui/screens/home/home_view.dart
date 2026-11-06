@@ -41,7 +41,7 @@ class HomeView extends StatelessWidget {
                         height: constraints.maxHeight,
                         width: constraints.maxWidth,
                         child: Padding(
-                          padding: const .symmetric(horizontal: 16),
+                          padding: const .only(left: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

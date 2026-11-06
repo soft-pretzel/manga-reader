@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import 'menu_buttons.dart';
+import 'page_preview.dart';
 import 'reader_slider.dart';
 import '../reader_view_model.dart';
 import '../../../../routing/routes.dart';
@@ -55,7 +56,6 @@ class ReaderMenu<T> extends PopupRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Card(
           margin: EdgeInsets.all(0),
@@ -95,12 +95,24 @@ class ReaderMenu<T> extends PopupRoute<T> {
                       },
                       child: Text('Reader settings'),
                     ),
+                    MenuItemButton(
+                      onPressed: () {
+                        _stillReading = false;
+                        context.pushNamed(
+                          RouteNames.book,
+                          pathParameters: {'bookId': viewModel.book.id},
+                        );
+                      },
+                      child: Text('Book details'),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
         ),
+        Spacer(),
+        // PagePreview(pageController: pageController, viewModel: viewModel),
         Card(
           margin: EdgeInsets.all(0),
           color: Theme.of(context).colorScheme.surface.withAlpha(224),

@@ -115,7 +115,7 @@ class BookGridTile extends StatelessWidget {
                               child: Align(
                                 alignment: .topRight,
                                 child: Padding(
-                                  padding: .all(8),
+                                  padding: .all(4),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       boxShadow: [

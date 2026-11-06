@@ -25,11 +25,10 @@ class LibraryViewModel extends ChangeNotifier {
     load = Command0(_load)..execute();
     markAsFinished = Command1(_markAsFinished);
     markAsUnread = Command1(_markAsUnread);
-    markSelectedAsFinished = Command0(_markSelectedAsFinished);
-    markSelectedAsUnread = Command0(_markSelectedAsUnread);
     parseLocalFolder = Command1(_parseLocalFolder);
     toggleSelect = Command1(_toggleSelect);
     selectAll = Command0(_selectAll);
+    setFilter = Command1(_setFilter);
     setLibraryDisplayMode = Command1(_setLibraryDisplayMode);
     setLibraryDisplaySpacing = Command1(_setLibraryDisplaySpacing);
     setLibrarySort = Command1(_setLibrarySort);
@@ -49,16 +48,16 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command0 load;
   late final Command1<void, Book> markAsFinished;
   late final Command1<void, Book> markAsUnread;
-  late final Command0 markSelectedAsFinished;
-  late final Command0 markSelectedAsUnread;
   late final Command1<void, Folder> parseLocalFolder;
   late final Command1<void, int> toggleSelect;
   late final Command0 selectAll;
+  late final Command1<void, ReadingStatus> setFilter;
   late final Command1<void, LibraryDisplayMode> setLibraryDisplayMode;
   late final Command1<void, LibraryDisplaySpacing> setLibraryDisplaySpacing;
   late final Command1<void, LibrarySort> setLibrarySort;
 
   double? _coverAspectRatio;
+  List<ReadingStatus> _filter = [];
   bool _isSelectionMode = false;
   List<Library> _library = [];
   late LibraryDisplayMode _libraryDisplayMode;
@@ -66,9 +65,11 @@ class LibraryViewModel extends ChangeNotifier {
   late LibrarySort _librarySort;
   late ReadingDirection _readingDirection;
   List<bool> _selected = [];
+  int _selectedCount = 0;
   String _title = 'Library';
 
   double? get coverAspectRatio => _coverAspectRatio;
+  List<ReadingStatus> get filter => _filter;
   bool get isSelectionMode => _isSelectionMode;
   List<Library> get library => _library;
   LibraryDisplayMode get libraryDisplayMode => _libraryDisplayMode;
@@ -76,6 +77,7 @@ class LibraryViewModel extends ChangeNotifier {
   LibrarySort get librarySort => _librarySort;
   ReadingDirection get readingDirection => _readingDirection;
   List<bool> get selected => _selected;
+  int get selectedCount => _selectedCount;
   String get title => _title;
 
   Future<Result<void>> _addLocalFolder() async {
@@ -102,6 +104,32 @@ class LibraryViewModel extends ChangeNotifier {
       case Error():
         return Result.error(result.error);
     }
+  }
+
+  Future<Result<void>> _disableSelectionMode() async {
+    try {
+      _isSelectionMode = false;
+      _selected = List.filled(_library.length, false);
+      notifyListeners();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<void> _filterLibrary() async {
+    await _loadLibrary();
+    if (_filter.isNotEmpty) {
+      _library.removeWhere((item) {
+        if (item.runtimeType == Book) {
+          final book = item as Book;
+          return !_filter.contains(book.readingStatus);
+        } else {
+          return false;
+        }
+      });
+    }
+    _disableSelectionMode();
   }
 
   Future<Result<void>> _getBookCover(Book book) async {
@@ -168,14 +196,15 @@ class LibraryViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
+      await Future.wait([_loadFilter(), _loadLibrarySort()]);
       await Future.wait([
         _loadFolder(),
         _loadLibrary(),
         _loadLibraryDisplayMode(),
         _loadLibraryDisplaySpacing(),
-        _loadLibrarySort(),
         _loadReadingDirection(),
       ]);
+      await Future.wait([_disableSelectionMode(), _filterLibrary()]);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -189,7 +218,6 @@ class LibraryViewModel extends ChangeNotifier {
         _library = result.value;
         if (_library.isNotEmpty) {
           await _sortLibrary();
-          await _disableSelectionMode();
         }
         notifyListeners();
         return Result.ok(null);
@@ -215,6 +243,18 @@ class LibraryViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _libraryDisplaySpacing = result.value;
+        notifyListeners();
+        return Result.ok(null);
+      case Error():
+        return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _loadFilter() async {
+    final result = await _settingsRepository.getFilter();
+    switch (result) {
+      case Ok():
+        _filter = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -263,6 +303,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _markAsFinished(Book book) async {
     try {
       book.readingStatus = .finished;
+      _filterLibrary();
       notifyListeners();
       _libraryRepository.updateBook(book);
       return Result.ok(null);
@@ -276,32 +317,6 @@ class LibraryViewModel extends ChangeNotifier {
       book.readingStatus = .unread;
       notifyListeners();
       _libraryRepository.updateBook(book);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _markSelectedAsFinished() async {
-    try {
-      for (final (index, selected) in _selected.indexed) {
-        if (selected) {
-          _markAsFinished(_library[index] as Book);
-        }
-      }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _markSelectedAsUnread() async {
-    try {
-      for (final (index, selected) in _selected.indexed) {
-        if (selected) {
-          _markAsUnread(_library[index] as Book);
-        }
-      }
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -323,6 +338,7 @@ class LibraryViewModel extends ChangeNotifier {
     try {
       _isSelectionMode = true;
       _selected = List.filled(_library.length, true);
+      _selectedCount = _selected.length;
       notifyListeners();
       return Result.ok(null);
     } on Exception catch (e) {
@@ -356,6 +372,22 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
+  Future<Result<void>> _setFilter(ReadingStatus filter) async {
+    try {
+      if (_filter.contains(filter)) {
+        _filter.remove(filter);
+      } else {
+        _filter.add(filter);
+      }
+      await _filterLibrary();
+      notifyListeners();
+      _settingsRepository.setFilter(_filter);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<void>> _setLibrarySort(LibrarySort librarySort) async {
     try {
       _librarySort = librarySort;
@@ -371,7 +403,8 @@ class LibraryViewModel extends ChangeNotifier {
   Future<void> _sortLibrary() async {
     switch (_librarySort) {
       case .alphabetical:
-        if (_library.first.title.replaceAll(RegExp(r'[^0-9]'), '') != '') {
+        if (_library.firstOrNull?.title.replaceAll(RegExp(r'[^0-9]'), '') !=
+            '') {
           _library.sort(
             (a, b) => int.parse(
               a.title.replaceAll(RegExp(r'[^0-9]'), ''),
@@ -397,27 +430,21 @@ class LibraryViewModel extends ChangeNotifier {
       case .fileSize:
       case .fileSizeReverse:
     }
+    _disableSelectionMode();
   }
 
   Future<Result<void>> _toggleSelect(int index) async {
     try {
       _selected[index] = !_selected[index];
-      if (_selected.any((item) => item == true)) {
-        _isSelectionMode = true;
-      } else {
-        _isSelectionMode = false;
+      _selectedCount = 0;
+      for (final selected in _selected) {
+        if (selected) _selectedCount++;
       }
-      notifyListeners();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _disableSelectionMode() async {
-    try {
-      _isSelectionMode = false;
-      _selected = List.filled(_library.length, false);
+      if (_selectedCount == 0) {
+        _isSelectionMode = false;
+      } else {
+        _isSelectionMode = true;
+      }
       notifyListeners();
       return Result.ok(null);
     } on Exception catch (e) {

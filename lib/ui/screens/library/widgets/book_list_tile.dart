@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dynamic_system_colors/dynamic_system_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -124,6 +123,7 @@ class BookListTile extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: .start,
                             mainAxisAlignment: .center,
+                            spacing: 4,
                             children: [
                               RichText(
                                 maxLines: 1,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/book.dart';
 import '../models/settings.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
@@ -103,6 +104,15 @@ class SettingsRepository {
     }
   }
 
+  Future<Result<List<ReadingStatus>>> getFilter() async {
+    try {
+      final filter = await _sharedPreferencesService.getFilter();
+      return Result.ok(filter);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<Result<LibraryDisplayMode>> getLibraryDisplayMode() async {
     try {
       final libraryDisplayMode = await _sharedPreferencesService
@@ -199,6 +209,15 @@ class SettingsRepository {
   Future<Result<void>> setDynamicMode(bool dynamicMode) async {
     try {
       await _sharedPreferencesService.setDynamicMode(dynamicMode);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> setFilter(List<ReadingStatus> filter) async {
+    try {
+      await _sharedPreferencesService.setFilter(filter);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
