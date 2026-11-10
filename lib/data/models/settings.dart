@@ -7,8 +7,8 @@ enum LibrarySort {
   alphabeticalReverse,
   dateAdded,
   dateAddedReverse,
-  fileSize,
-  fileSizeReverse,
+  lastRead,
+  lastReadReverse,
 }
 
 enum ReadingDirection { leftToRight, rightToLeft, vertical }

@@ -27,11 +27,6 @@ class FolderMenu extends StatelessWidget {
       controller: menuController,
       menuChildren: [
         MenuItemButton(
-          onPressed: () => viewModel.parseLocalFolder.execute(folder),
-          trailingIcon: Icon(Icons.cached),
-          child: Text('Rescan'),
-        ),
-        MenuItemButton(
           onPressed: () {
             showDialog(
               context: context,
@@ -42,10 +37,7 @@ class FolderMenu extends StatelessWidget {
                       onPressed: () => context.pop(),
                       child: Text('Cancel'),
                     ),
-                    TextButton.icon(
-                      icon: Icon(Icons.delete_outline_rounded),
-                      iconAlignment: .end,
-                      label: Text('Delete'),
+                    TextButton(
                       onPressed: () {
                         context.pop();
                         viewModel.deleteLocalFolder.execute(folder);
@@ -58,6 +50,7 @@ class FolderMenu extends StatelessWidget {
                           ColorScheme.of(context).error,
                         ),
                       ),
+                      child: Text('Delete'),
                     ),
                   ],
                   content: Text(

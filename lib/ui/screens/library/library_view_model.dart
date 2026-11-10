@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../data/models/book.dart';
@@ -16,16 +18,13 @@ class LibraryViewModel extends ChangeNotifier {
     required this._settingsRepository,
   }) {
     addLocalFolder = Command0(_addLocalFolder);
+    clearSnackBar = Command0(_clearSnackBar);
     deleteLocalFolder = Command1(_deleteLocalFolder);
     disableSelectionMode = Command0(_disableSelectionMode);
-    getBookCover = Command1(_getBookCover);
-    getFolderCover1 = Command1(_getFolderCover1);
-    getFolderCover2 = Command1(_getFolderCover2);
-    getFolderCover3 = Command1(_getFolderCover3);
+    // getBookCover = Command1(_getBookCover);
     load = Command0(_load)..execute();
     markAsFinished = Command1(_markAsFinished);
     markAsUnread = Command1(_markAsUnread);
-    parseLocalFolder = Command1(_parseLocalFolder);
     toggleSelect = Command1(_toggleSelect);
     selectAll = Command0(_selectAll);
     setFilter = Command1(_setFilter);
@@ -39,16 +38,13 @@ class LibraryViewModel extends ChangeNotifier {
   final SettingsRepository _settingsRepository;
 
   late final Command0 addLocalFolder;
+  late final Command0 clearSnackBar;
   late final Command1<void, Folder> deleteLocalFolder;
   late final Command0 disableSelectionMode;
-  late final Command1<void, Book> getBookCover;
-  late final Command1<void, Folder> getFolderCover1;
-  late final Command1<void, Folder> getFolderCover2;
-  late final Command1<void, Folder> getFolderCover3;
+  // late final Command1<void, Book> getBookCover;
   late final Command0 load;
   late final Command1<void, Book> markAsFinished;
   late final Command1<void, Book> markAsUnread;
-  late final Command1<void, Folder> parseLocalFolder;
   late final Command1<void, int> toggleSelect;
   late final Command0 selectAll;
   late final Command1<void, ReadingStatus> setFilter;
@@ -66,6 +62,7 @@ class LibraryViewModel extends ChangeNotifier {
   late ReadingDirection _readingDirection;
   List<bool> _selected = [];
   int _selectedCount = 0;
+  String? _snackBar;
   String _title = 'Library';
 
   double? get coverAspectRatio => _coverAspectRatio;
@@ -78,20 +75,41 @@ class LibraryViewModel extends ChangeNotifier {
   ReadingDirection get readingDirection => _readingDirection;
   List<bool> get selected => _selected;
   int get selectedCount => _selectedCount;
+  String? get snackBar => _snackBar;
   String get title => _title;
 
   Future<Result<void>> _addLocalFolder() async {
-    final result = await _libraryRepository.addLocalFolder();
-    switch (result) {
-      case Ok():
-        if (result.value != null) {
-          _parseLocalFolder(result.value!);
-          _library.add(result.value!);
+    try {
+      final newFolder = await _libraryRepository.selectLocalFolder();
+      if (newFolder == null) {
+        _snackBar = 'No folder selected';
+      } else {
+        final existingFolder = await _libraryRepository.getFolderByPath(
+          newFolder,
+        );
+        if (existingFolder != null) {
+          _snackBar = 'Folder \'${existingFolder.title}\' already added';
+        } else {
+          final folder = await _libraryRepository.saveNewFolder(newFolder);
+          _library.add(folder);
           notifyListeners();
+          _snackBar = 'Added new folder \'${folder.title}\'';
+          _loadFolder(folder);
         }
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
+      }
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _clearSnackBar() async {
+    try {
+      _snackBar = null;
+      notifyListeners();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -99,7 +117,8 @@ class LibraryViewModel extends ChangeNotifier {
     final result = await _libraryRepository.deleteLocalFolder(folder);
     switch (result) {
       case Ok():
-        _loadLibrary();
+        _library.removeWhere((item) => item == folder);
+        notifyListeners();
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
@@ -118,7 +137,6 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<void> _filterLibrary() async {
-    await _loadLibrary();
     if (_filter.isNotEmpty) {
       _library.removeWhere((item) {
         if (item.runtimeType == Book) {
@@ -129,100 +147,84 @@ class LibraryViewModel extends ChangeNotifier {
         }
       });
     }
-    _disableSelectionMode();
+    if (_isSelectionMode) _disableSelectionMode();
   }
 
-  Future<Result<void>> _getBookCover(Book book) async {
-    final result = await _libraryRepository.getBookCover(book.path, book.id);
-    switch (result) {
-      case Ok():
-        book.cover = result.value;
-        notifyListeners();
-        _libraryRepository.updateBook(book);
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _getFolderCover1(Folder folder) async {
-    if (!parseLocalFolder.running) {
-      final result = await _libraryRepository.getFolderCover(folder.id, 0);
-      switch (result) {
-        case Ok():
-          folder.covers.add(result.value);
+  Future<void> _getFolderCovers(Folder folder) async {
+    folder.sort(_librarySort);
+    for (int i = 0; i < folder.covers.length; i++) {
+      if (folder.items.elementAtOrNull(i) == null) {
+        folder.covers[i] = '';
+      } else {
+        if (folder.items[i].runtimeType == Book) {
+          final item = folder.items[i] as Book;
+          if (item.cover == null) {
+            item.cover = await _libraryRepository.getBookCover(item);
+            _libraryRepository.updateBook(item);
+          }
+          folder.covers[i] = item.cover;
           notifyListeners();
-          _libraryRepository.updateFolder(folder);
-        case Error():
-          return Result.error(result.error);
-      }
-    }
-    return Result.ok(null);
-  }
-
-  Future<Result<void>> _getFolderCover2(Folder folder) async {
-    if (!parseLocalFolder.running) {
-      if (folder.covers.elementAtOrNull(0) != null) {
-        final result = await _libraryRepository.getFolderCover(folder.id, 1);
-        switch (result) {
-          case Ok():
-            folder.covers.add(result.value);
-            notifyListeners();
-            _libraryRepository.updateFolder(folder);
-          case Error():
-            return Result.error(result.error);
+        } else {
+          final item = folder.items[i] as Folder;
+          item.sort(_librarySort);
+          await _getFolderCovers(item);
+          folder.covers[i] = item.covers.first;
+          notifyListeners();
         }
       }
     }
-    return Result.ok(null);
-  }
-
-  Future<Result<void>> _getFolderCover3(Folder folder) async {
-    if (!parseLocalFolder.running) {
-      if (folder.covers.elementAtOrNull(1) != null) {
-        final result = await _libraryRepository.getFolderCover(folder.id, 2);
-        switch (result) {
-          case Ok():
-            folder.covers.add(result.value);
-            notifyListeners();
-            _libraryRepository.updateFolder(folder);
-          case Error():
-            return Result.error(result.error);
-        }
-      }
-    }
-    return Result.ok(null);
   }
 
   Future<Result<void>> _load() async {
     try {
-      await Future.wait([_loadFilter(), _loadLibrarySort()]);
       await Future.wait([
-        _loadFolder(),
-        _loadLibrary(),
+        _loadFilter(),
         _loadLibraryDisplayMode(),
         _loadLibraryDisplaySpacing(),
+        _loadLibrarySort(),
         _loadReadingDirection(),
+        _loadTitle(),
       ]);
-      await Future.wait([_disableSelectionMode(), _filterLibrary()]);
+      _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<void>> _loadLibrary() async {
-    final result = await _libraryRepository.getLibrary(_folderId);
-    switch (result) {
-      case Ok():
-        _library = result.value;
-        if (_library.isNotEmpty) {
-          await _sortLibrary();
-        }
+  Future<void> _loadBook(Book book) async {
+    if (book.cover == null || book.pageCount == null) {
+      final session = await _libraryRepository.openBook(book.id);
+      if (book.cover == null) {
+        book.cover = await _libraryRepository.saveCover(
+          session.book.metadata.cover,
+          book.id,
+        );
         notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
+      }
+      if (book.pageCount == null) {
+        book.pageCount = session.book.files.images.length;
+        notifyListeners();
+      }
+      _libraryRepository.updateBook(book);
+      session.dispose();
+    }
+  }
+
+  Future<void> _loadLibrary() async {
+    _library = await _libraryRepository.getLibrary(_folderId);
+    if (_library.isNotEmpty) {
+      await _filterLibrary();
+      await _sortLibrary();
+      _selected = List.filled(_library.length, false);
+      notifyListeners();
+      for (final item in _library) {
+        if (item.runtimeType == Folder) {
+          await _loadFolder(item as Folder);
+        } else {
+          await _loadBook(item as Book);
+        }
+      }
     }
   }
 
@@ -262,6 +264,13 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> _loadFolder(Folder folder) async {
+    folder.items = await _libraryRepository.getFolderItems(folder);
+    notifyListeners();
+    await _getFolderCovers(folder);
+    _libraryRepository.updateFolder(folder);
+  }
+
   Future<Result<void>> _loadLibrarySort() async {
     final result = await _settingsRepository.getLibrarySort();
     switch (result) {
@@ -274,20 +283,6 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _loadFolder() async {
-    if (_folderId != null) {
-      final result = await _libraryRepository.getFolder(_folderId);
-      switch (result) {
-        case Ok():
-          _title = result.value.title;
-          notifyListeners();
-        case Error():
-          return Result.error(result.error);
-      }
-    }
-    return Result.ok(null);
-  }
-
   Future<Result<void>> _loadReadingDirection() async {
     final result = await _settingsRepository.getReadingDirection();
     switch (result) {
@@ -297,6 +292,19 @@ class LibraryViewModel extends ChangeNotifier {
         return Result.ok(null);
       case Error():
         return Result.error(result.error);
+    }
+  }
+
+  Future<Result<void>> _loadTitle() async {
+    try {
+      if (_folderId != null) {
+        final folder = await _libraryRepository.getFolder(_folderId);
+        _title = folder.title;
+        notifyListeners();
+      }
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -320,17 +328,6 @@ class LibraryViewModel extends ChangeNotifier {
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _parseLocalFolder(Folder folder) async {
-    final result = await _libraryRepository.parseLocalFolder(folder);
-    switch (result) {
-      case Ok():
-        _loadLibrary();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
     }
   }
 
@@ -403,34 +400,34 @@ class LibraryViewModel extends ChangeNotifier {
   Future<void> _sortLibrary() async {
     switch (_librarySort) {
       case .alphabetical:
-        if (_library.firstOrNull?.title.replaceAll(RegExp(r'[^0-9]'), '') !=
-            '') {
-          _library.sort(
-            (a, b) => int.parse(
-              a.title.replaceAll(RegExp(r'[^0-9]'), ''),
-            ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), ''))),
-          );
-        } else {
-          _library.sort((a, b) => a.title.compareTo(b.title));
-        }
+        _library.sort((a, b) => _sortAlphabetically(a, b));
       case .alphabeticalReverse:
-        if (_library.first.title.replaceAll(RegExp(r'[^0-9]'), '') != '') {
-          _library.sort(
-            (b, a) => int.parse(
-              a.title.replaceAll(RegExp(r'[^0-9]'), ''),
-            ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), ''))),
-          );
-        } else {
-          _library.sort((b, a) => a.title.compareTo(b.title));
-        }
+        _library.sort((b, a) => _sortAlphabetically(a, b));
       case .dateAdded:
         _library.sort((a, b) => a.dateAdded.compareTo(b.dateAdded));
       case .dateAddedReverse:
         _library.sort((b, a) => a.dateAdded.compareTo(b.dateAdded));
-      case .fileSize:
-      case .fileSizeReverse:
+      case .lastRead:
+      case .lastReadReverse:
     }
-    _disableSelectionMode();
+    for (final item in _library) {
+      if (item.runtimeType == Folder) {
+        final folder = item as Folder;
+        folder.sort(_librarySort);
+        await _getFolderCovers(folder);
+      }
+    }
+    if (_isSelectionMode) _disableSelectionMode();
+  }
+
+  int _sortAlphabetically(Library a, Library b) {
+    if (a.title.replaceAll(RegExp(r'[^0-9]'), '') != '') {
+      return int.parse(
+        a.title.replaceAll(RegExp(r'[^0-9]'), ''),
+      ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), '')));
+    } else {
+      return a.title.compareTo(b.title);
+    }
   }
 
   Future<Result<void>> _toggleSelect(int index) async {

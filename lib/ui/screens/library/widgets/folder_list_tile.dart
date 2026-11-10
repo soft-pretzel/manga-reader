@@ -27,15 +27,6 @@ class FolderListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!folder.parsing) {
-      if (folder.covers.elementAtOrNull(0) == null) {
-        viewModel.getFolderCover1.execute(folder);
-      } else if (folder.covers[0] != '') {
-        if (!File(folder.covers[0]!).existsSync()) {
-          viewModel.getFolderCover1.execute(folder);
-        }
-      }
-    }
     return SizedBox(
       height: switch (viewModel.libraryDisplaySpacing) {
         .comfortable => 120,
@@ -53,15 +44,10 @@ class FolderListTile extends StatelessWidget {
           },
           child: InkWell(
             onTap: () {
-              if (!folder.parsing &&
-                  !viewModel.getFolderCover1.running &&
-                  !viewModel.getFolderCover2.running &&
-                  !viewModel.getFolderCover3.running) {
-                context.pushNamed(
-                  RouteNames.folder,
-                  pathParameters: {'folderId': folder.id},
-                );
-              }
+              context.pushNamed(
+                RouteNames.folder,
+                pathParameters: {'folderId': folder.id},
+              );
             },
             child: FolderMenu(
               folder: folder,
@@ -78,7 +64,7 @@ class FolderListTile extends StatelessWidget {
                   spacing: 16,
                   children: [
                     Expanded(
-                      child: viewModel.getFolderCover1.running || folder.parsing
+                      child: folder.covers[0] == null
                           ? Center(child: CircularProgressIndicator())
                           : Center(
                               child: Image.file(
@@ -108,9 +94,9 @@ class FolderListTile extends StatelessWidget {
                               style: TextTheme.of(context).bodyMedium!.apply(
                                 color: ColorScheme.of(context).outline,
                               ),
-                              text: folder.itemCount == 1
-                                  ? '${folder.itemCount} item'
-                                  : '${folder.itemCount} items',
+                              text: folder.items.length == 1
+                                  ? '${folder.items.length} item'
+                                  : '${folder.items.length} items',
                             ),
                           ),
                         ],

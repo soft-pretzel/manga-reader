@@ -60,7 +60,6 @@ class LocalStorageService {
 
   Future<String?> extractBookCover(String bookPath, String id) async {
     final token = RootIsolateToken.instance;
-    // final coverWithSize = CoverWithSize();
     final cover = await Isolate.run(() async {
       BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
       BookSession session;
@@ -81,9 +80,6 @@ class LocalStorageService {
         );
         await file.writeAsBytes(cover.bytes, flush: true);
         return file.path;
-        // coverWithSize.cover = file.path;
-        // coverWithSize.height = cover.height;
-        // coverWithSize.width = cover.width;
       }
       return null;
     });
@@ -206,7 +202,7 @@ class LocalStorageService {
     return session;
   }
 
-  Future<String?> selectFolder() async {
+  Future<String?> pickDirectory() async {
     if (Platform.isAndroid) {
       final safUtil = SafUtil();
       final safDocumentFile = await safUtil.pickDirectory(

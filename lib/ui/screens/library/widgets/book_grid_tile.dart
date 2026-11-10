@@ -27,13 +27,6 @@ class BookGridTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (book.cover == null) {
-      viewModel.getBookCover.execute(book);
-    } else if (book.cover != '') {
-      if (!File(book.cover!).existsSync()) {
-        viewModel.getBookCover.execute(book);
-      }
-    }
     return Column(
       children: [
         Expanded(
@@ -63,11 +56,11 @@ class BookGridTile extends StatelessWidget {
                   margin: .all(0),
                   child: Stack(
                     children: [
-                      viewModel.getBookCover.running
+                      book.cover == null
                           ? SizedBox.expand(
                               child: Center(child: CircularProgressIndicator()),
                             )
-                          : book.cover != null && book.cover != ''
+                          : book.cover != ''
                           ? Image.file(File(book.cover!))
                           : SizedBox.expand(),
                       book.readingStatus == .inProgress
@@ -102,7 +95,7 @@ class BookGridTile extends StatelessWidget {
                                         borderRadius: .all(.circular(2)),
                                         color: ColorScheme.of(context).primary,
                                         value:
-                                            book.currentPage / book.pageCount,
+                                            book.currentPage / book.pageCount!,
                                       ),
                                     ),
                                   ),

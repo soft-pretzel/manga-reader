@@ -79,7 +79,7 @@ class BookCard extends StatelessWidget {
                                   ).surface.withAlpha(153),
                                   borderRadius: .all(.circular(2)),
                                   color: ColorScheme.of(context).primary,
-                                  value: book.currentPage / book.pageCount,
+                                  value: book.currentPage / book.pageCount!,
                                 ),
                               ),
                             ),
@@ -113,7 +113,8 @@ class BookCard extends StatelessWidget {
                   style: DefaultTextStyle.of(
                     context,
                   ).style.apply(color: ColorScheme.of(context).outline),
-                  text: '${(book.currentPage / book.pageCount * 100).round()}%',
+                  text:
+                      '${(book.currentPage / book.pageCount! * 100).round()}%',
                 ),
               ),
             ],

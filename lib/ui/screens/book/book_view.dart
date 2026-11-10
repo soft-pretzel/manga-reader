@@ -174,7 +174,7 @@ class BookView extends StatelessWidget {
                                     title: 'Tags',
                                   ),
                                   InfoTile(
-                                    info: viewModel.book.format.name,
+                                    info: viewModel.book.format?.name,
                                     title: 'File format',
                                   ),
                                   LinkTile(

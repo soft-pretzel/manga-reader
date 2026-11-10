@@ -115,8 +115,8 @@ class DisplaySettings extends StatelessWidget {
                           viewModel.librarySort == .alphabeticalReverse,
                       viewModel.librarySort == .dateAdded ||
                           viewModel.librarySort == .dateAddedReverse,
-                      viewModel.librarySort == .fileSize ||
-                          viewModel.librarySort == .fileSizeReverse,
+                      viewModel.librarySort == .lastRead ||
+                          viewModel.librarySort == .lastReadReverse,
                     ],
                     onPressed: (index) {
                       switch (index) {
@@ -135,10 +135,10 @@ class DisplaySettings extends StatelessWidget {
                             viewModel.setLibrarySort.execute(.dateAdded);
                           }
                         case 2:
-                          if (viewModel.librarySort == .fileSize) {
-                            viewModel.setLibrarySort.execute(.fileSizeReverse);
+                          if (viewModel.librarySort == .lastRead) {
+                            viewModel.setLibrarySort.execute(.lastReadReverse);
                           } else {
-                            viewModel.setLibrarySort.execute(.fileSize);
+                            viewModel.setLibrarySort.execute(.lastRead);
                           }
                       }
                     },
@@ -166,10 +166,10 @@ class DisplaySettings extends StatelessWidget {
                       Row(
                         mainAxisAlignment: .center,
                         children: [
-                          Text('File size'),
-                          if (viewModel.librarySort == .fileSize)
+                          Text('Last read'),
+                          if (viewModel.librarySort == .lastRead)
                             Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.librarySort == .fileSizeReverse)
+                          if (viewModel.librarySort == .lastReadReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),

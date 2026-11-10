@@ -9,7 +9,7 @@ class Book extends Library {
   String? cover;
   int currentPage;
   String? description;
-  BookFormat format;
+  BookFormat? format;
   List<String> genres;
   String? goodreads;
   String? isbn;
@@ -17,7 +17,7 @@ class Book extends Library {
   DateTime? lastRead;
   String? libraryThing;
   String? openLibrary;
-  int pageCount;
+  int? pageCount;
   int? publishYear;
   String? publisher;
   ReadingStatus readingStatus;
@@ -32,7 +32,7 @@ class Book extends Library {
     this.currentPage = 1,
     required super.dateAdded,
     this.description,
-    required this.format,
+    this.format,
     this.genres = const [],
     this.goodreads,
     this.isbn,
@@ -40,7 +40,7 @@ class Book extends Library {
     this.lastRead,
     this.libraryThing,
     this.openLibrary,
-    required this.pageCount,
+    this.pageCount,
     required super.parentId,
     required super.path,
     this.publishYear,
@@ -61,7 +61,7 @@ class Book extends Library {
       'current_page': currentPage,
       'date_added': dateAdded.toString(),
       if (description != null) 'description': description,
-      'format': format.index,
+      if (format != null) 'format': format!.index,
       'genres': genres.join(","),
       if (goodreads != null) 'goodreads': goodreads,
       if (isbn != null) 'isbn': isbn,
@@ -69,7 +69,7 @@ class Book extends Library {
       if (lastRead != null) 'last_read': lastRead.toString(),
       if (libraryThing != null) 'library_thing': libraryThing,
       if (openLibrary != null) 'open_library': openLibrary,
-      'page_count': pageCount,
+      if (pageCount != null) 'page_count': pageCount,
       'parent_id': parentId,
       'path': path,
       if (publishYear != null) 'publish_year': publishYear,
@@ -87,7 +87,9 @@ class Book extends Library {
       cover = map['cover']?.toString(),
       currentPage = int.parse(map['current_page'].toString()),
       description = map['description']?.toString(),
-      format = BookFormat.values[int.parse(map['format'].toString())],
+      format = map['format'] != null
+          ? BookFormat.values[int.parse(map['format'].toString())]
+          : null,
       genres = map['genres'].toString().split(","),
       goodreads = map['goodreads']?.toString(),
       isbn = map['isbn']?.toString(),
@@ -95,7 +97,7 @@ class Book extends Library {
       lastRead = DateTime.tryParse(map['last_read'].toString()),
       libraryThing = map['library_thing']?.toString(),
       openLibrary = map['open_library']?.toString(),
-      pageCount = int.parse(map['page_count'].toString()),
+      pageCount = int.tryParse(map['page_count'].toString()),
       publishYear = int.tryParse(map['publish_year'].toString()),
       publisher = map['publisher']?.toString(),
       readingStatus =

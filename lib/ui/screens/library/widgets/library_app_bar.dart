@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../data/models/book.dart';
 import '../library_view_model.dart';
+import 'add_library.dart';
 import 'display_settings.dart';
 
 class LibraryAppBar extends StatelessWidget {
@@ -31,6 +31,7 @@ class LibraryAppBar extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.tune_rounded),
                 onPressed: () => showModalBottomSheet(
+                  backgroundColor: ColorScheme.of(context).surfaceDim,
                   builder: (context) {
                     return DisplaySettings(viewModel: viewModel);
                   },
@@ -75,45 +76,39 @@ class LibraryAppBar extends StatelessWidget {
                     ),
                   if (!viewModel.isSelectionMode)
                     MenuItemButton(
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (context) {
-                          return SimpleDialog(
-                            title: Text('Add new library'),
-                            children: [
-                              SimpleDialogOption(
-                                onPressed: () {
-                                  context.pop();
-                                  viewModel.addLocalFolder.execute();
-                                },
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.folder_outlined),
-                                    SizedBox(width: 8),
-                                    Text('Local folder'),
-                                  ],
-                                ),
+                      onPressed: () async {
+                        await showModalBottomSheet(
+                          backgroundColor: ColorScheme.of(context).surfaceDim,
+                          builder: (context) {
+                            return AddLibrary(
+                              context: context,
+                              viewModel: viewModel,
+                            );
+                          },
+                          context: context,
+                          showDragHandle: true,
+                        );
+                        if (context.mounted && viewModel.snackBar != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              action: SnackBarAction(
+                                label: 'Dismiss',
+                                onPressed: () => ScaffoldMessenger.of(
+                                  context,
+                                ).hideCurrentSnackBar(),
                               ),
-                              SimpleDialogOption(
-                                onPressed: () {
-                                  context.pop();
-                                },
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.computer_rounded),
-                                    SizedBox(width: 8),
-                                    Text('OPDS server'),
-                                  ],
-                                ),
-                              ),
-                            ],
+                              content: Text(viewModel.snackBar!),
+                              persist: false,
+                            ),
                           );
-                        },
-                      ),
+                          viewModel.clearSnackBar.execute();
+                        }
+                      },
                       trailingIcon: Icon(Icons.my_library_add_outlined),
                       child: Text('Add new library'),
                     ),
-                  if (viewModel.selected.any((item) => item == false))
+                  if (viewModel.library.isNotEmpty &&
+                      viewModel.selected.any((item) => item == false))
                     MenuItemButton(
                       onPressed: () {
                         viewModel.selectAll.execute();

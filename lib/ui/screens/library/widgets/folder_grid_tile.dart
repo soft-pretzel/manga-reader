@@ -28,29 +28,6 @@ class FolderGridTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!folder.parsing) {
-      if (folder.covers.elementAtOrNull(0) == null) {
-        viewModel.getFolderCover1.execute(folder);
-      } else if (folder.covers[0] != '') {
-        if (!File(folder.covers[0]!).existsSync()) {
-          viewModel.getFolderCover1.execute(folder);
-        }
-      }
-      if (folder.covers.elementAtOrNull(1) == null) {
-        viewModel.getFolderCover2.execute(folder);
-      } else if (folder.covers[1] != '') {
-        if (!File(folder.covers[1]!).existsSync()) {
-          viewModel.getFolderCover2.execute(folder);
-        }
-      }
-      if (folder.covers.elementAtOrNull(2) == null) {
-        viewModel.getFolderCover3.execute(folder);
-      } else if (folder.covers[2] != '') {
-        if (!File(folder.covers[2]!).existsSync()) {
-          viewModel.getFolderCover3.execute(folder);
-        }
-      }
-    }
     return Column(
       children: [
         Expanded(
@@ -61,15 +38,10 @@ class FolderGridTile extends StatelessWidget {
                 if (!viewModel.isSelectionMode) _handleLongPress(details);
               },
               onTap: () {
-                if (!folder.parsing &&
-                    !viewModel.getFolderCover1.running &&
-                    !viewModel.getFolderCover2.running &&
-                    !viewModel.getFolderCover3.running) {
-                  context.pushNamed(
-                    RouteNames.folder,
-                    pathParameters: {'folderId': folder.id},
-                  );
-                }
+                context.pushNamed(
+                  RouteNames.folder,
+                  pathParameters: {'folderId': folder.id},
+                );
               },
               child: FolderMenu(
                 folder: folder,
@@ -85,17 +57,11 @@ class FolderGridTile extends StatelessWidget {
                         color: ColorScheme.of(context).surfaceContainer,
                         margin: .all(0),
                         child:
-                            folder.covers.elementAtOrNull(2) != null &&
-                                folder.covers.elementAtOrNull(2) != ''
+                            folder.covers[2] != null && folder.covers[2] != ''
                             ? Image.file(
                                 File(folder.covers[2]!),
                                 isAntiAlias: true,
                                 opacity: AlwaysStoppedAnimation(0.4),
-                              )
-                            : viewModel.coverAspectRatio != null
-                            ? AspectRatio(
-                                aspectRatio: viewModel.coverAspectRatio!,
-                                child: SizedBox.expand(),
                               )
                             : SizedBox.expand(),
                       ),
@@ -107,17 +73,11 @@ class FolderGridTile extends StatelessWidget {
                         color: ColorScheme.of(context).surfaceContainerHigh,
                         margin: .all(0),
                         child:
-                            folder.covers.elementAtOrNull(1) != null &&
-                                folder.covers.elementAtOrNull(1) != ''
+                            folder.covers[1] != null && folder.covers[1] != ''
                             ? Image.file(
                                 File(folder.covers[1]!),
                                 isAntiAlias: true,
-                                opacity: AlwaysStoppedAnimation(0.7),
-                              )
-                            : viewModel.coverAspectRatio != null
-                            ? AspectRatio(
-                                aspectRatio: viewModel.coverAspectRatio!,
-                                child: SizedBox.expand(),
+                                opacity: AlwaysStoppedAnimation(0.4),
                               )
                             : SizedBox.expand(),
                       ),
@@ -126,12 +86,11 @@ class FolderGridTile extends StatelessWidget {
                       clipBehavior: .antiAlias,
                       color: ColorScheme.of(context).surfaceContainerHighest,
                       margin: .all(0),
-                      child: viewModel.getFolderCover1.running || folder.parsing
+                      child: folder.covers[0] == null
                           ? SizedBox.expand(
                               child: Center(child: CircularProgressIndicator()),
                             )
-                          : folder.covers.elementAtOrNull(0) != null &&
-                                folder.covers.elementAtOrNull(0) != ''
+                          : folder.covers[0] != ''
                           ? Image.file(
                               File(folder.covers[0]!),
                               isAntiAlias: true,
@@ -172,9 +131,9 @@ class FolderGridTile extends StatelessWidget {
                     style: DefaultTextStyle.of(
                       context,
                     ).style.apply(color: ColorScheme.of(context).outline),
-                    text: folder.itemCount == 1
-                        ? '${folder.itemCount} item'
-                        : '${folder.itemCount} items',
+                    text: folder.items.length == 1
+                        ? '${folder.items.length} item'
+                        : '${folder.items.length} items',
                   ),
                 ),
               ],

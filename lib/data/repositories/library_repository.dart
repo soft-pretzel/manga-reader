@@ -6,6 +6,7 @@ import 'package:unseal/unseal.dart' as unseal;
 import '../models/book.dart';
 import '../models/folder.dart';
 import '../models/library.dart';
+import '../models/settings.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../../utils/result.dart';
@@ -24,27 +25,6 @@ class LibraryRepository {
 
   static List<String> comicTypes = ['cbt', 'cbz', 'tar', 'zip'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
-
-  Future<Result<Folder?>> addLocalFolder() async {
-    try {
-      final path = await _localStorageService.selectFolder();
-      if (path != null) {
-        final folder = Folder(
-          id: await _databaseService.generateId(),
-          dateAdded: DateTime.now(),
-          itemCount: (await _localStorageService.getFiles(path)).length,
-          title: await _localStorageService.getFileName(path),
-          path: path,
-          parsing: true,
-        );
-        await _databaseService.insertFolder(folder);
-        return Result.ok(folder);
-      }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
 
   Future<Result<void>> deleteLocalFolder(Folder folder) async {
     try {
@@ -114,12 +94,23 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<String>> getBookCover(String path, String id) async {
+  Future<String> getBookCover(Book book) async {
+    final cover = await _localStorageService.extractBookCover(
+      book.path,
+      book.id,
+    );
+    return cover ?? '';
+  }
+
+  Future<Folder> getFolder(String id) async {
+    return await _databaseService.getFolderById(id);
+  }
+
+  Future<Folder?> getFolderByPath(String path) async {
     try {
-      final cover = await _localStorageService.extractBookCover(path, id);
-      return Result.ok(cover ?? '');
-    } on Exception catch (e) {
-      return Result.error(e);
+      return await _databaseService.getFolderByPath(path);
+    } on Exception {
+      rethrow;
     }
   }
 
@@ -132,26 +123,13 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<List<Library>>> getLibrary(String? parentId) async {
-    try {
-      final List<Library> library = [];
-      library.addAll(await _databaseService.getFoldersByParentId(parentId));
-      if (parentId != null) {
-        library.addAll(await _databaseService.getBooksByParentId(parentId));
-      }
-      return Result.ok(library);
-    } on Exception catch (e) {
-      return Result.error(e);
+  Future<List<Library>> getLibrary(String? parentId) async {
+    final List<Library> library = [];
+    library.addAll(await _databaseService.getFoldersByParentId(parentId));
+    if (parentId != null) {
+      library.addAll(await _databaseService.getBooksByParentId(parentId));
     }
-  }
-
-  Future<Result<Folder>> getFolder(String id) async {
-    try {
-      final folder = await _databaseService.getFolderById(id);
-      return Result.ok(folder);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    return library;
   }
 
   Future<Result<String>> getName(String path) async {
@@ -161,6 +139,10 @@ class LibraryRepository {
     } on Exception catch (e) {
       return Result.error(e);
     }
+  }
+
+  Future<int> getPageCount(Book book) async {
+    return await _localStorageService.getPageCount(book.path);
   }
 
   Future<Result<void>> markAsFinished(String id) async {
@@ -185,14 +167,9 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<unseal.BookSession>> openBook(String id) async {
-    try {
-      final book = await _databaseService.getBook(id);
-      final session = await _localStorageService.openBook(book.path, book.id);
-      return Result.ok(session);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<unseal.BookSession> openBook(String id) async {
+    final book = await _databaseService.getBook(id);
+    return await _localStorageService.openBook(book.path, book.id);
   }
 
   Future<Result<void>> openLink(Uri uri) async {
@@ -204,82 +181,88 @@ class LibraryRepository {
     }
   }
 
-  Future<Result<void>> parseLocalFolder(Folder folder) async {
-    try {
-      final items = await _localStorageService.getFiles(folder.path);
-      for (final item in items) {
-        if (await _localStorageService.isDir(item)) {
-          final existingFolder = await _databaseService.getFolderByPath(item);
-          if (existingFolder == null) {
-            final newFolder = Folder(
-              id: await _databaseService.generateId(),
-              dateAdded: DateTime.now(),
-              itemCount: (await _localStorageService.getFiles(item)).length,
-              title: await _localStorageService.getFileName(item),
-              parentId: folder.id,
-              path: item,
-            );
-            await _databaseService.insertFolder(newFolder);
-            await parseLocalFolder(newFolder);
-          } else {
-            existingFolder.itemCount = (await _localStorageService.getFiles(
-              item,
-            )).length;
-            await _databaseService.updateFolder(existingFolder);
-            await parseLocalFolder(existingFolder);
-          }
-        } else {
-          final existingBook = await _databaseService.getBookByPath(item);
-          if (existingBook == null) {
-            final structure = await _localStorageService.getBookStructure(item);
-            final newBook = Book(
-              id: await _databaseService.generateId(),
-              author: structure.metadata.authors.firstOrNull,
-              dateAdded: DateTime.now(),
-              description: structure.metadata.description,
-              format: structure.format,
-              isbn: structure.metadata.isbn,
-              language: structure.metadata.languages.firstOrNull,
-              pageCount: structure.files.images.length,
-              parentId: folder.id,
-              path: item,
-              publishYear: structure.metadata.publishedAt?.year,
-              publisher: structure.metadata.publisher,
-              series: structure.metadata.series ?? folder.title,
-              seriesIndex: structure.metadata.seriesIndex,
-              genres: structure.metadata.subjects,
-              title:
-                  structure.metadata.title ??
-                  await _localStorageService.getFileName(item),
-            );
-            await _databaseService.insertBook(newBook);
-          }
+  Future<List<Library>> getFolderItems(Folder folder) async {
+    final List<Library> items = List.from(folder.items);
+    final files = await _localStorageService.getFiles(folder.path);
+    for (final file in files) {
+      if (await _localStorageService.isDir(file)) {
+        final existingFolder = await _databaseService.getFolderByPath(file);
+        if (existingFolder == null) {
+          final newFolder = await saveNewFolder(file, parentId: folder.id);
+          await getFolderItems(newFolder);
+          items.add(newFolder);
+        }
+      } else {
+        final existingBook = await _databaseService.getBookByPath(file);
+        if (existingBook == null) {
+          final newBook = await saveNewBook(file, parentId: folder.id);
+          items.add(newBook);
         }
       }
-      final List<Library> existingItems = [];
-      existingItems.addAll(
-        await _databaseService.getFoldersByParentId(folder.id),
-      );
-      existingItems.addAll(
-        await _databaseService.getBooksByParentId(folder.id),
-      );
-      for (final existingItem in existingItems) {
-        if (!items.contains(existingItem.path)) {
-          if (existingItem.runtimeType == Folder) {
-            await _databaseService.deleteFolder(existingItem.id);
-          } else {
-            final existingBook = existingItem as Book;
-            await _databaseService.deleteBook(existingItem.id);
-            if (existingBook.cover != null && existingBook.cover != '') {
-              await _localStorageService.deleteFile(existingItem.cover!);
-            }
-          }
-        }
-      }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
     }
+    return items;
+    // final List<Library> existingItems = [];
+    // existingItems.addAll(
+    //   await _databaseService.getFoldersByParentId(folder.id),
+    // );
+    // existingItems.addAll(
+    //   await _databaseService.getBooksByParentId(folder.id),
+    // );
+    // for (final existingItem in existingItems) {
+    //   if (!items.contains(existingItem.path)) {
+    //     if (existingItem.runtimeType == Folder) {
+    //       await _databaseService.deleteFolder(existingItem.id);
+    //     } else {
+    //       final existingBook = existingItem as Book;
+    //       await _databaseService.deleteBook(existingItem.id);
+    //       if (existingBook.cover != null && existingBook.cover != '') {
+    //         await _localStorageService.deleteFile(existingItem.cover!);
+    //       }
+    //     }
+    //   }
+    // }
+  }
+
+  Future<String?> saveCover(unseal.BookCover? cover, String id) async {
+    if (cover != null) {
+      final cache = await _localStorageService.getCoversCache();
+      final file = File(
+        '${cache.path}${Platform.pathSeparator}$id.${cover.fileExtension}',
+      );
+      await file.writeAsBytes(cover.bytes, flush: true);
+      return file.path;
+    } else {
+      return null;
+    }
+  }
+
+  Future<Folder> saveNewFolder(String path, {String? parentId}) async {
+    final folder = Folder(
+      id: await _databaseService.generateId(),
+      covers: List.filled(3, null),
+      dateAdded: DateTime.now(),
+      parentId: parentId,
+      path: path,
+      title: await _localStorageService.getFileName(path),
+    );
+    _databaseService.insertFolder(folder);
+    return folder;
+  }
+
+  Future<Book> saveNewBook(String path, {required String parentId}) async {
+    final book = Book(
+      id: await _databaseService.generateId(),
+      dateAdded: DateTime.now(),
+      parentId: parentId,
+      path: path,
+      title: await _localStorageService.getFileName(path),
+    );
+    await _databaseService.insertBook(book);
+    return book;
+  }
+
+  Future<String?> selectLocalFolder() async {
+    return await _localStorageService.pickDirectory();
   }
 
   Future<void> updateBook(Book book) async {
@@ -288,65 +271,5 @@ class LibraryRepository {
 
   Future<void> updateFolder(Folder folder) async {
     await _databaseService.updateFolder(folder);
-  }
-
-  Future<Result<String>> getFolderCover(String id, int i) async {
-    final List<Library> library = [];
-    library.addAll(await _databaseService.getFoldersByParentId(id));
-    library.addAll(await _databaseService.getBooksByParentId(id));
-    if (library.length < i + 1) return Result.ok('');
-    if (library.length > 1) {
-      library.sort(
-        (a, b) => int.parse(
-          a.title.replaceAll(RegExp(r'[^0-9]'), ''),
-        ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), ''))),
-      );
-    }
-    final item = library[i];
-    if (item.runtimeType == Book) {
-      final book = item as Book;
-      if (book.cover == null) {
-        final cover = await _localStorageService.extractBookCover(
-          book.path,
-          book.id,
-        );
-        book.cover = cover;
-        _databaseService.updateBook(book);
-      } else if (book.cover != '') {
-        if (!File(book.cover!).existsSync()) {
-          final cover = await _localStorageService.extractBookCover(
-            book.path,
-            book.id,
-          );
-          book.cover = cover;
-          _databaseService.updateBook(book);
-        }
-      }
-      return Result.ok(book.cover!);
-    } else {
-      final folder = item as Folder;
-      if (folder.covers.firstOrNull == null) {
-        final result = await getFolderCover(folder.id, 0);
-        switch (result) {
-          case Ok():
-            folder.covers.add(result.value);
-            _databaseService.updateFolder(folder);
-          case Error():
-            return Result.error(result.error);
-        }
-      } else if (folder.covers.first != '') {
-        if (!File(folder.covers.first!).existsSync()) {
-          final result = await getFolderCover(folder.id, 0);
-          switch (result) {
-            case Ok():
-              folder.covers.add(result.value);
-              _databaseService.updateFolder(folder);
-            case Error():
-              return Result.error(result.error);
-          }
-        }
-      }
-      return Result.ok(folder.covers.first!);
-    }
   }
 }

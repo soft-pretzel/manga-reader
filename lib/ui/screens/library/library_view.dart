@@ -36,9 +36,6 @@ class LibraryView extends StatelessWidget {
                     text: 'Error loading Library',
                   );
                 }
-                if (viewModel.addLocalFolder.running) {
-                  return Center(child: CircularProgressIndicator());
-                }
                 if (viewModel.library.isEmpty) {
                   return EmptyLibraryScreen();
                 }
@@ -97,29 +94,30 @@ class LibraryView extends StatelessWidget {
                       ),
                     );
                   case .list:
-                    return ListView.separated(
-                      clipBehavior: .antiAlias,
-                      itemBuilder: (context, index) {
-                        if (viewModel.library[index].runtimeType == Folder) {
-                          return FolderListTile(
-                            folder: viewModel.library[index] as Folder,
-                            index: index,
-                            viewModel: viewModel,
-                          );
-                        } else {
-                          return BookListTile(
-                            book: viewModel.library[index] as Book,
-                            index: index,
-                            viewModel: viewModel,
-                          );
-                        }
-                      },
-                      itemCount: viewModel.library.length,
-                      padding: .all(0),
-                      separatorBuilder: (context, index) {
-                        return Divider(height: 0);
-                      },
-                    );
+                    return SizedBox.shrink();
+                  // return ListView.separated(
+                  //   clipBehavior: .antiAlias,
+                  //   itemBuilder: (context, index) {
+                  //     if (viewModel.library[index].runtimeType == Folder) {
+                  //       return FolderListTile(
+                  //         folder: viewModel.library[index] as Folder,
+                  //         index: index,
+                  //         viewModel: viewModel,
+                  //       );
+                  //     } else {
+                  //       return BookListTile(
+                  //         book: viewModel.library[index] as Book,
+                  //         index: index,
+                  //         viewModel: viewModel,
+                  //       );
+                  //     }
+                  //   },
+                  //   itemCount: viewModel.library.length,
+                  //   padding: .all(0),
+                  //   separatorBuilder: (context, index) {
+                  //     return Divider(height: 0);
+                  //   },
+                  // );
                 }
               },
             ),

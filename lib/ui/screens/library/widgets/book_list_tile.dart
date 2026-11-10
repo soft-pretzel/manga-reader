@@ -27,13 +27,6 @@ class BookListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (book.cover == null) {
-      viewModel.getBookCover.execute(book);
-    } else if (book.cover != '') {
-      if (!File(book.cover!).existsSync()) {
-        viewModel.getBookCover.execute(book);
-      }
-    }
     return SizedBox(
       height: switch (viewModel.libraryDisplaySpacing) {
         .comfortable => 120,
@@ -75,7 +68,7 @@ class BookListTile extends StatelessWidget {
                       child: LinearProgressIndicator(
                         backgroundColor: Colors.transparent,
                         minHeight: .infinity,
-                        value: book.currentPage / book.pageCount,
+                        value: book.currentPage / book.pageCount!,
                         valueColor: AlwaysStoppedAnimation(
                           ColorScheme.of(context).primary.withAlpha(24),
                         ),
@@ -94,9 +87,9 @@ class BookListTile extends StatelessWidget {
                           child: Stack(
                             children: [
                               Center(
-                                child: viewModel.getBookCover.running
+                                child: book.cover == null
                                     ? CircularProgressIndicator()
-                                    : book.cover != null && book.cover != ''
+                                    : book.cover != ''
                                     ? Image.file(
                                         File(book.cover!),
                                         color: viewModel.selected[index]
@@ -168,7 +161,7 @@ class BookListTile extends StatelessWidget {
                             switch (book.readingStatus) {
                               .unread => 'Unread',
                               .inProgress =>
-                                '${(book.currentPage / book.pageCount * 100).round()}%',
+                                '${(book.currentPage / book.pageCount! * 100).round()}%',
                               .finished => 'Finished',
                             },
                             textAlign: .end,

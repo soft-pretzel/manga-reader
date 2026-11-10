@@ -116,7 +116,7 @@ class ReaderViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _book = result.value;
-        _pages = List.filled(_book.pageCount, null);
+        _pages = List.filled(_book.pageCount!, null);
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -137,33 +137,32 @@ class ReaderViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _loadPages() async {
-    final result = await _libraryRepository.openBook(_bookId);
-    switch (result) {
-      case Ok():
-        final session = result.value;
-        final pages = session.book.files.images;
-        Future<void> loadPage(int index) async {
-          _pages[index] = await session.loadResource(pages[index].path);
-          notifyListeners();
+    try {
+      final session = await _libraryRepository.openBook(_bookId);
+      final pages = session.book.files.images;
+      Future<void> loadPage(int index) async {
+        _pages[index] = await session.loadResource(pages[index].path);
+        notifyListeners();
+      }
+
+      int i = _book.currentPage - 1;
+      int j = i + 1;
+      final List<Future> futures = [];
+      while (futures.length < pages.length) {
+        if (i >= 0) {
+          futures.add(loadPage(i));
+          i--;
         }
-        int i = _book.currentPage - 1;
-        int j = i + 1;
-        final List<Future> futures = [];
-        while (futures.length < pages.length) {
-          if (i >= 0) {
-            futures.add(loadPage(i));
-            i--;
-          }
-          if (j < pages.length) {
-            futures.add(loadPage(j));
-            j++;
-          }
+        if (j < pages.length) {
+          futures.add(loadPage(j));
+          j++;
         }
-        await Future.wait(futures);
-        session.dispose();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
+      }
+      await Future.wait(futures);
+      session.dispose();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -252,7 +251,7 @@ class ReaderViewModel extends ChangeNotifier {
 
   Future<Result<void>> _setReadingStatus() async {
     try {
-      if (_book.currentPage + 4 >= _book.pageCount) {
+      if (_book.currentPage + 4 >= _book.pageCount!) {
         _book.readingStatus = .finished;
       } else if (_book.currentPage == 1) {
         _book.readingStatus = .unread;
