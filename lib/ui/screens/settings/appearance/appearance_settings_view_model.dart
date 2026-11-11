@@ -38,89 +38,38 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      await Future.wait([
-        _loadDynamicMode(),
-        _loadOledDarkMode(),
-        _loadThemeColor(),
-        _loadThemeMode(),
-      ]);
+      _dynamicMode = await _settingsRepository.getDynamicMode();
+      _oledDarkMode = await _settingsRepository.getOledDarkMode();
+      _themeColor = await _settingsRepository.getThemeColor();
+      _themeMode = await _settingsRepository.getThemeMode();
+      notifyListeners();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<void>> _loadDynamicMode() async {
-    final result = await _settingsRepository.getDynamicMode();
-    switch (result) {
-      case Ok():
-        _dynamicMode = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadOledDarkMode() async {
-    final result = await _settingsRepository.getOledDarkMode();
-    switch (result) {
-      case Ok():
-        _oledDarkMode = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadThemeColor() async {
-    final result = await _settingsRepository.getThemeColor();
-    switch (result) {
-      case Ok():
-        _themeColor = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadThemeMode() async {
-    final result = await _settingsRepository.getThemeMode();
-    switch (result) {
-      case Ok():
-        _themeMode = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
   Future<Result<void>> _setThemeColor(Color color) async {
-    final result = await _settingsRepository.setThemeColor(color);
-    switch (result) {
-      case Ok():
-        _themeColor = color;
-        notifyListeners();
-        _themeProvider.loadThemeColor();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
+    try {
+      _themeColor = color;
+      notifyListeners();
+      await _settingsRepository.setThemeColor(color);
+      _themeProvider.loadThemeColor();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
   Future<Result<void>> _setThemeMode(ThemeMode theme) async {
-    final result = await _settingsRepository.setThemeMode(theme);
-    switch (result) {
-      case Ok():
-        _themeMode = theme;
-        notifyListeners();
-        _themeProvider.loadThemeMode();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
+    try {
+      _themeMode = theme;
+      notifyListeners();
+      await _settingsRepository.setThemeMode(theme);
+      _themeProvider.loadThemeMode();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 

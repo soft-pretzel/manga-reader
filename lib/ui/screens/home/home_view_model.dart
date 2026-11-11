@@ -30,7 +30,8 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      await Future.wait([_loadInProgressBooks(), _loadReadingDirection()]);
+      _readingDirection = await _settingsRepository.getReadingDirection();
+      await _loadInProgressBooks();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -42,18 +43,6 @@ class HomeViewModel extends ChangeNotifier {
     switch (result) {
       case Ok():
         _inProgressBooks = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadReadingDirection() async {
-    final result = await _settingsRepository.getReadingDirection();
-    switch (result) {
-      case Ok():
-        _readingDirection = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():

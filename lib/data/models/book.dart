@@ -1,10 +1,10 @@
 import 'package:unseal/unseal.dart';
 
-import 'library.dart';
+import 'library_item.dart';
 
 enum ReadingStatus { unread, inProgress, finished }
 
-class Book extends Library {
+class Book extends LibraryItem {
   String? author;
   String? cover;
   int currentPage;

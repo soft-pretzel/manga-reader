@@ -28,7 +28,7 @@ class BookListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: switch (viewModel.libraryDisplaySpacing) {
+      height: switch (viewModel.spacing) {
         .comfortable => 120,
         .normal => 104,
         .compact => 88,
@@ -75,7 +75,7 @@ class BookListTile extends StatelessWidget {
                       ),
                     ),
                   Padding(
-                    padding: switch (viewModel.libraryDisplaySpacing) {
+                    padding: switch (viewModel.spacing) {
                       .comfortable => .symmetric(horizontal: 24, vertical: 12),
                       .normal => .symmetric(horizontal: 20, vertical: 10),
                       .compact => .symmetric(horizontal: 16, vertical: 8),

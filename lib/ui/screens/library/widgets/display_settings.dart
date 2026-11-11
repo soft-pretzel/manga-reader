@@ -29,15 +29,15 @@ class DisplaySettings extends StatelessWidget {
                       width: (constraints.maxWidth / 2) - 2,
                     ),
                     isSelected: [
-                      viewModel.libraryDisplayMode == .grid,
-                      viewModel.libraryDisplayMode == .list,
+                      viewModel.displayMode == .grid,
+                      viewModel.displayMode == .list,
                     ],
                     onPressed: (index) {
                       switch (index) {
                         case 0:
-                          viewModel.setLibraryDisplayMode.execute(.grid);
+                          viewModel.setDisplayMode.execute(.grid);
                         case 1:
-                          viewModel.setLibraryDisplayMode.execute(.list);
+                          viewModel.setDisplayMode.execute(.list);
                       }
                     },
                     children: [Text('Grid'), Text('List')],
@@ -51,20 +51,18 @@ class DisplaySettings extends StatelessWidget {
                       width: (constraints.maxWidth / 3) - 2,
                     ),
                     isSelected: [
-                      viewModel.libraryDisplaySpacing == .comfortable,
-                      viewModel.libraryDisplaySpacing == .normal,
-                      viewModel.libraryDisplaySpacing == .compact,
+                      viewModel.spacing == .comfortable,
+                      viewModel.spacing == .normal,
+                      viewModel.spacing == .compact,
                     ],
                     onPressed: (index) {
                       switch (index) {
                         case 0:
-                          viewModel.setLibraryDisplaySpacing.execute(
-                            .comfortable,
-                          );
+                          viewModel.setSpacing.execute(.comfortable);
                         case 1:
-                          viewModel.setLibraryDisplaySpacing.execute(.normal);
+                          viewModel.setSpacing.execute(.normal);
                         case 2:
-                          viewModel.setLibraryDisplaySpacing.execute(.compact);
+                          viewModel.setSpacing.execute(.compact);
                       }
                     },
                     children: [
@@ -111,34 +109,32 @@ class DisplaySettings extends StatelessWidget {
                       width: (constraints.maxWidth / 3) - 2,
                     ),
                     isSelected: [
-                      viewModel.librarySort == .alphabetical ||
-                          viewModel.librarySort == .alphabeticalReverse,
-                      viewModel.librarySort == .dateAdded ||
-                          viewModel.librarySort == .dateAddedReverse,
-                      viewModel.librarySort == .lastRead ||
-                          viewModel.librarySort == .lastReadReverse,
+                      viewModel.sort == .alphabetical ||
+                          viewModel.sort == .alphabeticalReverse,
+                      viewModel.sort == .dateAdded ||
+                          viewModel.sort == .dateAddedReverse,
+                      viewModel.sort == .lastRead ||
+                          viewModel.sort == .lastReadReverse,
                     ],
                     onPressed: (index) {
                       switch (index) {
                         case 0:
-                          if (viewModel.librarySort == .alphabetical) {
-                            viewModel.setLibrarySort.execute(
-                              .alphabeticalReverse,
-                            );
+                          if (viewModel.sort == .alphabetical) {
+                            viewModel.setSort.execute(.alphabeticalReverse);
                           } else {
-                            viewModel.setLibrarySort.execute(.alphabetical);
+                            viewModel.setSort.execute(.alphabetical);
                           }
                         case 1:
-                          if (viewModel.librarySort == .dateAdded) {
-                            viewModel.setLibrarySort.execute(.dateAddedReverse);
+                          if (viewModel.sort == .dateAdded) {
+                            viewModel.setSort.execute(.dateAddedReverse);
                           } else {
-                            viewModel.setLibrarySort.execute(.dateAdded);
+                            viewModel.setSort.execute(.dateAdded);
                           }
                         case 2:
-                          if (viewModel.librarySort == .lastRead) {
-                            viewModel.setLibrarySort.execute(.lastReadReverse);
+                          if (viewModel.sort == .lastRead) {
+                            viewModel.setSort.execute(.lastReadReverse);
                           } else {
-                            viewModel.setLibrarySort.execute(.lastRead);
+                            viewModel.setSort.execute(.lastRead);
                           }
                       }
                     },
@@ -147,9 +143,9 @@ class DisplaySettings extends StatelessWidget {
                         mainAxisAlignment: .center,
                         children: [
                           Text('Alphabetical'),
-                          if (viewModel.librarySort == .alphabetical)
+                          if (viewModel.sort == .alphabetical)
                             Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.librarySort == .alphabeticalReverse)
+                          if (viewModel.sort == .alphabeticalReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),
@@ -157,9 +153,9 @@ class DisplaySettings extends StatelessWidget {
                         mainAxisAlignment: .center,
                         children: [
                           Text('Date added'),
-                          if (viewModel.librarySort == .dateAdded)
+                          if (viewModel.sort == .dateAdded)
                             Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.librarySort == .dateAddedReverse)
+                          if (viewModel.sort == .dateAddedReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),
@@ -167,9 +163,9 @@ class DisplaySettings extends StatelessWidget {
                         mainAxisAlignment: .center,
                         children: [
                           Text('Last read'),
-                          if (viewModel.librarySort == .lastRead)
+                          if (viewModel.sort == .lastRead)
                             Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.librarySort == .lastReadReverse)
+                          if (viewModel.sort == .lastReadReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),

@@ -1,32 +1,48 @@
-abstract class Library {
-  final String id;
-  final DateTime dateAdded;
-  final String? parentId;
-  final String path;
-  String title;
+import 'book.dart';
+import 'library_item.dart';
+import 'settings.dart';
 
-  Library({
-    required this.id,
-    required this.dateAdded,
-    this.parentId,
-    required this.path,
-    required this.title,
-  });
+class Library {
+  final List<LibraryItem> items;
+  final String title;
 
-  Map<String, Object?> toMap() {
-    return {
-      'id': id,
-      'date_added': dateAdded.toString(),
-      'parent_id': parentId,
-      'path': path,
-      'title': title,
-    };
+  Library({required this.items, required this.title});
+
+  void filter(List<ReadingStatus> filter) {
+    if (filter.isNotEmpty) {
+      items.removeWhere((item) {
+        if (item.runtimeType == Book) {
+          final book = item as Book;
+          return !filter.contains(book.readingStatus);
+        } else {
+          return false;
+        }
+      });
+    }
   }
 
-  Library.fromMap(Map<String, Object?> map)
-    : id = map['id'].toString(),
-      dateAdded = DateTime.parse(map['date_added'].toString()),
-      parentId = map['parent_id']?.toString(),
-      path = map['path'].toString(),
-      title = map['title'].toString();
+  void sort(LibrarySort sort) {
+    switch (sort) {
+      case .alphabetical:
+        items.sort((a, b) => _sortAlphabetically(a, b));
+      case .alphabeticalReverse:
+        items.sort((b, a) => _sortAlphabetically(a, b));
+      case .dateAdded:
+        items.sort((a, b) => a.dateAdded.compareTo(b.dateAdded));
+      case .dateAddedReverse:
+        items.sort((b, a) => a.dateAdded.compareTo(b.dateAdded));
+      case .lastRead:
+      case .lastReadReverse:
+    }
+  }
+}
+
+int _sortAlphabetically(LibraryItem a, LibraryItem b) {
+  if (a.title.replaceAll(RegExp(r'[^0-9]'), '') != '') {
+    return int.parse(
+      a.title.replaceAll(RegExp(r'[^0-9]'), ''),
+    ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), '')));
+  } else {
+    return a.title.compareTo(b.title);
+  }
 }

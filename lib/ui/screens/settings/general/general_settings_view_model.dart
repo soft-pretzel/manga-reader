@@ -21,32 +21,20 @@ class GeneralSettingsViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      await Future.wait([_loadVersion()]);
+      _version = await _settingsRepository.getAppVersion();
+      notifyListeners();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<void>> _loadVersion() async {
-    final result = await _settingsRepository.getAppVersion();
-    switch (result) {
-      case Ok():
-        _version = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
   Future<Result<void>> _openLink(Uri url) async {
-    final result = await _settingsRepository.openLink(url);
-    switch (result) {
-      case Ok():
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
+    try {
+      await _settingsRepository.openLink(url);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 }

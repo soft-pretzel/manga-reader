@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
+import 'package:flutter/services.dart';
 import 'package:unseal/unseal.dart' as unseal;
 
 import '../models/book.dart';
 import '../models/folder.dart';
 import '../models/library.dart';
-import '../models/settings.dart';
+import '../models/library_item.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../../utils/result.dart';
@@ -26,33 +28,26 @@ class LibraryRepository {
   static List<String> comicTypes = ['cbt', 'cbz', 'tar', 'zip'];
   static List<String> imgTypes = ['jpeg', 'jpg', 'png'];
 
-  Future<Result<void>> deleteLocalFolder(Folder folder) async {
-    try {
-      _databaseService.deleteFolder(folder.id);
-      _localStorageService.clearStorageAccess(folder.path);
-      final childFolders = await _databaseService.getFoldersByParentId(
-        folder.id,
-      );
-      for (final childFolder in childFolders) {
-        await deleteLocalFolder(childFolder);
-      }
-      final childBooks = await _databaseService.getBooksByParentId(folder.id);
-      for (final childBook in childBooks) {
-        _databaseService.deleteBook(childBook.id);
-        final cache = await _localStorageService.getCoversCache();
-        final files = cache.listSync(followLinks: false);
-        for (final file in files) {
-          final name = (file.path.split(Platform.pathSeparator).last)
-              .split('.')
-              .first;
-          if (name == childBook.id) {
-            file.delete();
-          }
+  Future<void> deleteLocalFolder(Folder folder) async {
+    _databaseService.deleteFolder(folder.id);
+    _localStorageService.clearStorageAccess(folder.path);
+    final childFolders = await _databaseService.getFoldersByParentId(folder.id);
+    for (final childFolder in childFolders) {
+      await deleteLocalFolder(childFolder);
+    }
+    final childBooks = await _databaseService.getBooksByParentId(folder.id);
+    for (final childBook in childBooks) {
+      _databaseService.deleteBook(childBook.id);
+      final cache = await _localStorageService.getCoversCache();
+      final files = cache.listSync(followLinks: false);
+      for (final file in files) {
+        final name = (file.path.split(Platform.pathSeparator).last)
+            .split('.')
+            .first;
+        if (name == childBook.id) {
+          file.delete();
         }
       }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
     }
   }
 
@@ -94,6 +89,10 @@ class LibraryRepository {
     }
   }
 
+  Future<Book?> getBookByPath(String path) async {
+    return await _databaseService.getBookByPath(path);
+  }
+
   Future<String> getBookCover(Book book) async {
     final cover = await _localStorageService.extractBookCover(
       book.path,
@@ -102,16 +101,29 @@ class LibraryRepository {
     return cover ?? '';
   }
 
+  Future<unseal.BookSession> getBookSession(String path) async {
+    return await _localStorageService.getBookSession(path);
+  }
+
   Future<Folder> getFolder(String id) async {
     return await _databaseService.getFolderById(id);
   }
 
   Future<Folder?> getFolderByPath(String path) async {
-    try {
-      return await _databaseService.getFolderByPath(path);
-    } on Exception {
-      rethrow;
+    return await _databaseService.getFolderByPath(path);
+  }
+
+  Future<List<String>> getFolderFiles(String path) async {
+    return await _localStorageService.getFiles(path);
+  }
+
+  Future<List<LibraryItem>> getFolderItems(String? parentId) async {
+    final List<LibraryItem> library = [];
+    library.addAll(await _databaseService.getFoldersByParentId(parentId));
+    if (parentId != null) {
+      library.addAll(await _databaseService.getBooksByParentId(parentId));
     }
+    return library;
   }
 
   Future<Result<List<Book>>> getInProgressBooks() async {
@@ -123,13 +135,11 @@ class LibraryRepository {
     }
   }
 
-  Future<List<Library>> getLibrary(String? parentId) async {
-    final List<Library> library = [];
-    library.addAll(await _databaseService.getFoldersByParentId(parentId));
-    if (parentId != null) {
-      library.addAll(await _databaseService.getBooksByParentId(parentId));
-    }
-    return library;
+  Future<Library> getLibrary(String? parentId) async {
+    return Library(
+      items: await getFolderItems(parentId),
+      title: parentId != null ? (await getFolder(parentId)).title : 'Library',
+    );
   }
 
   Future<Result<String>> getName(String path) async {
@@ -143,6 +153,10 @@ class LibraryRepository {
 
   Future<int> getPageCount(Book book) async {
     return await _localStorageService.getPageCount(book.path);
+  }
+
+  Future<bool> isDir(String path) async {
+    return await _localStorageService.isDir(path);
   }
 
   Future<Result<void>> markAsFinished(String id) async {
@@ -169,7 +183,7 @@ class LibraryRepository {
 
   Future<unseal.BookSession> openBook(String id) async {
     final book = await _databaseService.getBook(id);
-    return await _localStorageService.openBook(book.path, book.id);
+    return await _localStorageService.getBookSession(book.path);
   }
 
   Future<Result<void>> openLink(Uri uri) async {
@@ -181,26 +195,22 @@ class LibraryRepository {
     }
   }
 
-  Future<List<Library>> getFolderItems(Folder folder) async {
-    final List<Library> items = List.from(folder.items);
+  Future<void> parseFolder(Folder folder) async {
     final files = await _localStorageService.getFiles(folder.path);
     for (final file in files) {
       if (await _localStorageService.isDir(file)) {
         final existingFolder = await _databaseService.getFolderByPath(file);
         if (existingFolder == null) {
           final newFolder = await saveNewFolder(file, parentId: folder.id);
-          await getFolderItems(newFolder);
-          items.add(newFolder);
+          await parseFolder(newFolder);
         }
       } else {
         final existingBook = await _databaseService.getBookByPath(file);
         if (existingBook == null) {
-          final newBook = await saveNewBook(file, parentId: folder.id);
-          items.add(newBook);
+          await saveNewBook(file, folder);
         }
       }
     }
-    return items;
     // final List<Library> existingItems = [];
     // existingItems.addAll(
     //   await _databaseService.getFoldersByParentId(folder.id),
@@ -241,24 +251,42 @@ class LibraryRepository {
       id: await _databaseService.generateId(),
       covers: List.filled(3, null),
       dateAdded: DateTime.now(),
+      itemCount: (await _localStorageService.getFiles(path)).length,
       parentId: parentId,
       path: path,
       title: await _localStorageService.getFileName(path),
     );
-    _databaseService.insertFolder(folder);
+    await _databaseService.insertFolder(folder);
     return folder;
   }
 
-  Future<Book> saveNewBook(String path, {required String parentId}) async {
-    final book = Book(
-      id: await _databaseService.generateId(),
-      dateAdded: DateTime.now(),
-      parentId: parentId,
-      path: path,
-      title: await _localStorageService.getFileName(path),
-    );
-    await _databaseService.insertBook(book);
-    return book;
+  Future<Book> saveNewBook(String path, Folder folder) async {
+    final token = RootIsolateToken.instance;
+    return await Isolate.run(() async {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
+      final session = await _localStorageService.getBookSession(path);
+      final metadata = session.book.metadata;
+      final book = Book(
+        id: await _databaseService.generateId(),
+        author: metadata.authors.firstOrNull,
+        dateAdded: DateTime.now(),
+        description: metadata.description,
+        format: session.book.format,
+        isbn: metadata.isbn,
+        language: metadata.languages.firstOrNull,
+        pageCount: session.book.files.images.length,
+        parentId: folder.id,
+        path: path,
+        publishYear: metadata.publishedAt?.year,
+        publisher: metadata.publisher,
+        series: metadata.series ?? folder.title,
+        seriesIndex: metadata.seriesIndex,
+        title: metadata.title ?? await _localStorageService.getFileName(path),
+      );
+      session.dispose();
+      await _databaseService.insertBook(book);
+      return book;
+    });
   }
 
   Future<String?> selectLocalFolder() async {

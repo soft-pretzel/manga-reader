@@ -36,88 +36,85 @@ class LibraryView extends StatelessWidget {
                     text: 'Error loading Library',
                   );
                 }
-                if (viewModel.library.isEmpty) {
+                if (viewModel.library.items.isEmpty) {
                   return EmptyLibraryScreen();
                 }
-                switch (viewModel.libraryDisplayMode) {
+                switch (viewModel.displayMode) {
                   case .grid:
                     return GridView.builder(
                       clipBehavior: .antiAlias,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        childAspectRatio:
-                            viewModel.libraryDisplaySpacing == .comfortable
+                        childAspectRatio: viewModel.spacing == .comfortable
                             ? 0.534
-                            : viewModel.libraryDisplaySpacing == .normal
+                            : viewModel.spacing == .normal
                             ? 0.498
                             : 0.474,
-                        crossAxisCount:
-                            viewModel.libraryDisplaySpacing == .comfortable
+                        crossAxisCount: viewModel.spacing == .comfortable
                             ? 2
-                            : viewModel.libraryDisplaySpacing == .normal
+                            : viewModel.spacing == .normal
                             ? 3
                             : 4,
-                        crossAxisSpacing:
-                            viewModel.libraryDisplaySpacing == .comfortable
+                        crossAxisSpacing: viewModel.spacing == .comfortable
                             ? 24
-                            : viewModel.libraryDisplaySpacing == .normal
+                            : viewModel.spacing == .normal
                             ? 20
                             : 16,
-                        mainAxisSpacing:
-                            viewModel.libraryDisplaySpacing == .comfortable
+                        mainAxisSpacing: viewModel.spacing == .comfortable
                             ? 24
-                            : viewModel.libraryDisplaySpacing == .normal
+                            : viewModel.spacing == .normal
                             ? 20
                             : 16,
                       ),
                       itemBuilder: (context, index) {
-                        if (viewModel.library[index].runtimeType == Folder) {
+                        if (viewModel.library.items[index].runtimeType ==
+                            Folder) {
                           return FolderGridTile(
-                            folder: viewModel.library[index] as Folder,
+                            folder: viewModel.library.items[index] as Folder,
                             index: index,
                             viewModel: viewModel,
                           );
                         } else {
                           return BookGridTile(
-                            book: viewModel.library[index] as Book,
+                            book: viewModel.library.items[index] as Book,
                             index: index,
                             viewModel: viewModel,
                           );
                         }
                       },
-                      itemCount: viewModel.library.length,
+                      itemCount: viewModel.library.items.length,
                       padding: .all(
-                        viewModel.libraryDisplaySpacing == .comfortable
+                        viewModel.spacing == .comfortable
                             ? 24
-                            : viewModel.libraryDisplaySpacing == .normal
+                            : viewModel.spacing == .normal
                             ? 20
                             : 16,
                       ),
                     );
                   case .list:
-                    return SizedBox.shrink();
-                  // return ListView.separated(
-                  //   clipBehavior: .antiAlias,
-                  //   itemBuilder: (context, index) {
-                  //     if (viewModel.library[index].runtimeType == Folder) {
-                  //       return FolderListTile(
-                  //         folder: viewModel.library[index] as Folder,
-                  //         index: index,
-                  //         viewModel: viewModel,
-                  //       );
-                  //     } else {
-                  //       return BookListTile(
-                  //         book: viewModel.library[index] as Book,
-                  //         index: index,
-                  //         viewModel: viewModel,
-                  //       );
-                  //     }
-                  //   },
-                  //   itemCount: viewModel.library.length,
-                  //   padding: .all(0),
-                  //   separatorBuilder: (context, index) {
-                  //     return Divider(height: 0);
-                  //   },
-                  // );
+                    return ListView.separated(
+                      clipBehavior: .antiAlias,
+                      itemBuilder: (context, index) {
+                        if (viewModel.library.items[index].runtimeType ==
+                            Folder) {
+                          return FolderListTile(
+                            folder: viewModel.library.items[index] as Folder,
+                            index: index,
+                            viewModel: viewModel,
+                          );
+                        } else {
+                          return BookListTile(
+                            book: viewModel.library.items[index] as Book,
+                            index: index,
+                            viewModel: viewModel,
+                          );
+                        }
+                      },
+                      itemCount: viewModel.library.items.length,
+                      padding: .all(0),
+                      separatorBuilder: (context, index) {
+                        return Divider(height: 0);
+                      },
+                    );
                 }
               },
             ),

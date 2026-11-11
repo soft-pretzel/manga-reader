@@ -28,7 +28,7 @@ class FolderListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: switch (viewModel.libraryDisplaySpacing) {
+      height: switch (viewModel.spacing) {
         .comfortable => 120,
         .normal => 104,
         .compact => 88,
@@ -44,10 +44,12 @@ class FolderListTile extends StatelessWidget {
           },
           child: InkWell(
             onTap: () {
-              context.pushNamed(
-                RouteNames.folder,
-                pathParameters: {'folderId': folder.id},
-              );
+              if (!folder.parsing) {
+                context.pushNamed(
+                  RouteNames.folder,
+                  pathParameters: {'folderId': folder.id},
+                );
+              }
             },
             child: FolderMenu(
               folder: folder,
@@ -55,7 +57,7 @@ class FolderListTile extends StatelessWidget {
               menuController: _menuController,
               viewModel: viewModel,
               child: Padding(
-                padding: switch (viewModel.libraryDisplaySpacing) {
+                padding: switch (viewModel.spacing) {
                   .comfortable => .symmetric(horizontal: 24, vertical: 12),
                   .normal => .symmetric(horizontal: 20, vertical: 10),
                   .compact => .symmetric(horizontal: 16, vertical: 8),
@@ -94,9 +96,9 @@ class FolderListTile extends StatelessWidget {
                               style: TextTheme.of(context).bodyMedium!.apply(
                                 color: ColorScheme.of(context).outline,
                               ),
-                              text: folder.items.length == 1
-                                  ? '${folder.items.length} item'
-                                  : '${folder.items.length} items',
+                              text: folder.itemCount == 1
+                                  ? '${folder.itemCount} item'
+                                  : '${folder.itemCount} items',
                             ),
                           ),
                         ],

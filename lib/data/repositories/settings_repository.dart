@@ -5,7 +5,6 @@ import '../models/settings.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/shared_preferences_service.dart';
-import '../../utils/result.dart';
 import '../services/utils_service.dart';
 
 class SettingsRepository {
@@ -21,313 +20,143 @@ class SettingsRepository {
   final SharedPreferencesService _sharedPreferencesService;
   final UtilsService _utilsService;
 
-  Future<Result<void>> brightnessDown() async {
-    try {
-      await _utilsService.brightnessDown();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> brightnessDown() async {
+    await _utilsService.brightnessDown();
   }
 
-  Future<Result<void>> brightnessReset() async {
-    try {
-      await _utilsService.brightnessReset();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> brightnessReset() async {
+    await _utilsService.brightnessReset();
   }
 
-  Future<Result<void>> brightnessUp() async {
-    try {
-      await _utilsService.brightnessUp();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> brightnessUp() async {
+    await _utilsService.brightnessUp();
   }
 
-  Future<Result<bool>> getAnimations() async {
-    try {
-      final animations = await _sharedPreferencesService.getAnimations();
-      return Result.ok(animations);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<bool> getAnimations() async {
+    return await _sharedPreferencesService.getAnimations();
   }
 
-  Future<Result<String>> getAppVersion() async {
-    try {
-      final version = await _utilsService.getAppVersion();
-      return Result.ok(version);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<String> getAppVersion() async {
+    return await _utilsService.getAppVersion();
   }
 
-  Future<Result<bool>> getDoubleTapZoom() async {
-    try {
-      final doubleTapZoom = await _sharedPreferencesService.getDoubleTapZoom();
-      return Result.ok(doubleTapZoom);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<bool> getDoubleTapZoom() async {
+    return await _sharedPreferencesService.getDoubleTapZoom();
   }
 
-  Future<Result<String>> getCacheInfo() async {
-    try {
-      final info = await _localStorageService.getCacheInfo();
-      final size = await _utilsService.formatFileSize(info.size);
-      return Result.ok(size);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<String> getCacheInfo() async {
+    final info = await _localStorageService.getCacheInfo();
+    return await _utilsService.formatFileSize(info.size);
   }
 
-  Future<Result<String>> getDatabaseInfo() async {
-    try {
-      final info = await _databaseService.getDatabaseInfo();
-      final size = await _utilsService.formatFileSize(info.size);
-      return Result.ok(size);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<String> getDatabaseInfo() async {
+    final info = await _databaseService.getDatabaseInfo();
+    return await _utilsService.formatFileSize(info.size);
   }
 
-  Future<Result<bool>> getDynamicMode() async {
-    try {
-      final result = await _sharedPreferencesService.getDynamicMode();
-      return Result.ok(result);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<bool> getDynamicMode() async {
+    return await _sharedPreferencesService.getDynamicMode();
   }
 
-  Future<Result<List<ReadingStatus>>> getFilter() async {
-    try {
-      final filter = await _sharedPreferencesService.getFilter();
-      return Result.ok(filter);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<List<ReadingStatus>> getFilter() async {
+    return await _sharedPreferencesService.getFilter();
   }
 
-  Future<Result<LibraryDisplayMode>> getLibraryDisplayMode() async {
-    try {
-      final libraryDisplayMode = await _sharedPreferencesService
-          .getLibraryDisplayMode();
-      return Result.ok(libraryDisplayMode);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<LibraryDisplayMode> getLibraryDisplayMode() async {
+    return await _sharedPreferencesService.getLibraryDisplayMode();
   }
 
-  Future<Result<LibraryDisplaySpacing>> getLibraryDisplaySpacing() async {
-    try {
-      final libraryDisplaySpacing = await _sharedPreferencesService
-          .getLibraryDisplaySpacing();
-      return Result.ok(libraryDisplaySpacing);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<LibraryDisplaySpacing> getLibraryDisplaySpacing() async {
+    return await _sharedPreferencesService.getLibraryDisplaySpacing();
   }
 
-  Future<Result<LibrarySort>> getLibrarySort() async {
-    try {
-      final librarySort = await _sharedPreferencesService.getLibrarySort();
-      return Result.ok(librarySort);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<LibrarySort> getLibrarySort() async {
+    return await _sharedPreferencesService.getLibrarySort();
   }
 
-  Future<Result<bool>> getOledDarkMode() async {
-    try {
-      final oledDarkMode = await _sharedPreferencesService.getOledDarkMode();
-      return Result.ok(oledDarkMode);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<bool> getOledDarkMode() async {
+    return await _sharedPreferencesService.getOledDarkMode();
   }
 
-  Future<Result<ReadingDirection>> getReadingDirection() async {
-    try {
-      final readingDirection = await _sharedPreferencesService
-          .getReadingDirection();
-      return Result.ok(readingDirection);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<ReadingDirection> getReadingDirection() async {
+    return await _sharedPreferencesService.getReadingDirection();
   }
 
-  Future<Result<ReadingMode>> getReadingMode() async {
-    try {
-      final readingMode = await _sharedPreferencesService.getReadingMode();
-      return Result.ok(readingMode);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<ReadingMode> getReadingMode() async {
+    return await _sharedPreferencesService.getReadingMode();
   }
 
-  Future<Result<Color>> getThemeColor() async {
-    try {
-      final themeColor = await _sharedPreferencesService.getThemeColor();
-      return Result.ok(themeColor);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<Color> getThemeColor() async {
+    return await _sharedPreferencesService.getThemeColor();
   }
 
-  Future<Result<ThemeMode>> getThemeMode() async {
-    try {
-      final themeMode = await _sharedPreferencesService.getThemeMode();
-      return Result.ok(themeMode);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<ThemeMode> getThemeMode() async {
+    return await _sharedPreferencesService.getThemeMode();
   }
 
-  Future<Result<double>> getZoom() async {
-    try {
-      final zoom = await _sharedPreferencesService.getZoom();
-      return Result.ok(zoom);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<double> getZoom() async {
+    return await _sharedPreferencesService.getZoom();
   }
 
-  Future<Result<void>> openLink(Uri url) async {
-    try {
-      await _utilsService.openLink(url);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> openLink(Uri url) async {
+    await _utilsService.openLink(url);
   }
 
-  Future<Result<void>> setDynamicMode(bool dynamicMode) async {
-    try {
-      await _sharedPreferencesService.setDynamicMode(dynamicMode);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setDynamicMode(bool dynamicMode) async {
+    await _sharedPreferencesService.setDynamicMode(dynamicMode);
   }
 
-  Future<Result<void>> setFilter(List<ReadingStatus> filter) async {
-    try {
-      await _sharedPreferencesService.setFilter(filter);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setFilter(List<ReadingStatus> filter) async {
+    await _sharedPreferencesService.setFilter(filter);
   }
 
-  Future<Result<void>> setLibraryDisplayMode(
+  Future<void> setLibraryDisplayMode(
     LibraryDisplayMode libraryDisplayMode,
   ) async {
-    try {
-      await _sharedPreferencesService.setLibraryDisplayMode(libraryDisplayMode);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    await _sharedPreferencesService.setLibraryDisplayMode(libraryDisplayMode);
   }
 
-  Future<Result<void>> setLibraryDisplaySpacing(
+  Future<void> setLibraryDisplaySpacing(
     LibraryDisplaySpacing libraryDisplaySpacing,
   ) async {
-    try {
-      await _sharedPreferencesService.setLibraryDisplaySpacing(
-        libraryDisplaySpacing,
-      );
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    await _sharedPreferencesService.setLibraryDisplaySpacing(
+      libraryDisplaySpacing,
+    );
   }
 
-  Future<Result<void>> setLibrarySort(LibrarySort librarySort) async {
-    try {
-      await _sharedPreferencesService.setLibrarySort(librarySort);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setLibrarySort(LibrarySort librarySort) async {
+    await _sharedPreferencesService.setLibrarySort(librarySort);
   }
 
-  Future<Result<void>> setOledDarkMode(bool oledDarkMode) async {
-    try {
-      await _sharedPreferencesService.setOledDarkMode(oledDarkMode);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setOledDarkMode(bool oledDarkMode) async {
+    await _sharedPreferencesService.setOledDarkMode(oledDarkMode);
   }
 
-  Future<Result<void>> setReadingDirection(
-    ReadingDirection readingDirection,
-  ) async {
-    try {
-      await _sharedPreferencesService.setReadingDirection(readingDirection);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setReadingDirection(ReadingDirection readingDirection) async {
+    await _sharedPreferencesService.setReadingDirection(readingDirection);
   }
 
-  Future<Result<void>> setReadingMode(ReadingMode readingMode) async {
-    try {
-      await _sharedPreferencesService.setReadingMode(readingMode);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setReadingMode(ReadingMode readingMode) async {
+    await _sharedPreferencesService.setReadingMode(readingMode);
   }
 
-  Future<Result<void>> setThemeColor(Color color) async {
-    try {
-      await _sharedPreferencesService.setThemeColor(color);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setThemeColor(Color color) async {
+    await _sharedPreferencesService.setThemeColor(color);
   }
 
-  Future<Result<void>> setThemeMode(ThemeMode theme) async {
-    try {
-      await _sharedPreferencesService.setThemeMode(theme);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setThemeMode(ThemeMode theme) async {
+    await _sharedPreferencesService.setThemeMode(theme);
   }
 
-  Future<Result<void>> setZoom(double zoom) async {
-    try {
-      await _sharedPreferencesService.setZoom(zoom);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<void> setZoom(double zoom) async {
+    await _sharedPreferencesService.setZoom(zoom);
   }
 
-  Future<Result<bool>> toggleAnimations() async {
-    try {
-      final result = await _sharedPreferencesService.toggleAnimations();
-      return Result.ok(result);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<bool> toggleAnimations() async {
+    return await _sharedPreferencesService.toggleAnimations();
   }
 
-  Future<Result<bool>> toggleDoubleTapZoom() async {
-    try {
-      final result = await _sharedPreferencesService.toggleDoubleTapZoom();
-      return Result.ok(result);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+  Future<bool> toggleDoubleTapZoom() async {
+    return await _sharedPreferencesService.toggleDoubleTapZoom();
   }
 }

@@ -5,8 +5,6 @@ import 'package:uuid/uuid.dart';
 
 import '../models/book.dart';
 import '../models/folder.dart';
-import '../models/library.dart';
-import '../models/settings.dart';
 
 final uuid = Uuid();
 
@@ -79,11 +77,8 @@ class DatabaseService {
 
   Future<Folder> getFolderById(String id) async {
     final db = await _database();
-    final list = await db.query('folders', where: 'id = ?', whereArgs: [id]);
-    final folder = Folder.fromMap(list.single);
-    folder.items.addAll(await getBooksByParentId(folder.id));
-    folder.items.addAll(await getFoldersByParentId(folder.id));
-    return folder;
+    final folder = await db.query('folders', where: 'id = ?', whereArgs: [id]);
+    return Folder.fromMap(folder.single);
   }
 
   Future<Folder?> getFolderByTitle(String title) async {
@@ -112,19 +107,12 @@ class DatabaseService {
 
   Future<List<Folder>> getFoldersByParentId(String? parentId) async {
     final db = await _database();
-    final list = await db.query(
+    final folders = await db.query(
       'folders',
       where: parentId != null ? 'parent_id = ?' : 'parent_id IS NULL',
       whereArgs: parentId != null ? [parentId] : null,
     );
-    final folders = list.map((folder) => Folder.fromMap(folder)).toList();
-    if (folders.isNotEmpty) {
-      for (final folder in folders) {
-        folder.items.addAll(await getBooksByParentId(folder.id));
-        folder.items.addAll(await getFoldersByParentId(folder.id));
-      }
-    }
-    return folders;
+    return folders.map((folder) => Folder.fromMap(folder)).toList();
   }
 
   Future<void> insertBook(Book book) async {
@@ -196,6 +184,7 @@ CREATE TABLE folders (
 id TEXT PRIMARY KEY,
 covers TEXT,
 date_added TEXT NOT NULL,
+item_count INTEGER NOT NULL,
 parent_id TEXT,
 path TEXT NOT NULL,
 title TEXT,

@@ -85,29 +85,15 @@ class ReaderViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      await Future.wait([
-        _loadAnimations(),
-        _loadDoubleTapZoom(),
-        _loadReadingDirection(),
-        _loadReadingMode(),
-        _loadZoom(),
-      ]);
+      _animations = await _settingsRepository.getAnimations();
+      _doubleTapZoom = await _settingsRepository.getDoubleTapZoom();
+      _readingDirection = await _settingsRepository.getReadingDirection();
+      _readingMode = await _settingsRepository.getReadingMode();
+      _zoom = await _settingsRepository.getZoom();
       _loadPages();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _loadAnimations() async {
-    final result = await _settingsRepository.getAnimations();
-    switch (result) {
-      case Ok():
-        _animations = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
     }
   }
 
@@ -117,18 +103,6 @@ class ReaderViewModel extends ChangeNotifier {
       case Ok():
         _book = result.value;
         _pages = List.filled(_book.pageCount!, null);
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadDoubleTapZoom() async {
-    final result = await _settingsRepository.getDoubleTapZoom();
-    switch (result) {
-      case Ok():
-        _doubleTapZoom = result.value;
         notifyListeners();
         return Result.ok(null);
       case Error():
@@ -163,42 +137,6 @@ class ReaderViewModel extends ChangeNotifier {
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _loadReadingDirection() async {
-    final result = await _settingsRepository.getReadingDirection();
-    switch (result) {
-      case Ok():
-        _readingDirection = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadReadingMode() async {
-    final result = await _settingsRepository.getReadingMode();
-    switch (result) {
-      case Ok():
-        _readingMode = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadZoom() async {
-    final result = await _settingsRepository.getZoom();
-    switch (result) {
-      case Ok():
-        _zoom = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
     }
   }
 

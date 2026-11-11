@@ -154,9 +154,9 @@ class BookGridTile extends StatelessWidget {
         ),
         Padding(
           padding: .only(
-            top: viewModel.libraryDisplaySpacing == .comfortable
+            top: viewModel.spacing == .comfortable
                 ? 8
-                : viewModel.libraryDisplaySpacing == .normal
+                : viewModel.spacing == .normal
                 ? 6
                 : 4,
           ),

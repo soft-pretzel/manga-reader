@@ -49,7 +49,7 @@ class LibraryAppBar extends StatelessWidget {
                             in viewModel.selected.indexed) {
                           if (selected) {
                             await viewModel.markAsFinished.execute(
-                              viewModel.library[index] as Book,
+                              viewModel.library.items[index] as Book,
                             );
                           }
                         }
@@ -65,7 +65,7 @@ class LibraryAppBar extends StatelessWidget {
                             in viewModel.selected.indexed) {
                           if (selected) {
                             await viewModel.markAsUnread.execute(
-                              viewModel.library[index] as Book,
+                              viewModel.library.items[index] as Book,
                             );
                           }
                         }
@@ -74,7 +74,8 @@ class LibraryAppBar extends StatelessWidget {
                       trailingIcon: Icon(Icons.replay_rounded),
                       child: Text('Mark as unread'),
                     ),
-                  if (!viewModel.isSelectionMode)
+                  if (!viewModel.isSelectionMode &&
+                      viewModel.library.title == 'Library')
                     MenuItemButton(
                       onPressed: () async {
                         await showModalBottomSheet(
@@ -107,7 +108,7 @@ class LibraryAppBar extends StatelessWidget {
                       trailingIcon: Icon(Icons.my_library_add_outlined),
                       child: Text('Add new library'),
                     ),
-                  if (viewModel.library.isNotEmpty &&
+                  if (viewModel.library.items.isNotEmpty &&
                       viewModel.selected.any((item) => item == false))
                     MenuItemButton(
                       onPressed: () {
@@ -124,7 +125,7 @@ class LibraryAppBar extends StatelessWidget {
               ),
             ],
             actionsPadding: .all(0),
-            title: Text(viewModel.title),
+            title: Text(viewModel.library.title),
           );
         }
       },

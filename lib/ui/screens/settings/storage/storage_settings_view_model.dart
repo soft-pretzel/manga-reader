@@ -21,34 +21,12 @@ class StorageSettingsViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      await Future.wait([_loadCacheSize(), _loadDatabaseSize()]);
+      _cacheSize = await _settingsRepository.getCacheInfo();
+      _dbSize = await _settingsRepository.getDatabaseInfo();
+      notifyListeners();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _loadCacheSize() async {
-    final result = await _settingsRepository.getCacheInfo();
-    switch (result) {
-      case Ok():
-        _cacheSize = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
-  Future<Result<void>> _loadDatabaseSize() async {
-    final result = await _settingsRepository.getDatabaseInfo();
-    switch (result) {
-      case Ok():
-        _dbSize = result.value;
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
     }
   }
 }

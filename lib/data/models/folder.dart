@@ -1,50 +1,36 @@
-import 'library.dart';
-import 'settings.dart';
+import 'library_item.dart';
 
-class Folder extends Library {
+class Folder extends LibraryItem {
   List<String?> covers;
-  List<Library> items;
+  int itemCount;
+  bool parsing;
 
   Folder({
     required super.id,
     this.covers = const [],
     required super.dateAdded,
-    this.items = const [],
+    required this.itemCount,
     super.parentId,
+    this.parsing = true,
     required super.path,
     required super.title,
   });
 
+  @override
+  Map<String, Object?> toMap() {
+    return {
+      'id': id,
+      'date_added': dateAdded.toString(),
+      'item_count': itemCount,
+      'parent_id': parentId,
+      'path': path,
+      'title': title,
+    };
+  }
+
   Folder.fromMap(super.map)
     : covers = List.filled(3, null),
-      items = [],
+      itemCount = int.parse(map['item_count'].toString()),
+      parsing = false,
       super.fromMap();
-
-  void sort(LibrarySort sort) {
-    List<Library> items = List.from(this.items);
-    switch (sort) {
-      case .alphabetical:
-        items.sort((a, b) => _sortAlphabetically(a, b));
-      case .alphabeticalReverse:
-        items.sort((b, a) => _sortAlphabetically(a, b));
-      case .dateAdded:
-        items.sort((a, b) => a.dateAdded.compareTo(b.dateAdded));
-      case .dateAddedReverse:
-        items.sort((b, a) => a.dateAdded.compareTo(b.dateAdded));
-      case .lastRead:
-      case .lastReadReverse:
-    }
-    this.items = items;
-  }
-}
-
-int _sortAlphabetically(Library a, Library b) {
-  if (a.title.replaceAll(RegExp(r'[^0-9]'), '') != '' &&
-      b.title.replaceAll(RegExp(r'[^0-9]'), '') != '') {
-    return int.parse(
-      a.title.replaceAll(RegExp(r'[^0-9]'), ''),
-    ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), '')));
-  } else {
-    return a.title.compareTo(b.title);
-  }
 }
