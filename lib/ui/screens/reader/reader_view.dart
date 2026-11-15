@@ -91,7 +91,8 @@ class _ReaderViewState extends State<ReaderView>
                       if (orientation == .landscape) {
                         value = value * 2;
                       }
-                      widget.viewModel.setCurrentPage.execute(value);
+                      widget.viewModel.setCurrentPage.execute(value + 1);
+                      widget.viewModel.updateBook.execute();
                       if (_menuVisible) {
                         SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
                         setState(() {
