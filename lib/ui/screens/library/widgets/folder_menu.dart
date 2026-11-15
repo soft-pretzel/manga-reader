@@ -28,6 +28,13 @@ class FolderMenu extends StatelessWidget {
       menuChildren: [
         MenuItemButton(
           onPressed: () {
+            viewModel.toggleSelect.execute(index);
+          },
+          trailingIcon: Icon(Icons.select_all_rounded),
+          child: Text('Select'),
+        ),
+        MenuItemButton(
+          onPressed: () {
             showDialog(
               context: context,
               builder: (context) {

@@ -1,6 +1,6 @@
 enum LibraryDisplayMode { grid, list }
 
-enum LibraryDisplaySpacing { compact, normal, comfortable }
+enum LibrarySpacing { compact, normal, comfortable }
 
 enum LibrarySort {
   alphabetical,

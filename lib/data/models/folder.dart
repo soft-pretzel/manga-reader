@@ -10,6 +10,7 @@ class Folder extends LibraryItem {
     this.covers = const [],
     required super.dateAdded,
     required this.itemCount,
+    super.lastModified,
     super.parentId,
     this.parsing = true,
     required super.path,
@@ -20,8 +21,10 @@ class Folder extends LibraryItem {
   Map<String, Object?> toMap() {
     return {
       'id': id,
-      'date_added': dateAdded.toString(),
+      'date_added': dateAdded.millisecondsSinceEpoch,
       'item_count': itemCount,
+      if (lastModified != null)
+        'last_modified': lastModified!.millisecondsSinceEpoch,
       'parent_id': parentId,
       'path': path,
       'title': title,

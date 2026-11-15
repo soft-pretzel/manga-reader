@@ -11,7 +11,6 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     setReadingDirection = Command1(_setReadingDirection);
     setReadingMode = Command1(_setReadingMode);
     setZoom = Command1(_setZoom);
-    toggleAnimations = Command0(_toggleAnimations);
     toggleDoubleTapZoom = Command0(_toggleDoubleTapZoom);
   }
 
@@ -21,16 +20,13 @@ class ReaderSettingsViewModel extends ChangeNotifier {
   late Command1<void, ReadingDirection> setReadingDirection;
   late Command1<void, ReadingMode> setReadingMode;
   late Command1<void, double> setZoom;
-  late Command0 toggleAnimations;
   late Command0 toggleDoubleTapZoom;
 
-  late bool _animations;
   late bool _doubleTapZoom;
   late ReadingDirection _readingDirection;
   late ReadingMode _readingMode;
   late double _zoom;
 
-  bool get animations => _animations;
   bool get doubleTapZoom => _doubleTapZoom;
   ReadingDirection get readingDirection => _readingDirection;
   ReadingMode get readingMode => _readingMode;
@@ -38,7 +34,6 @@ class ReaderSettingsViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      _animations = await _settingsRepository.getAnimations();
       _doubleTapZoom = await _settingsRepository.getDoubleTapZoom();
       _readingDirection = await _settingsRepository.getReadingDirection();
       _readingMode = await _settingsRepository.getReadingMode();
@@ -56,7 +51,7 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     try {
       _readingDirection = readingDirection;
       notifyListeners();
-      _settingsRepository.setReadingDirection(readingDirection);
+      await _settingsRepository.setReadingDirection(readingDirection);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -67,7 +62,7 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     try {
       _readingMode = readingMode;
       notifyListeners();
-      _settingsRepository.setReadingMode(readingMode);
+      await _settingsRepository.setReadingMode(readingMode);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -78,18 +73,7 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     try {
       _zoom = zoom;
       notifyListeners();
-      _settingsRepository.setZoom(zoom);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _toggleAnimations() async {
-    try {
-      _animations = !_animations;
-      notifyListeners();
-      _settingsRepository.toggleAnimations();
+      await _settingsRepository.setZoom(zoom);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -100,7 +84,7 @@ class ReaderSettingsViewModel extends ChangeNotifier {
     try {
       _doubleTapZoom = !_doubleTapZoom;
       notifyListeners();
-      _settingsRepository.toggleDoubleTapZoom();
+      await _settingsRepository.toggleDoubleTapZoom();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

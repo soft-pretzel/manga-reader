@@ -32,16 +32,8 @@ class SettingsRepository {
     await _utilsService.brightnessUp();
   }
 
-  Future<bool> getAnimations() async {
-    return await _sharedPreferencesService.getAnimations();
-  }
-
   Future<String> getAppVersion() async {
     return await _utilsService.getAppVersion();
-  }
-
-  Future<bool> getDoubleTapZoom() async {
-    return await _sharedPreferencesService.getDoubleTapZoom();
   }
 
   Future<String> getCacheInfo() async {
@@ -54,24 +46,32 @@ class SettingsRepository {
     return await _utilsService.formatFileSize(info.size);
   }
 
+  Future<bool> getDoubleTapZoom() async {
+    return await _sharedPreferencesService.getDoubleTapZoom();
+  }
+
   Future<bool> getDynamicMode() async {
     return await _sharedPreferencesService.getDynamicMode();
   }
 
-  Future<List<ReadingStatus>> getFilter() async {
-    return await _sharedPreferencesService.getFilter();
+  Future<bool> getEreaderMode() async {
+    return await _sharedPreferencesService.getEreaderMode();
   }
 
   Future<LibraryDisplayMode> getLibraryDisplayMode() async {
     return await _sharedPreferencesService.getLibraryDisplayMode();
   }
 
-  Future<LibraryDisplaySpacing> getLibraryDisplaySpacing() async {
-    return await _sharedPreferencesService.getLibraryDisplaySpacing();
+  Future<List<ReadingStatus>> getLibraryFilter() async {
+    return await _sharedPreferencesService.getLibraryFilter();
   }
 
   Future<LibrarySort> getLibrarySort() async {
     return await _sharedPreferencesService.getLibrarySort();
+  }
+
+  Future<LibrarySpacing> getLibrarySpacing() async {
+    return await _sharedPreferencesService.getLibrarySpacing();
   }
 
   Future<bool> getOledDarkMode() async {
@@ -106,26 +106,22 @@ class SettingsRepository {
     await _sharedPreferencesService.setDynamicMode(dynamicMode);
   }
 
-  Future<void> setFilter(List<ReadingStatus> filter) async {
-    await _sharedPreferencesService.setFilter(filter);
-  }
-
   Future<void> setLibraryDisplayMode(
     LibraryDisplayMode libraryDisplayMode,
   ) async {
     await _sharedPreferencesService.setLibraryDisplayMode(libraryDisplayMode);
   }
 
-  Future<void> setLibraryDisplaySpacing(
-    LibraryDisplaySpacing libraryDisplaySpacing,
-  ) async {
-    await _sharedPreferencesService.setLibraryDisplaySpacing(
-      libraryDisplaySpacing,
-    );
+  Future<void> setLibraryFilter(List<ReadingStatus> libraryFilter) async {
+    await _sharedPreferencesService.setLibraryFilter(libraryFilter);
   }
 
   Future<void> setLibrarySort(LibrarySort librarySort) async {
     await _sharedPreferencesService.setLibrarySort(librarySort);
+  }
+
+  Future<void> setLibrarySpacing(LibrarySpacing librarySpacing) async {
+    await _sharedPreferencesService.setLibrarySpacing(librarySpacing);
   }
 
   Future<void> setOledDarkMode(bool oledDarkMode) async {
@@ -140,23 +136,23 @@ class SettingsRepository {
     await _sharedPreferencesService.setReadingMode(readingMode);
   }
 
-  Future<void> setThemeColor(Color color) async {
-    await _sharedPreferencesService.setThemeColor(color);
+  Future<void> setThemeColor(Color themeColor) async {
+    await _sharedPreferencesService.setThemeColor(themeColor);
   }
 
-  Future<void> setThemeMode(ThemeMode theme) async {
-    await _sharedPreferencesService.setThemeMode(theme);
+  Future<void> setThemeMode(ThemeMode themeMode) async {
+    await _sharedPreferencesService.setThemeMode(themeMode);
   }
 
   Future<void> setZoom(double zoom) async {
     await _sharedPreferencesService.setZoom(zoom);
   }
 
-  Future<bool> toggleAnimations() async {
-    return await _sharedPreferencesService.toggleAnimations();
+  Future<void> toggleDoubleTapZoom() async {
+    await _sharedPreferencesService.toggleDoubleTapZoom();
   }
 
-  Future<bool> toggleDoubleTapZoom() async {
-    return await _sharedPreferencesService.toggleDoubleTapZoom();
+  Future<void> toggleEreaderMode() async {
+    await _sharedPreferencesService.toggleEreaderMode();
   }
 }

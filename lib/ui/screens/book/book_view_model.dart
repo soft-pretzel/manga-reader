@@ -40,24 +40,9 @@ class BookViewModel extends ChangeNotifier {
 
   Future<Result<void>> _load() async {
     try {
-      Future.wait([_loadBook()]);
+      _book = await _libraryRepository.getBook(_bookId);
+      notifyListeners();
       return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _loadBook() async {
-    try {
-      final result = await _libraryRepository.getBook(_bookId);
-      switch (result) {
-        case Ok():
-          _book = result.value;
-          notifyListeners();
-          return Result.ok(null);
-        case Error():
-          return Result.error(result.error);
-      }
     } on Exception catch (e) {
       return Result.error(e);
     }

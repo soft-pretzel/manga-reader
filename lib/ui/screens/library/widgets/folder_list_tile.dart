@@ -28,7 +28,7 @@ class FolderListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: switch (viewModel.spacing) {
+      height: switch (viewModel.librarySpacing) {
         .comfortable => 120,
         .normal => 104,
         .compact => 88,
@@ -44,11 +44,15 @@ class FolderListTile extends StatelessWidget {
           },
           child: InkWell(
             onTap: () {
-              if (!folder.parsing) {
-                context.pushNamed(
-                  RouteNames.folder,
-                  pathParameters: {'folderId': folder.id},
-                );
+              if (viewModel.isSelectionMode) {
+                viewModel.toggleSelect.execute(index);
+              } else {
+                if (!folder.parsing) {
+                  context.pushNamed(
+                    RouteNames.folder,
+                    pathParameters: {'folderId': folder.id},
+                  );
+                }
               }
             },
             child: FolderMenu(
@@ -57,7 +61,7 @@ class FolderListTile extends StatelessWidget {
               menuController: _menuController,
               viewModel: viewModel,
               child: Padding(
-                padding: switch (viewModel.spacing) {
+                padding: switch (viewModel.librarySpacing) {
                   .comfortable => .symmetric(horizontal: 24, vertical: 12),
                   .normal => .symmetric(horizontal: 20, vertical: 10),
                   .compact => .symmetric(horizontal: 16, vertical: 8),
@@ -66,20 +70,39 @@ class FolderListTile extends StatelessWidget {
                   spacing: 16,
                   children: [
                     Expanded(
-                      child: folder.covers[0] == null
-                          ? Center(child: CircularProgressIndicator())
-                          : Center(
-                              child: Image.file(
-                                File(folder.covers.first!),
-                                alignment: .centerLeft,
+                      child: Stack(
+                        children: [
+                          folder.covers[0] == null
+                              ? Center(child: CircularProgressIndicator())
+                              : folder.covers[0] != ''
+                              ? Center(
+                                  child: Image.file(
+                                    File(folder.covers.first!),
+                                    color: viewModel.selected[index]
+                                        ? ColorScheme.of(
+                                            context,
+                                          ).surfaceBright.withAlpha(128)
+                                        : null,
+                                    colorBlendMode: .srcOver,
+                                  ),
+                                )
+                              : SizedBox(),
+                          if (viewModel.selected[index])
+                            Center(
+                              child: Icon(
+                                Icons.check_circle_rounded,
+                                color: ColorScheme.of(context).primary,
                               ),
                             ),
+                        ],
+                      ),
                     ),
                     Expanded(
                       flex: 3,
                       child: Column(
                         crossAxisAlignment: .start,
                         mainAxisAlignment: .center,
+                        spacing: 4,
                         children: [
                           RichText(
                             maxLines: 1,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'appearance_settings_view_model.dart';
 import '../widgets/card_list.dart';
+import 'widgets/ereader_mode_tile.dart';
 import 'widgets/dynamic_color_tile.dart';
 import 'widgets/oled_dark_mode_tile.dart';
 import 'widgets/theme_color_tile.dart';
@@ -29,9 +30,13 @@ class AppearanceSettingsView extends StatelessWidget {
               return CardList(
                 children: [
                   ThemeModeTile(viewModel: viewModel),
+                  if (viewModel.themeMode != .light &&
+                      Theme.of(context).brightness != .light)
+                    OledDarkModeTile(viewModel: viewModel),
                   if (!Platform.isIOS) DynamicColorTile(viewModel: viewModel),
-                  ThemeColorTile(viewModel: viewModel),
-                  OledDarkModeTile(viewModel: viewModel),
+                  if (!viewModel.dynamicMode)
+                    ThemeColorTile(viewModel: viewModel),
+                  EreaderModeTile(viewModel: viewModel),
                 ],
               );
             },

@@ -14,6 +14,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
     setThemeColor = Command1(_setThemeColor);
     setThemeMode = Command1(_setThemeMode);
     toggleDynamicMode = Command0(_toggleDynamicMode);
+    toggleEreaderMode = Command0(_toggleEreaderMode);
     toggleOledDarkMode = Command0(_toggleOledDarkMode);
   }
 
@@ -24,14 +25,17 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   late Command1<void, Color> setThemeColor;
   late Command1<void, ThemeMode> setThemeMode;
   late Command0 toggleDynamicMode;
+  late Command0 toggleEreaderMode;
   late Command0 toggleOledDarkMode;
 
   late bool _dynamicMode;
+  late bool _ereaderMode;
   late bool _oledDarkMode;
   late Color _themeColor;
   late ThemeMode _themeMode;
 
   bool get dynamicMode => _dynamicMode;
+  bool get ereaderMode => _ereaderMode;
   bool get oledDarkMode => _oledDarkMode;
   Color get themeColor => _themeColor;
   ThemeMode get themeMode => _themeMode;
@@ -39,6 +43,7 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
   Future<Result<void>> _load() async {
     try {
       _dynamicMode = await _settingsRepository.getDynamicMode();
+      _ereaderMode = await _settingsRepository.getEreaderMode();
       _oledDarkMode = await _settingsRepository.getOledDarkMode();
       _themeColor = await _settingsRepository.getThemeColor();
       _themeMode = await _settingsRepository.getThemeMode();
@@ -79,6 +84,17 @@ class AppearanceSettingsViewModel extends ChangeNotifier {
       notifyListeners();
       await _settingsRepository.setDynamicMode(_dynamicMode);
       _themeProvider.loadDynamicMode();
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _toggleEreaderMode() async {
+    try {
+      _ereaderMode = !_ereaderMode;
+      notifyListeners();
+      await _settingsRepository.toggleEreaderMode();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

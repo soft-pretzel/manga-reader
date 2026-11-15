@@ -23,7 +23,23 @@ class LibraryView extends StatelessWidget {
         LibraryAppBar(viewModel: viewModel),
         Expanded(
           child: RefreshIndicator(
-            onRefresh: viewModel.load.execute,
+            onRefresh: () async {
+              await viewModel.load.execute();
+              if (context.mounted && viewModel.snackBar != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      onPressed: () =>
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                    ),
+                    content: Text(viewModel.snackBar!),
+                    persist: false,
+                  ),
+                );
+                viewModel.clearSnackBar.execute();
+              }
+            },
             child: ListenableBuilder(
               listenable: viewModel,
               builder: (context, child) {
@@ -39,29 +55,32 @@ class LibraryView extends StatelessWidget {
                 if (viewModel.library.items.isEmpty) {
                   return EmptyLibraryScreen();
                 }
-                switch (viewModel.displayMode) {
+                switch (viewModel.libraryDisplayMode) {
                   case .grid:
                     return GridView.builder(
                       clipBehavior: .antiAlias,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        childAspectRatio: viewModel.spacing == .comfortable
-                            ? 0.534
-                            : viewModel.spacing == .normal
-                            ? 0.498
+                        childAspectRatio:
+                            viewModel.librarySpacing == .comfortable
+                            ? 0.537
+                            : viewModel.librarySpacing == .normal
+                            ? 0.501
                             : 0.474,
-                        crossAxisCount: viewModel.spacing == .comfortable
+                        crossAxisCount: viewModel.librarySpacing == .comfortable
                             ? 2
-                            : viewModel.spacing == .normal
+                            : viewModel.librarySpacing == .normal
                             ? 3
                             : 4,
-                        crossAxisSpacing: viewModel.spacing == .comfortable
+                        crossAxisSpacing:
+                            viewModel.librarySpacing == .comfortable
                             ? 24
-                            : viewModel.spacing == .normal
+                            : viewModel.librarySpacing == .normal
                             ? 20
                             : 16,
-                        mainAxisSpacing: viewModel.spacing == .comfortable
+                        mainAxisSpacing:
+                            viewModel.librarySpacing == .comfortable
                             ? 24
-                            : viewModel.spacing == .normal
+                            : viewModel.librarySpacing == .normal
                             ? 20
                             : 16,
                       ),
@@ -83,9 +102,9 @@ class LibraryView extends StatelessWidget {
                       },
                       itemCount: viewModel.library.items.length,
                       padding: .all(
-                        viewModel.spacing == .comfortable
+                        viewModel.librarySpacing == .comfortable
                             ? 24
-                            : viewModel.spacing == .normal
+                            : viewModel.librarySpacing == .normal
                             ? 20
                             : 16,
                       ),

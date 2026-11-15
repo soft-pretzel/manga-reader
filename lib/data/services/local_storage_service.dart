@@ -1,8 +1,5 @@
 import 'dart:io';
-import 'dart:isolate';
 
-import 'package:archive/archive.dart';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:saf_util/saf_util.dart';
@@ -23,59 +20,11 @@ class LocalStorageService {
     }
   }
 
-  Future<Archive?> decodeArchive(String path) async {
-    InputStream stream;
-    if (Platform.isAndroid) {
-      final safStream = SafStream();
-      Stream<List<int>> byteStream = await safStream.readFileStream(path);
-      List<int> bytes = [];
-      await for (final byteList in byteStream) {
-        for (final byte in byteList) {
-          bytes.add(byte);
-        }
-      }
-      stream = InputMemoryStream(bytes);
-    } else {
-      stream = InputFileStream(path);
-    }
-
-    Archive? archive;
-    final archiveType = await getFileType(path);
-    switch (archiveType) {
-      case 'cbz' || 'zip':
-        archive = ZipDecoder().decodeStream(stream);
-      case 'cbt' || 'tar':
-        archive = TarDecoder().decodeStream(stream);
-    }
-
-    return archive;
-  }
-
   Future<void> deleteFile(String path) async {
     final file = File(path);
     if (file.existsSync()) {
       await File(path).delete();
     }
-  }
-
-  Future<String?> extractBookCover(String path, String id) async {
-    final token = RootIsolateToken.instance;
-    return await Isolate.run(() async {
-      BackgroundIsolateBinaryMessenger.ensureInitialized(token!);
-      final session = await getBookSession(path);
-      final cover = session.book.metadata.cover;
-      if (cover != null) {
-        final cache = await getCoversCache();
-        final file = File(
-          '${cache.path}${Platform.pathSeparator}$id.${cover.fileExtension}',
-        );
-        await file.writeAsBytes(cover.bytes, flush: true);
-        session.dispose();
-        return file.path;
-      }
-      session.dispose();
-      return null;
-    });
   }
 
   Future<BookSession> getBookSession(String path) async {
@@ -87,19 +36,6 @@ class LocalStorageService {
       session = await BookSession.openFile(path);
     }
     return session;
-  }
-
-  Future<Book> getBookStructure(String path) async {
-    BookSession session;
-    if (Platform.isAndroid) {
-      final safStream = SafStream();
-      session = await BookSession.open(await safStream.readFileBytes(path));
-    } else {
-      session = await BookSession.openFile(path);
-    }
-    final book = session.book;
-    session.dispose();
-    return book;
   }
 
   Future<FileStat> getCacheInfo() async {
@@ -160,28 +96,23 @@ class LocalStorageService {
     }
   }
 
-  Future<int> getPageCount(String path) async {
-    BookSession session;
+  Future<bool> getFilePermission(String path) async {
     if (Platform.isAndroid) {
-      final safStream = SafStream();
-      session = await BookSession.open(await safStream.readFileBytes(path));
+      final safUtil = SafUtil();
+      return await safUtil.hasPersistedPermission(path);
     } else {
-      session = await BookSession.openFile(path);
+      return true;
     }
-    final pageCount = session.book.files.images.length;
-    session.dispose();
-    return pageCount;
   }
 
-  Future<Directory> getReadingCache() async {
-    final cache = await getApplicationCacheDirectory();
-    final readingCache = Directory(
-      '${cache.path}${Platform.pathSeparator}reading',
-    );
-    if (!await readingCache.exists()) {
-      await readingCache.create(recursive: true);
+  Future<DateTime> getLastModified(String path) async {
+    if (Platform.isAndroid) {
+      final safUtil = SafUtil();
+      final file = await safUtil.documentFileFromUri(path, null);
+      return DateTime.fromMillisecondsSinceEpoch(file!.lastModified);
+    } else {
+      return File(path).lastModifiedSync();
     }
-    return readingCache;
   }
 
   Future<bool> isDir(String path) async {
@@ -207,9 +138,7 @@ class LocalStorageService {
     }
   }
 
-  Future<String?> saveBookCover(BookSession session, String id) async {
-    final cover = session.book.metadata.cover;
-    session.dispose();
+  Future<String?> saveBookCover(BookCover? cover, String id) async {
     if (cover != null) {
       final cache = await getCoversCache();
       final file = File(
@@ -220,18 +149,5 @@ class LocalStorageService {
     } else {
       return null;
     }
-  }
-
-  Future<String> writeArchiveFile(
-    ArchiveFile file,
-    String path, [
-    String? name,
-  ]) async {
-    file.decompress();
-    final outputPath = '$path${Platform.pathSeparator}${name ?? file.name}';
-    final outputStream = OutputFileStream(outputPath);
-    file.writeContent(outputStream, freeMemory: true);
-    outputStream.closeSync();
-    return outputPath;
   }
 }

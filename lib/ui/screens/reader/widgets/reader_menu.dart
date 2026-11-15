@@ -1,129 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import 'menu_buttons.dart';
-import 'reader_slider.dart';
 import '../reader_view_model.dart';
-import '../../../../routing/routes.dart';
 
-class ReaderMenu<T> extends PopupRoute<T> {
-  ReaderMenu({
-    required this.orientation,
-    required this.pageController,
-    required this.viewModel,
-  });
-
-  final Orientation orientation;
-  final PageController pageController;
+class ReaderMenu extends StatelessWidget {
   final ReaderViewModel viewModel;
 
-  final _menuContoroller = MenuController();
-  bool _stillReading = true;
-  final _transitionDuration = Duration(milliseconds: 200);
+  const ReaderMenu({super.key, required this.viewModel});
 
   @override
-  Color? get barrierColor => Colors.black.withAlpha(50);
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String? get barrierLabel => 'Reader Menu';
-
-  @override
-  void didComplete(T? result) {
-    if (_stillReading) {
-      Future.delayed(
-        (viewModel.animations) ? _transitionDuration : Duration.zero,
-        () {
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-        },
-      );
-    }
-    super.didComplete(result);
-  }
-
-  @override
-  Duration get transitionDuration =>
-      (viewModel.animations) ? _transitionDuration : Duration.zero;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Card(
-          margin: EdgeInsets.all(0),
-          color: Theme.of(context).colorScheme.surface.withAlpha(224),
+          margin: .all(0),
           child: SafeArea(
             bottom: false,
             child: Row(
               children: [
                 IconButton(
+                  onPressed: () => context..pop(),
                   icon: Icon(Icons.arrow_back),
-                  color: Theme.of(context).colorScheme.primary,
-                  onPressed: () {
-                    _stillReading = false;
-                    context
-                      ..pop()
-                      ..pop();
-                  },
-                ),
-                Text(viewModel.book.title),
-                Spacer(),
-                MenuAnchor(
-                  builder: (context, controller, child) {
-                    return IconButton(
-                      onPressed: _menuContoroller.open,
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    );
-                  },
-                  controller: _menuContoroller,
-                  menuChildren: [
-                    MenuItemButton(
-                      onPressed: () {
-                        _stillReading = false;
-                        context.goNamed(RouteNames.readerSettings);
-                      },
-                      child: Text('Reader settings'),
-                    ),
-                    MenuItemButton(
-                      onPressed: () {
-                        _stillReading = false;
-                        context.pushNamed(
-                          RouteNames.book,
-                          pathParameters: {'bookId': viewModel.book.id},
-                        );
-                      },
-                      child: Text('Book details'),
-                    ),
-                  ],
                 ),
               ],
             ),
           ),
         ),
         Spacer(),
-        // PagePreview(pageController: pageController, viewModel: viewModel),
         Card(
-          margin: EdgeInsets.all(0),
-          color: Theme.of(context).colorScheme.surface.withAlpha(224),
+          margin: .all(0),
           child: SafeArea(
             top: false,
             child: Column(
               children: [
-                MenuButtons(viewModel: viewModel),
-                ReaderSlider(
-                  orientation: orientation,
-                  pageController: pageController,
-                  viewModel: viewModel,
+                Text(
+                  '${viewModel.book.currentPage} / ${viewModel.book.pageCount}',
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.first_page_rounded),
+                    ),
+                    Expanded(
+                      child: Directionality(
+                        textDirection:
+                            viewModel.readingDirection == .rightToLeft
+                            ? .rtl
+                            : .ltr,
+                        child: Slider(
+                          max: viewModel.book.pageCount!.toDouble(),
+                          min: 1,
+                          value: viewModel.book.currentPage.toDouble(),
+                          onChanged: (value) {
+                            viewModel.setCurrentPage.execute(value.toInt());
+                            viewModel.pageController.jumpToPage(
+                              (value - 1).toInt(),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.undo_rounded),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.last_page_rounded),
+                    ),
+                  ],
                 ),
               ],
             ),

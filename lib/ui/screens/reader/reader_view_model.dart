@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../data/models/book.dart';
 import '../../../data/models/settings.dart';
@@ -8,88 +10,55 @@ import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
 class ReaderViewModel extends ChangeNotifier {
+  final String _bookId;
+  final LibraryRepository _libraryRepository;
+  final SettingsRepository _settingsRepository;
+
   ReaderViewModel({
     required this._bookId,
     required this._libraryRepository,
     required this._settingsRepository,
   }) {
-    brightnessDown = Command0(_brightnessDown);
-    brightnessReset = Command0(_brightnessReset);
-    brightnessUp = Command0(_brightnessUp);
     load = Command0(_load)..execute();
-    loadBook = Command0(_loadBook);
-    setReadingDirection = Command1(_setReadingDirection);
-    setReadingMode = Command1(_setReadingMode);
+    setCurrentPage = Command1(_setCurrentPage);
     setReadingStatus = Command0(_setReadingStatus);
-    toggleAnimations = Command0(_toggleAnimations);
-    updateBook = Command1(_updateBook);
   }
 
-  final String _bookId;
-  final LibraryRepository _libraryRepository;
-  final SettingsRepository _settingsRepository;
-
-  late final Command0 brightnessDown;
-  late final Command0 brightnessReset;
-  late final Command0 brightnessUp;
   late final Command0 load;
-  late final Command0 loadBook;
-  late final Command1<void, ReadingDirection> setReadingDirection;
-  late final Command1<void, ReadingMode> setReadingMode;
+  late final Command1<void, int> setCurrentPage;
   late final Command0 setReadingStatus;
-  late final Command0 toggleAnimations;
-  late final Command1<void, int> updateBook;
 
-  late bool _animations;
-  late Book _book;
-  late bool _doubleTapZoom;
+  late final Book _book;
+  final _curve = Curves.easeInOut;
+  final _duration = Duration(milliseconds: 300);
+  late final bool _ereaderMode;
+  late final PageController _pageController;
   List<Uint8List?> _pages = [];
   late ReadingDirection _readingDirection;
   late ReadingMode _readingMode;
-  late double _zoom;
 
-  bool get animations => _animations;
   Book get book => _book;
-  bool get doubleTapZoom => _doubleTapZoom;
+  Curve get curve => _curve;
+  Duration get duration => _duration;
+  bool get ereaderMode => _ereaderMode;
+  PageController get pageController => _pageController;
   List<Uint8List?> get pages => _pages;
   ReadingDirection get readingDirection => _readingDirection;
   ReadingMode get readingMode => _readingMode;
-  double get zoom => _zoom;
-
-  Future<Result<void>> _brightnessDown() async {
-    try {
-      await _settingsRepository.brightnessDown();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _brightnessReset() async {
-    try {
-      await _settingsRepository.brightnessReset();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _brightnessUp() async {
-    try {
-      await _settingsRepository.brightnessUp();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
 
   Future<Result<void>> _load() async {
     try {
-      _animations = await _settingsRepository.getAnimations();
-      _doubleTapZoom = await _settingsRepository.getDoubleTapZoom();
+      SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
+      _book = await _libraryRepository.getBook(_bookId);
+      _ereaderMode = await _settingsRepository.getEreaderMode();
+      _pageController = PageController(
+        initialPage: _book.currentPage - 1,
+        keepPage: false,
+      );
+      _pages = List.filled(_book.pageCount!, null);
       _readingDirection = await _settingsRepository.getReadingDirection();
       _readingMode = await _settingsRepository.getReadingMode();
-      _zoom = await _settingsRepository.getZoom();
+      notifyListeners();
       _loadPages();
       return Result.ok(null);
     } on Exception catch (e) {
@@ -97,22 +66,9 @@ class ReaderViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _loadBook() async {
-    final result = await _libraryRepository.getBook(_bookId);
-    switch (result) {
-      case Ok():
-        _book = result.value;
-        _pages = List.filled(_book.pageCount!, null);
-        notifyListeners();
-        return Result.ok(null);
-      case Error():
-        return Result.error(result.error);
-    }
-  }
-
   Future<Result<void>> _loadPages() async {
     try {
-      final session = await _libraryRepository.openBook(_bookId);
+      final session = await _libraryRepository.openBook(_book.path);
       final pages = session.book.files.images;
       Future<void> loadPage(int index) async {
         _pages[index] = await session.loadResource(pages[index].path);
@@ -140,47 +96,12 @@ class ReaderViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _updateBook(int currentPage) async {
+  Future<Result<void>> _setCurrentPage(int value) async {
     try {
-      _book.currentPage = currentPage;
-      _book.lastRead = .now();
+      _book.currentPage = value + 1;
       notifyListeners();
+      _book.lastRead = DateTime.now();
       _libraryRepository.updateBook(_book);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _toggleAnimations() async {
-    try {
-      _animations = !_animations;
-      notifyListeners();
-      _settingsRepository.toggleAnimations();
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _setReadingDirection(
-    ReadingDirection readingDirection,
-  ) async {
-    try {
-      _readingDirection = readingDirection;
-      notifyListeners();
-      _settingsRepository.setReadingDirection(readingDirection);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _setReadingMode(ReadingMode readingMode) async {
-    try {
-      _readingMode = readingMode;
-      notifyListeners();
-      _settingsRepository.setReadingMode(readingMode);
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

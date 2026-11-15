@@ -38,11 +38,15 @@ class FolderGridTile extends StatelessWidget {
                 if (!viewModel.isSelectionMode) _handleLongPress(details);
               },
               onTap: () {
-                if (!folder.parsing) {
-                  context.pushNamed(
-                    RouteNames.folder,
-                    pathParameters: {'folderId': folder.id},
-                  );
+                if (viewModel.isSelectionMode) {
+                  viewModel.toggleSelect.execute(index);
+                } else {
+                  if (!folder.parsing) {
+                    context.pushNamed(
+                      RouteNames.folder,
+                      pathParameters: {'folderId': folder.id},
+                    );
+                  }
                 }
               },
               child: FolderMenu(
@@ -99,6 +103,18 @@ class FolderGridTile extends StatelessWidget {
                             )
                           : SizedBox.expand(),
                     ),
+                    if (viewModel.selected[index])
+                      Positioned.fill(
+                        child: Container(
+                          color: ColorScheme.of(context).surface.withAlpha(128),
+                          child: Center(
+                            child: Icon(
+                              Icons.check_circle,
+                              color: ColorScheme.of(context).primary,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -107,9 +123,9 @@ class FolderGridTile extends StatelessWidget {
         ),
         Padding(
           padding: .only(
-            top: viewModel.spacing == .comfortable
+            top: viewModel.librarySpacing == .comfortable
                 ? 8
-                : viewModel.spacing == .normal
+                : viewModel.librarySpacing == .normal
                 ? 6
                 : 4,
           ),

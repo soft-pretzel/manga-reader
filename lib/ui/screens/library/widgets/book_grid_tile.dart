@@ -154,9 +154,9 @@ class BookGridTile extends StatelessWidget {
         ),
         Padding(
           padding: .only(
-            top: viewModel.spacing == .comfortable
+            top: viewModel.librarySpacing == .comfortable
                 ? 8
-                : viewModel.spacing == .normal
+                : viewModel.librarySpacing == .normal
                 ? 6
                 : 4,
           ),
@@ -180,9 +180,11 @@ class BookGridTile extends StatelessWidget {
                     style: DefaultTextStyle.of(
                       context,
                     ).style.apply(color: ColorScheme.of(context).outline),
-                    text: book.pageCount == 1
-                        ? '${book.pageCount} page'
-                        : '${book.pageCount} pages',
+                    text: book.pageCount != null
+                        ? book.pageCount == 1
+                              ? '${book.pageCount} page'
+                              : '${book.pageCount} pages'
+                        : null,
                   ),
                 ),
               ],

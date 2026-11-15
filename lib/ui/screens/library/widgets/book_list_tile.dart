@@ -28,7 +28,7 @@ class BookListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: switch (viewModel.spacing) {
+      height: switch (viewModel.librarySpacing) {
         .comfortable => 120,
         .normal => 104,
         .compact => 88,
@@ -75,7 +75,7 @@ class BookListTile extends StatelessWidget {
                       ),
                     ),
                   Padding(
-                    padding: switch (viewModel.spacing) {
+                    padding: switch (viewModel.librarySpacing) {
                       .comfortable => .symmetric(horizontal: 24, vertical: 12),
                       .normal => .symmetric(horizontal: 20, vertical: 10),
                       .compact => .symmetric(horizontal: 16, vertical: 8),
@@ -148,9 +148,11 @@ class BookListTile extends StatelessWidget {
                                       .apply(
                                         color: ColorScheme.of(context).outline,
                                       ),
-                                  text: book.pageCount == 1
-                                      ? '${book.pageCount} page'
-                                      : '${book.pageCount} pages',
+                                  text: book.pageCount != null
+                                      ? book.pageCount == 1
+                                            ? '${book.pageCount} page'
+                                            : '${book.pageCount} pages'
+                                      : null,
                                 ),
                               ),
                             ],

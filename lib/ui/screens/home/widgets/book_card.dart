@@ -40,9 +40,19 @@ class BookCard extends StatelessWidget {
                 menuChildren: [
                   MenuItemButton(
                     onPressed: () => viewModel.markAsFinished.execute(book.id),
+                    trailingIcon: Icon(Icons.task_alt_rounded),
                     child: Text('Mark as finished'),
                   ),
-                  MenuItemButton(child: Text('Details')),
+                  MenuItemButton(
+                    onPressed: () {
+                      context.pushNamed(
+                        RouteNames.book,
+                        pathParameters: {'bookId': book.id},
+                      );
+                    },
+                    trailingIcon: Icon(Icons.more_vert),
+                    child: Text('Details'),
+                  ),
                 ],
                 child: Card(
                   clipBehavior: .antiAlias,

@@ -45,7 +45,7 @@ class BookMenu extends StatelessWidget {
           onPressed: () {
             viewModel.toggleSelect.execute(index);
           },
-          trailingIcon: Icon(Icons.check_circle_outline_rounded),
+          trailingIcon: Icon(Icons.select_all_rounded),
           child: Text('Select'),
         ),
         MenuItemButton(

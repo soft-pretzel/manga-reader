@@ -29,15 +29,15 @@ class DisplaySettings extends StatelessWidget {
                       width: (constraints.maxWidth / 2) - 2,
                     ),
                     isSelected: [
-                      viewModel.displayMode == .grid,
-                      viewModel.displayMode == .list,
+                      viewModel.libraryDisplayMode == .grid,
+                      viewModel.libraryDisplayMode == .list,
                     ],
                     onPressed: (index) {
                       switch (index) {
                         case 0:
-                          viewModel.setDisplayMode.execute(.grid);
+                          viewModel.setLibraryDisplayMode.execute(.grid);
                         case 1:
-                          viewModel.setDisplayMode.execute(.list);
+                          viewModel.setLibraryDisplayMode.execute(.list);
                       }
                     },
                     children: [Text('Grid'), Text('List')],
@@ -51,18 +51,18 @@ class DisplaySettings extends StatelessWidget {
                       width: (constraints.maxWidth / 3) - 2,
                     ),
                     isSelected: [
-                      viewModel.spacing == .comfortable,
-                      viewModel.spacing == .normal,
-                      viewModel.spacing == .compact,
+                      viewModel.librarySpacing == .comfortable,
+                      viewModel.librarySpacing == .normal,
+                      viewModel.librarySpacing == .compact,
                     ],
                     onPressed: (index) {
                       switch (index) {
                         case 0:
-                          viewModel.setSpacing.execute(.comfortable);
+                          viewModel.setLibrarySpacing.execute(.comfortable);
                         case 1:
-                          viewModel.setSpacing.execute(.normal);
+                          viewModel.setLibrarySpacing.execute(.normal);
                         case 2:
-                          viewModel.setSpacing.execute(.compact);
+                          viewModel.setLibrarySpacing.execute(.compact);
                       }
                     },
                     children: [
@@ -80,18 +80,20 @@ class DisplaySettings extends StatelessWidget {
                       width: (constraints.maxWidth / 3) - 2,
                     ),
                     isSelected: [
-                      viewModel.filter.contains(ReadingStatus.unread),
-                      viewModel.filter.contains(ReadingStatus.inProgress),
-                      viewModel.filter.contains(ReadingStatus.finished),
+                      viewModel.libraryFilter.contains(ReadingStatus.unread),
+                      viewModel.libraryFilter.contains(
+                        ReadingStatus.inProgress,
+                      ),
+                      viewModel.libraryFilter.contains(ReadingStatus.finished),
                     ],
                     onPressed: (index) {
                       switch (index) {
                         case 0:
-                          viewModel.setFilter.execute(.unread);
+                          viewModel.setLibraryFilter.execute(.unread);
                         case 1:
-                          viewModel.setFilter.execute(.inProgress);
+                          viewModel.setLibraryFilter.execute(.inProgress);
                         case 2:
-                          viewModel.setFilter.execute(.finished);
+                          viewModel.setLibraryFilter.execute(.finished);
                       }
                     },
                     children: [
@@ -109,32 +111,34 @@ class DisplaySettings extends StatelessWidget {
                       width: (constraints.maxWidth / 3) - 2,
                     ),
                     isSelected: [
-                      viewModel.sort == .alphabetical ||
-                          viewModel.sort == .alphabeticalReverse,
-                      viewModel.sort == .dateAdded ||
-                          viewModel.sort == .dateAddedReverse,
-                      viewModel.sort == .lastRead ||
-                          viewModel.sort == .lastReadReverse,
+                      viewModel.librarySort == .alphabetical ||
+                          viewModel.librarySort == .alphabeticalReverse,
+                      viewModel.librarySort == .dateAdded ||
+                          viewModel.librarySort == .dateAddedReverse,
+                      viewModel.librarySort == .lastRead ||
+                          viewModel.librarySort == .lastReadReverse,
                     ],
                     onPressed: (index) {
                       switch (index) {
                         case 0:
-                          if (viewModel.sort == .alphabetical) {
-                            viewModel.setSort.execute(.alphabeticalReverse);
+                          if (viewModel.librarySort == .alphabetical) {
+                            viewModel.setLibrarySort.execute(
+                              .alphabeticalReverse,
+                            );
                           } else {
-                            viewModel.setSort.execute(.alphabetical);
+                            viewModel.setLibrarySort.execute(.alphabetical);
                           }
                         case 1:
-                          if (viewModel.sort == .dateAdded) {
-                            viewModel.setSort.execute(.dateAddedReverse);
+                          if (viewModel.librarySort == .dateAdded) {
+                            viewModel.setLibrarySort.execute(.dateAddedReverse);
                           } else {
-                            viewModel.setSort.execute(.dateAdded);
+                            viewModel.setLibrarySort.execute(.dateAdded);
                           }
                         case 2:
-                          if (viewModel.sort == .lastRead) {
-                            viewModel.setSort.execute(.lastReadReverse);
+                          if (viewModel.librarySort == .lastRead) {
+                            viewModel.setLibrarySort.execute(.lastReadReverse);
                           } else {
-                            viewModel.setSort.execute(.lastRead);
+                            viewModel.setLibrarySort.execute(.lastRead);
                           }
                       }
                     },
@@ -143,9 +147,9 @@ class DisplaySettings extends StatelessWidget {
                         mainAxisAlignment: .center,
                         children: [
                           Text('Alphabetical'),
-                          if (viewModel.sort == .alphabetical)
+                          if (viewModel.librarySort == .alphabetical)
                             Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.sort == .alphabeticalReverse)
+                          if (viewModel.librarySort == .alphabeticalReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),
@@ -153,9 +157,9 @@ class DisplaySettings extends StatelessWidget {
                         mainAxisAlignment: .center,
                         children: [
                           Text('Date added'),
-                          if (viewModel.sort == .dateAdded)
+                          if (viewModel.librarySort == .dateAdded)
                             Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.sort == .dateAddedReverse)
+                          if (viewModel.librarySort == .dateAddedReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),
@@ -163,9 +167,9 @@ class DisplaySettings extends StatelessWidget {
                         mainAxisAlignment: .center,
                         children: [
                           Text('Last read'),
-                          if (viewModel.sort == .lastRead)
+                          if (viewModel.librarySort == .lastRead)
                             Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.sort == .lastReadReverse)
+                          if (viewModel.librarySort == .lastReadReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),

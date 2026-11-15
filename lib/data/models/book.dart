@@ -5,6 +5,7 @@ import 'library_item.dart';
 enum ReadingStatus { unread, inProgress, finished }
 
 class Book extends LibraryItem {
+  double? aspectRatio;
   String? author;
   String? cover;
   int currentPage;
@@ -27,6 +28,7 @@ class Book extends LibraryItem {
 
   Book({
     required super.id,
+    this.aspectRatio,
     this.author,
     this.cover,
     this.currentPage = 1,
@@ -37,6 +39,7 @@ class Book extends LibraryItem {
     this.goodreads,
     this.isbn,
     this.language,
+    super.lastModified,
     this.lastRead,
     this.libraryThing,
     this.openLibrary,
@@ -56,17 +59,20 @@ class Book extends LibraryItem {
   Map<String, Object?> toMap() {
     return {
       'id': id,
+      if (aspectRatio != null) 'aspect_ratio': aspectRatio,
       if (author != null) 'author': author,
       if (cover != null) 'cover': cover,
       'current_page': currentPage,
-      'date_added': dateAdded.toString(),
+      'date_added': dateAdded.millisecondsSinceEpoch,
       if (description != null) 'description': description,
       if (format != null) 'format': format!.index,
       'genres': genres.join(","),
       if (goodreads != null) 'goodreads': goodreads,
       if (isbn != null) 'isbn': isbn,
       if (language != null) 'language': language,
-      if (lastRead != null) 'last_read': lastRead.toString(),
+      if (lastModified != null)
+        'last_modified': lastModified!.millisecondsSinceEpoch,
+      if (lastRead != null) 'last_read': lastRead!.millisecondsSinceEpoch,
       if (libraryThing != null) 'library_thing': libraryThing,
       if (openLibrary != null) 'open_library': openLibrary,
       if (pageCount != null) 'page_count': pageCount,
@@ -83,7 +89,8 @@ class Book extends LibraryItem {
   }
 
   Book.fromMap(super.map)
-    : author = map['author']?.toString(),
+    : aspectRatio = double.tryParse(map['aspect_ratio'].toString()),
+      author = map['author']?.toString(),
       cover = map['cover']?.toString(),
       currentPage = int.parse(map['current_page'].toString()),
       description = map['description']?.toString(),
@@ -94,7 +101,11 @@ class Book extends LibraryItem {
       goodreads = map['goodreads']?.toString(),
       isbn = map['isbn']?.toString(),
       language = map['language']?.toString(),
-      lastRead = DateTime.tryParse(map['last_read'].toString()),
+      lastRead = map['last_read'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              int.parse(map['last_read'].toString()),
+            )
+          : null,
       libraryThing = map['library_thing']?.toString(),
       openLibrary = map['open_library']?.toString(),
       pageCount = int.tryParse(map['page_count'].toString()),

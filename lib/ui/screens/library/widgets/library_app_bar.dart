@@ -22,7 +22,9 @@ class LibraryAppBar extends StatelessWidget {
           return AppBar(
             actions: [
               if (viewModel.isSelectionMode) ...[
-                Text(viewModel.selectedCount.toString()),
+                Text(
+                  '${viewModel.selectedBookCount + viewModel.selectedFolderCount}',
+                ),
                 IconButton(
                   onPressed: () => viewModel.disableSelectionMode.execute(),
                   icon: Icon(Icons.close),
@@ -42,7 +44,8 @@ class LibraryAppBar extends StatelessWidget {
               MenuAnchor(
                 controller: _menuController,
                 menuChildren: [
-                  if (viewModel.isSelectionMode)
+                  if (viewModel.isSelectionMode &&
+                      viewModel.selectedFolderCount == 0)
                     MenuItemButton(
                       onPressed: () async {
                         for (final (index, selected)
@@ -58,7 +61,8 @@ class LibraryAppBar extends StatelessWidget {
                       trailingIcon: Icon(Icons.task_alt_rounded),
                       child: Text('Mark as finished'),
                     ),
-                  if (viewModel.isSelectionMode)
+                  if (viewModel.isSelectionMode &&
+                      viewModel.selectedFolderCount == 0)
                     MenuItemButton(
                       onPressed: () async {
                         for (final (index, selected)
@@ -114,7 +118,7 @@ class LibraryAppBar extends StatelessWidget {
                       onPressed: () {
                         viewModel.selectAll.execute();
                       },
-                      trailingIcon: Icon(Icons.select_all),
+                      trailingIcon: Icon(Icons.select_all_rounded),
                       child: Text('Select all'),
                     ),
                 ],
