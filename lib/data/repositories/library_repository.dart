@@ -84,6 +84,10 @@ class LibraryRepository {
     return await _databaseService.getBook(id);
   }
 
+  Future<bool> getFilePermission(String path) async {
+    return await _localStorageService.getFilePermission(path);
+  }
+
   Future<Folder?> getFolderByPath(String path) async {
     return await _databaseService.getFolderByPath(path);
   }
@@ -119,8 +123,11 @@ class LibraryRepository {
     );
   }
 
-  Future<bool> getFilePermission(String path) async {
-    return await _localStorageService.getFilePermission(path);
+  Future<Folder> getParentFolder(LibraryItem item) async {
+    while (item.parentId != null) {
+      item = await _databaseService.getFolderById(item.parentId!);
+    }
+    return item as Folder;
   }
 
   Future<Result<void>> markAsFinished(String id) async {

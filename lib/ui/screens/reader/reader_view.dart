@@ -17,6 +17,7 @@ class _ReaderViewState extends State<ReaderView>
     with SingleTickerProviderStateMixin {
   bool _menuVisible = false;
   late Orientation _orientation;
+  final _transformationController = TransformationController();
 
   @override
   void initState() {
@@ -30,8 +31,9 @@ class _ReaderViewState extends State<ReaderView>
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
+    _transformationController.dispose();
     widget.viewModel.setReadingStatus.execute();
-    widget.viewModel.pageController.dispose();
+    widget.viewModel.mainPageController.dispose();
     super.dispose();
   }
 
@@ -51,64 +53,142 @@ class _ReaderViewState extends State<ReaderView>
               if (orientation == .landscape) {
                 index = (index / 2).round();
               }
-              widget.viewModel.pageController.jumpToPage(index);
+              widget.viewModel.mainPageController.jumpToPage(index);
             }
             return Stack(
               children: [
-                PageView.builder(
-                  controller: widget.viewModel.pageController,
-                  itemBuilder: (context, index) {
-                    if (orientation == .portrait || index == 0) {
-                      final page = widget.viewModel.pages[index];
-                      if (page == null) {
-                        return Center(child: CircularProgressIndicator());
+                InteractiveViewer(
+                  transformationController: _transformationController,
+                  child: PageView.builder(
+                    controller: widget.viewModel.mainPageController,
+                    itemBuilder: (context, index) {
+                      Widget page(int index) {
+                        if (widget.viewModel.pages[index] == null) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        return Image.memory(widget.viewModel.pages[index]!);
                       }
-                      return Image.memory(page);
-                    } else {
-                      index = index * 2;
-                      final leftPage = widget.viewModel.pages[index];
-                      final rightPage = widget.viewModel.pages[index - 1];
-                      if (leftPage == null || rightPage == null) {
-                        return Center(child: CircularProgressIndicator());
-                      } else {
+
+                      if (index == 0) {
+                        return page(index);
+                      }
+                      if (orientation == .landscape) {
+                        index = index * 2;
+                        if (widget.viewModel.book.pageCount! % 2 == 0 &&
+                            index == widget.viewModel.book.pageCount!) {
+                          return page(index - 1);
+                        }
                         return Row(
                           mainAxisAlignment: .center,
                           children: [
-                            Image.memory(leftPage),
-                            Image.memory(rightPage),
+                            if (widget.viewModel.readingDirection ==
+                                .rightToLeft) ...[
+                              page(index),
+                              page(index - 1),
+                            ] else ...[
+                              page(index - 1),
+                              page(index),
+                            ],
                           ],
                         );
                       }
-                    }
-                  },
-                  itemCount: orientation == .portrait
-                      ? widget.viewModel.book.pageCount!
-                      : widget.viewModel.book.pageCount! % 2 == 0
-                      ? ((widget.viewModel.book.pageCount! - 2) / 2).toInt()
-                      : ((widget.viewModel.book.pageCount! - 1) / 2).toInt(),
-                  onPageChanged: (value) {
-                    if (orientation == _orientation) {
-                      if (orientation == .landscape) {
-                        value = value * 2;
+                      return page(index);
+                    },
+                    itemCount: orientation == .portrait
+                        ? widget.viewModel.book.pageCount!
+                        : widget.viewModel.book.pageCount! % 2 == 0
+                        ? ((widget.viewModel.book.pageCount! - 2) / 2).toInt() +
+                              2
+                        : ((widget.viewModel.book.pageCount! - 1) / 2).toInt() +
+                              1,
+                    onPageChanged: (value) {
+                      if (orientation == _orientation) {
+                        if (orientation == .landscape) {
+                          value = value * 2;
+                          if (value == 0) value++;
+                        } else {
+                          value++;
+                        }
+                        widget.viewModel.updateBook.execute(value);
+                        if (_menuVisible) {
+                          SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
+                          setState(() {
+                            _menuVisible = false;
+                          });
+                        }
                       }
-                      widget.viewModel.setCurrentPage.execute(value + 1);
-                      widget.viewModel.updateBook.execute();
-                      if (_menuVisible) {
-                        SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
-                        setState(() {
-                          _menuVisible = false;
-                        });
-                      }
-                    }
-                  },
-                  pageSnapping: widget.viewModel.readingMode != .continuous,
-                  reverse: widget.viewModel.readingDirection == .rightToLeft,
-                  scrollDirection:
-                      widget.viewModel.readingDirection == .vertical
-                      ? .vertical
-                      : .horizontal,
+                    },
+                    pageSnapping: widget.viewModel.readingMode != .continuous,
+                    reverse: widget.viewModel.readingDirection == .rightToLeft,
+                    scrollDirection:
+                        widget.viewModel.readingDirection == .vertical
+                        ? .vertical
+                        : .horizontal,
+                  ),
                 ),
                 GestureDetector(
+                  onDoubleTapDown: (details) {
+                    setState(() {
+                      if (_transformationController.value != .identity()) {
+                        _transformationController.value = .identity();
+                      } else {
+                        _transformationController.value = .identity()
+                          ..translateByDouble(
+                            -details.globalPosition.dx *
+                                (widget.viewModel.zoom - 1),
+                            -details.globalPosition.dy *
+                                (widget.viewModel.zoom - 1),
+                            1,
+                            1,
+                          )
+                          ..scaleByDouble(
+                            widget.viewModel.zoom,
+                            widget.viewModel.zoom,
+                            1,
+                            1,
+                          );
+                      }
+                    });
+                  },
+                  onLongPressEnd: (details) {
+                    _transformationController.value = .identity();
+                  },
+                  onLongPressMoveUpdate: (details) {
+                    _transformationController.value = .identity()
+                      ..translateByDouble(
+                        (-details.globalPosition.dx *
+                                (widget.viewModel.zoom - 1)) -
+                            details.offsetFromOrigin.dx * 10,
+                        (-details.globalPosition.dy *
+                                (widget.viewModel.zoom - 1)) -
+                            details.offsetFromOrigin.dy * 10,
+                        1,
+                        1,
+                      )
+                      ..scaleByDouble(
+                        widget.viewModel.zoom,
+                        widget.viewModel.zoom,
+                        1,
+                        1,
+                      );
+                  },
+                  onLongPressStart: (details) {
+                    _transformationController.value = .identity()
+                      ..translateByDouble(
+                        -details.globalPosition.dx *
+                            (widget.viewModel.zoom - 1),
+                        -details.globalPosition.dy *
+                            (widget.viewModel.zoom - 1),
+                        1,
+                        1,
+                      )
+                      ..scaleByDouble(
+                        widget.viewModel.zoom,
+                        widget.viewModel.zoom,
+                        1,
+                        1,
+                      );
+                  },
                   onTap: () {
                     if (_menuVisible) {
                       SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
@@ -135,15 +215,16 @@ class _ReaderViewState extends State<ReaderView>
                             onTap: () {
                               if (widget.viewModel.readingDirection ==
                                   .rightToLeft) {
-                                widget.viewModel.pageController.nextPage(
+                                widget.viewModel.mainPageController.nextPage(
                                   duration: widget.viewModel.duration,
                                   curve: widget.viewModel.curve,
                                 );
                               } else {
-                                widget.viewModel.pageController.previousPage(
-                                  duration: widget.viewModel.duration,
-                                  curve: widget.viewModel.curve,
-                                );
+                                widget.viewModel.mainPageController
+                                    .previousPage(
+                                      duration: widget.viewModel.duration,
+                                      curve: widget.viewModel.curve,
+                                    );
                               }
                             },
                           ),
@@ -154,12 +235,13 @@ class _ReaderViewState extends State<ReaderView>
                             onTap: () {
                               if (widget.viewModel.readingDirection ==
                                   .rightToLeft) {
-                                widget.viewModel.pageController.previousPage(
-                                  duration: widget.viewModel.duration,
-                                  curve: widget.viewModel.curve,
-                                );
+                                widget.viewModel.mainPageController
+                                    .previousPage(
+                                      duration: widget.viewModel.duration,
+                                      curve: widget.viewModel.curve,
+                                    );
                               } else {
-                                widget.viewModel.pageController.nextPage(
+                                widget.viewModel.mainPageController.nextPage(
                                   duration: widget.viewModel.duration,
                                   curve: widget.viewModel.curve,
                                 );

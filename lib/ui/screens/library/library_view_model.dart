@@ -251,7 +251,8 @@ class LibraryViewModel extends ChangeNotifier {
 
   Future<Result<void>> _parseFolder(Folder folder) async {
     try {
-      if (await _libraryRepository.getFilePermission(folder.path)) {
+      final parentFolder = await _libraryRepository.getParentFolder(folder);
+      if (await _libraryRepository.getFilePermission(parentFolder.path)) {
         final lastModified = await _libraryRepository.getLastModified(
           folder.path,
         );
@@ -261,7 +262,7 @@ class LibraryViewModel extends ChangeNotifier {
         }
         await _getFolderCovers(folder);
       } else {
-        _snackBar = 'Can\'t access folder \'${folder.title}\'';
+        _snackBar = 'Can\'t access folder \'${parentFolder.title}\'';
         notifyListeners();
       }
       return Result.ok(null);
