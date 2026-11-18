@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../routing/routes.dart';
 import '../reader_view_model.dart';
 
 class ReaderMenu extends StatefulWidget {
@@ -15,6 +16,7 @@ class ReaderMenu extends StatefulWidget {
 class _ReaderMenuState extends State<ReaderMenu> {
   late int _currentPage;
   late PageController _controller;
+  final _menuController = MenuController();
   bool _sliding = false;
 
   Widget _page(int index, {int? goToIndex}) {
@@ -83,92 +85,154 @@ class _ReaderMenuState extends State<ReaderMenu> {
                 child: Row(
                   children: [
                     IconButton(
+                      color: ColorScheme.of(context).primary,
                       onPressed: () => context..pop(),
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: ColorScheme.of(context).primary,
-                      ),
+                      icon: Icon(Icons.arrow_back),
                     ),
                     Text(widget.viewModel.book.title),
+                    Spacer(),
+                    MenuAnchor(
+                      controller: _menuController,
+                      menuChildren: [
+                        MenuItemButton(
+                          onPressed: () {
+                            if (context.mounted) {
+                              context.pushNamed(
+                                RouteNames.book,
+                                pathParameters: {
+                                  'bookId': widget.viewModel.book.id,
+                                },
+                              );
+                            }
+                          },
+                          child: Text('Book details'),
+                        ),
+                        MenuItemButton(
+                          onPressed: () {
+                            context.goNamed(RouteNames.readerSettings);
+                          },
+                          child: Text('Reader settings'),
+                        ),
+                      ],
+                      child: IconButton(
+                        color: ColorScheme.of(context).primary,
+                        onPressed: () => _menuController.open(),
+                        icon: Icon(Icons.more_vert_rounded),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-            Spacer(),
-            SizedBox(
-              height: 150,
-              child: PageView.builder(
-                controller: _controller,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return _page(index);
-                  }
-                  if (widget.viewModel.readingMode == .double) {
-                    index = index * 2;
-                    if (widget.viewModel.book.pageCount! % 2 == 0 &&
-                        index == widget.viewModel.book.pageCount!) {
-                      if (orientation == .portrait) {
-                        return _page(index - 1);
-                      } else {
-                        return _page(index - 1, goToIndex: (index / 2).toInt());
-                      }
-                    }
-                    if (orientation == .portrait) {
-                      return Row(
-                        mainAxisAlignment: .center,
-                        children: [
-                          if (widget.viewModel.readingDirection ==
-                              .rightToLeft) ...[
-                            _page(index),
-                            _page(index - 1),
-                          ] else ...[
-                            _page(index - 1),
-                            _page(index),
-                          ],
-                        ],
-                      );
-                    } else {
-                      return Row(
-                        mainAxisAlignment: .center,
-                        children: [
-                          if (widget.viewModel.readingDirection ==
-                              .rightToLeft) ...[
-                            _page(index, goToIndex: (index / 2).toInt()),
-                            _page(index - 1, goToIndex: (index / 2).toInt()),
-                          ] else ...[
-                            _page(index - 1, goToIndex: (index / 2).toInt()),
-                            _page(index, goToIndex: (index / 2).toInt()),
-                          ],
-                        ],
-                      );
-                    }
-                  }
-                  return _page(index);
-                },
-                itemCount: widget.viewModel.readingMode == .double
-                    ? widget.viewModel.book.pageCount! % 2 == 0
-                          ? ((widget.viewModel.book.pageCount! - 2) / 2)
-                                    .toInt() +
-                                2
-                          : ((widget.viewModel.book.pageCount! - 1) / 2)
-                                    .toInt() +
-                                1
-                    : widget.viewModel.book.pageCount!,
-                onPageChanged: (value) {
-                  if (!_sliding) {
-                    if (widget.viewModel.readingMode == .double) {
-                      value = value * 2;
-                      if (value == 0) value++;
-                    } else {
-                      value++;
-                    }
-                    setState(() {
-                      _currentPage = value;
-                    });
-                  }
-                },
-                pageSnapping: false,
-                reverse: widget.viewModel.readingDirection == .rightToLeft,
+            Expanded(
+              child: Stack(
+                children: [
+                  IgnorePointer(
+                    child: Container(
+                      color: ColorScheme.of(context).surface.withAlpha(128),
+                    ),
+                  ),
+                  Align(
+                    alignment: .bottomCenter,
+                    child: Padding(
+                      padding: .only(bottom: 8),
+                      child: SizedBox(
+                        height: 150,
+                        child: PageView.builder(
+                          controller: _controller,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return _page(index);
+                            }
+                            if (widget.viewModel.readingMode == .double) {
+                              index = index * 2;
+                              if (widget.viewModel.book.pageCount! % 2 == 0 &&
+                                  index == widget.viewModel.book.pageCount!) {
+                                if (orientation == .portrait) {
+                                  return _page(index - 1);
+                                } else {
+                                  return _page(
+                                    index - 1,
+                                    goToIndex: (index / 2).toInt(),
+                                  );
+                                }
+                              }
+                              if (orientation == .portrait) {
+                                return Row(
+                                  mainAxisAlignment: .center,
+                                  children: [
+                                    if (widget.viewModel.readingDirection ==
+                                        .rightToLeft) ...[
+                                      _page(index),
+                                      _page(index - 1),
+                                    ] else ...[
+                                      _page(index - 1),
+                                      _page(index),
+                                    ],
+                                  ],
+                                );
+                              } else {
+                                return Row(
+                                  mainAxisAlignment: .center,
+                                  children: [
+                                    if (widget.viewModel.readingDirection ==
+                                        .rightToLeft) ...[
+                                      _page(
+                                        index,
+                                        goToIndex: (index / 2).toInt(),
+                                      ),
+                                      _page(
+                                        index - 1,
+                                        goToIndex: (index / 2).toInt(),
+                                      ),
+                                    ] else ...[
+                                      _page(
+                                        index - 1,
+                                        goToIndex: (index / 2).toInt(),
+                                      ),
+                                      _page(
+                                        index,
+                                        goToIndex: (index / 2).toInt(),
+                                      ),
+                                    ],
+                                  ],
+                                );
+                              }
+                            }
+                            return _page(index);
+                          },
+                          itemCount: widget.viewModel.readingMode == .double
+                              ? widget.viewModel.book.pageCount! % 2 == 0
+                                    ? ((widget.viewModel.book.pageCount! - 2) /
+                                                  2)
+                                              .toInt() +
+                                          2
+                                    : ((widget.viewModel.book.pageCount! - 1) /
+                                                  2)
+                                              .toInt() +
+                                          1
+                              : widget.viewModel.book.pageCount!,
+                          onPageChanged: (value) {
+                            if (!_sliding) {
+                              if (widget.viewModel.readingMode == .double) {
+                                value = value * 2;
+                                if (value == 0) value++;
+                              } else {
+                                value++;
+                              }
+                              setState(() {
+                                _currentPage = value;
+                              });
+                            }
+                          },
+                          pageSnapping: false,
+                          reverse:
+                              widget.viewModel.readingDirection == .rightToLeft,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Card(
@@ -186,7 +250,13 @@ class _ReaderMenuState extends State<ReaderMenu> {
                     Row(
                       children: [
                         IconButton(
+                          color: ColorScheme.of(context).primary,
                           onPressed: () {
+                            setState(() {
+                              widget.viewModel.undo.add(
+                                widget.viewModel.book.currentPage,
+                              );
+                            });
                             int value;
                             if (widget.viewModel.readingDirection ==
                                 .rightToLeft) {
@@ -212,10 +282,7 @@ class _ReaderMenuState extends State<ReaderMenu> {
                               );
                             }
                           },
-                          icon: Icon(
-                            Icons.first_page_rounded,
-                            color: ColorScheme.of(context).primary,
-                          ),
+                          icon: Icon(Icons.first_page_rounded),
                         ),
                         Expanded(
                           child: Directionality(
@@ -249,6 +316,11 @@ class _ReaderMenuState extends State<ReaderMenu> {
                                 }
                               },
                               onChangeEnd: (value) {
+                                setState(() {
+                                  widget.viewModel.undo.add(
+                                    widget.viewModel.book.currentPage,
+                                  );
+                                });
                                 if (orientation == .landscape) {
                                   value = value / 2;
                                 } else {
@@ -270,25 +342,65 @@ class _ReaderMenuState extends State<ReaderMenu> {
                           ),
                         ),
                         IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.undo_rounded,
-                            color: ColorScheme.of(context).primary,
-                          ),
+                          color: ColorScheme.of(context).primary,
+                          icon: Icon(Icons.undo_rounded),
+                          onPressed: widget.viewModel.undo.isNotEmpty
+                              ? () {
+                                  int value = widget.viewModel.undo
+                                      .removeLast();
+                                  if (orientation == .landscape) {
+                                    value = (value / 2).toInt();
+                                  } else {
+                                    value--;
+                                  }
+                                  if (widget.viewModel.ereaderMode) {
+                                    widget.viewModel.mainPageController
+                                        .jumpToPage(value);
+                                  } else {
+                                    widget.viewModel.mainPageController
+                                        .animateToPage(
+                                          value,
+                                          duration: widget.viewModel.duration,
+                                          curve: widget.viewModel.curve,
+                                        );
+                                  }
+                                }
+                              : null,
                         ),
                         IconButton(
+                          color: ColorScheme.of(context).primary,
                           onPressed: () {
+                            setState(() {
+                              widget.viewModel.undo.add(
+                                widget.viewModel.book.currentPage,
+                              );
+                            });
+                            int value;
                             if (widget.viewModel.readingDirection ==
                                 .rightToLeft) {
-                              widget.viewModel.goToFirstPage.execute();
+                              value = 0;
                             } else {
-                              widget.viewModel.goToLastPage.execute();
+                              value = widget.viewModel.book.pageCount! - 1;
+                              if (orientation == .landscape) {
+                                value = (value / 2).toInt();
+                                if (widget.viewModel.book.pageCount! % 2 == 0) {
+                                  value++;
+                                }
+                              }
+                            }
+                            if (widget.viewModel.ereaderMode) {
+                              widget.viewModel.mainPageController.jumpToPage(
+                                value,
+                              );
+                            } else {
+                              widget.viewModel.mainPageController.animateToPage(
+                                value,
+                                duration: widget.viewModel.duration,
+                                curve: widget.viewModel.curve,
+                              );
                             }
                           },
-                          icon: Icon(
-                            Icons.last_page_rounded,
-                            color: ColorScheme.of(context).primary,
-                          ),
+                          icon: Icon(Icons.last_page_rounded),
                         ),
                       ],
                     ),

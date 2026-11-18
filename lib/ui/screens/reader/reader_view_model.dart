@@ -23,6 +23,7 @@ class ReaderViewModel extends ChangeNotifier {
     goToLastPage = Command0(_goToLastPage);
     load = Command0(_load)..execute();
     setReadingStatus = Command0(_setReadingStatus);
+    setUndo = Command1(_setUndo);
     updateBook = Command1(_updateBook);
   }
 
@@ -30,6 +31,7 @@ class ReaderViewModel extends ChangeNotifier {
   late final Command0 goToLastPage;
   late final Command0 load;
   late final Command0 setReadingStatus;
+  late final Command1<void, List<int>> setUndo;
   late final Command1<void, int> updateBook;
 
   late final Book _book;
@@ -41,6 +43,7 @@ class ReaderViewModel extends ChangeNotifier {
   List<Uint8List?> _pages = [];
   late ReadingDirection _readingDirection;
   late ReadingMode _readingMode;
+  List<int> _undo = [];
   late double _zoom;
 
   Book get book => _book;
@@ -52,6 +55,7 @@ class ReaderViewModel extends ChangeNotifier {
   List<Uint8List?> get pages => _pages;
   ReadingDirection get readingDirection => _readingDirection;
   ReadingMode get readingMode => _readingMode;
+  List<int> get undo => _undo;
   double get zoom => _zoom;
 
   Future<Result<void>> _goToFirstPage() async {
@@ -149,6 +153,16 @@ class ReaderViewModel extends ChangeNotifier {
         _book.readingStatus = .inProgress;
       }
       _libraryRepository.updateBook(_book);
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _setUndo(List<int> undo) async {
+    try {
+      _undo = undo;
+      notifyListeners();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
