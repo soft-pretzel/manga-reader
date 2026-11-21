@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/book.dart';
@@ -217,7 +217,7 @@ class SharedPreferencesService {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
-    final current = prefs.getBool(_kEreaderMode) ?? true;
+    final current = prefs.getBool(_kEreaderMode) ?? false;
     await prefs.setBool(_kEreaderMode, !current);
     return !current;
   }

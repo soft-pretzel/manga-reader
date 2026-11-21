@@ -1,8 +1,9 @@
 import 'dart:convert';
 
+import 'package:filesize/filesize.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:proper_filesize/proper_filesize.dart';
+// import 'package:proper_filesize/proper_filesize.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -30,10 +31,7 @@ class UtilsService {
   }
 
   Future<String> formatFileSize(int size) async {
-    return FileSize.fromBytes(size).toString(
-      decimals: 1,
-      unit: Unit.auto(size: size, baseType: BaseType.metric),
-    );
+    return filesize(size);
   }
 
   Future<String> getAppVersion() async {

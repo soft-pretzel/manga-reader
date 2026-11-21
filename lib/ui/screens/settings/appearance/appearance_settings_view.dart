@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'appearance_settings_view_model.dart';
 import '../widgets/card_list.dart';

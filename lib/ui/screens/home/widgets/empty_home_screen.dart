@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class EmptyHomeScreen extends StatelessWidget {
   const EmptyHomeScreen({super.key});

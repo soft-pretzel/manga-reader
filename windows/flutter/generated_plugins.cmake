@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  dynamic_system_colors
+  dynamic_color
   screen_brightness_windows
   url_launcher_windows
 )

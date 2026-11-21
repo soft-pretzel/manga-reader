@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'reader_view_model.dart';
@@ -70,9 +70,13 @@ class _ReaderViewState extends State<ReaderView>
                   maxScale: widget.viewModel.zoom,
                   minScale: 1.0,
                   onInteractionEnd: (details) {
-                    if (_transformationController.value == .identity()) {
+                    if (_transformationController.value.row0[0] == 1.0) {
                       setState(() {
                         _enableScroll = true;
+                      });
+                    } else {
+                      setState(() {
+                        _enableScroll = false;
                       });
                     }
                   },
@@ -137,7 +141,7 @@ class _ReaderViewState extends State<ReaderView>
                       }
                     },
                     pageSnapping: widget.viewModel.readingMode != .continuous,
-                    physics: _enableScroll
+                    physics: _enableScroll && !widget.viewModel.ereaderMode
                         ? null
                         : NeverScrollableScrollPhysics(),
                     reverse: widget.viewModel.readingDirection == .rightToLeft,
@@ -153,16 +157,19 @@ class _ReaderViewState extends State<ReaderView>
                       setState(() {
                         _enableScroll = true;
                       });
-                      _animation =
-                          Matrix4Tween(
-                            begin: _transformationController.value,
-                            end: .identity(),
-                          ).animate(
-                            CurveTween(
-                              curve: widget.viewModel.curve,
-                            ).animate(_animationController),
-                          );
-                      _animationController.forward(from: 0);
+                      if (!widget.viewModel.ereaderMode) {
+                        _animation =
+                            Matrix4Tween(
+                              begin: _transformationController.value,
+                              end: .identity(),
+                            ).animate(
+                              CurveTween(curve: widget.viewModel.curve)
+                                  .animate(_animationController),
+                            );
+                        _animationController.forward(from: 0);
+                      } else {
+                        _transformationController.value = .identity();
+                      }
                     } else {
                       setState(() {
                         _enableScroll = false;
@@ -180,78 +187,110 @@ class _ReaderViewState extends State<ReaderView>
                           1,
                           1,
                         );
-                      _animation = Matrix4Tween(begin: .identity(), end: matrix)
-                          .animate(
-                            CurveTween(
-                              curve: widget.viewModel.curve,
-                            ).animate(_animationController),
-                          );
-                      _animationController.forward(from: 0);
+                      if (!widget.viewModel.ereaderMode) {
+                        _animation =
+                            Matrix4Tween(
+                              begin: .identity(),
+                              end: matrix,
+                            ).animate(
+                              CurveTween(curve: widget.viewModel.curve)
+                                  .animate(_animationController),
+                            );
+                        _animationController.forward(from: 0);
+                      } else {
+                        _transformationController.value = matrix;
+                      }
                     }
                   },
-                  onLongPressEnd: (details) {
-                    _animation =
-                        Matrix4Tween(
-                          begin: _transformationController.value,
-                          end: .identity(),
-                        ).animate(
-                          CurveTween(
-                            curve: widget.viewModel.curve,
-                          ).animate(_animationController),
-                        );
-                    _animationController.forward(from: 0);
-                  },
-                  onLongPressMoveUpdate: (details) {
-                    final matrix = Matrix4.identity()
-                      ..translateByDouble(
-                        (-details.globalPosition.dx *
-                                (widget.viewModel.zoom - 1)) -
-                            details.offsetFromOrigin.dx * 10,
-                        (-details.globalPosition.dy *
-                                (widget.viewModel.zoom - 1)) -
-                            details.offsetFromOrigin.dy * 10,
-                        1,
-                        1,
-                      )
-                      ..scaleByDouble(
-                        widget.viewModel.zoom,
-                        widget.viewModel.zoom,
-                        1,
-                        1,
-                      );
-                    _animation =
-                        Matrix4Tween(
-                          begin: _transformationController.value,
-                          end: matrix,
-                        ).animate(
-                          CurveTween(
-                            curve: Curves.easeOutQuart,
-                          ).animate(_animationController),
-                        );
-                    _animationController.forward(from: 0);
-                  },
-                  onLongPressStart: (details) {
-                    final matrix = Matrix4.identity()
-                      ..translateByDouble(
-                        -details.globalPosition.dx,
-                        -details.globalPosition.dy,
-                        1,
-                        1,
-                      )
-                      ..scaleByDouble(
-                        widget.viewModel.zoom,
-                        widget.viewModel.zoom,
-                        1,
-                        1,
-                      );
-                    _animation = Matrix4Tween(begin: .identity(), end: matrix)
-                        .animate(
-                          CurveTween(
-                            curve: widget.viewModel.curve,
-                          ).animate(_animationController),
-                        );
-                    _animationController.forward(from: 0);
-                  },
+                  onHorizontalDragEnd:
+                      widget.viewModel.ereaderMode && _enableScroll
+                      ? (details) {
+                          int index = widget.viewModel.mainPageController.page!
+                              .toInt();
+                          if (details.primaryVelocity! > 0) {
+                            if (widget.viewModel.readingDirection ==
+                                .rightToLeft) {
+                              index++;
+                            } else {
+                              index--;
+                            }
+                            widget.viewModel.mainPageController.jumpToPage(
+                              index,
+                            );
+                          }
+                          if (widget.viewModel.readingDirection ==
+                              .rightToLeft) {
+                            index--;
+                          } else {
+                            index++;
+                          }
+                          if (details.primaryVelocity! < 0) {
+                            widget.viewModel.mainPageController.jumpToPage(
+                              index,
+                            );
+                          }
+                        }
+                      : null,
+                  onLongPressEnd: !widget.viewModel.ereaderMode
+                      ? (details) {
+                          _animation =
+                              Matrix4Tween(
+                                begin: _transformationController.value,
+                                end: .identity(),
+                              ).animate(
+                                CurveTween(curve: widget.viewModel.curve)
+                                    .animate(_animationController),
+                              );
+                          _animationController.forward(from: 0);
+                        }
+                      : null,
+                  onLongPressMoveUpdate: !widget.viewModel.ereaderMode
+                      ? (details) {
+                          _transformationController.value = .identity()
+                            ..translateByDouble(
+                              (-details.globalPosition.dx *
+                                      (widget.viewModel.zoom - 1)) -
+                                  details.localOffsetFromOrigin.dx * 12,
+                              (-details.globalPosition.dy *
+                                      (widget.viewModel.zoom - 1)) -
+                                  details.localOffsetFromOrigin.dy * 12,
+                              1,
+                              1,
+                            )
+                            ..scaleByDouble(
+                              widget.viewModel.zoom,
+                              widget.viewModel.zoom,
+                              1,
+                              1,
+                            );
+                        }
+                      : null,
+                  onLongPressStart: !widget.viewModel.ereaderMode
+                      ? (details) {
+                          final matrix = Matrix4.identity()
+                            ..translateByDouble(
+                              -details.globalPosition.dx,
+                              -details.globalPosition.dy,
+                              1,
+                              1,
+                            )
+                            ..scaleByDouble(
+                              widget.viewModel.zoom,
+                              widget.viewModel.zoom,
+                              1,
+                              1,
+                            );
+                          _animation =
+                              Matrix4Tween(
+                                begin: .identity(),
+                                end: matrix,
+                              ).animate(
+                                CurveTween(curve: widget.viewModel.curve)
+                                    .animate(_animationController),
+                              );
+                          _animationController.forward(from: 0);
+                        }
+                      : null,
                   onTap: () {
                     if (_menuVisible) {
                       SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
@@ -276,15 +315,25 @@ class _ReaderViewState extends State<ReaderView>
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
+                              int index = widget
+                                  .viewModel
+                                  .mainPageController
+                                  .page!
+                                  .toInt();
                               if (widget.viewModel.readingDirection ==
                                   .rightToLeft) {
-                                widget.viewModel.mainPageController.nextPage(
-                                  duration: widget.viewModel.duration,
-                                  curve: widget.viewModel.curve,
+                                index++;
+                              } else {
+                                index--;
+                              }
+                              if (widget.viewModel.ereaderMode) {
+                                widget.viewModel.mainPageController.jumpToPage(
+                                  index,
                                 );
                               } else {
                                 widget.viewModel.mainPageController
-                                    .previousPage(
+                                    .animateToPage(
+                                      index,
                                       duration: widget.viewModel.duration,
                                       curve: widget.viewModel.curve,
                                     );
@@ -296,18 +345,28 @@ class _ReaderViewState extends State<ReaderView>
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
+                              int index = widget
+                                  .viewModel
+                                  .mainPageController
+                                  .page!
+                                  .toInt();
                               if (widget.viewModel.readingDirection ==
                                   .rightToLeft) {
+                                index--;
+                              } else {
+                                index++;
+                              }
+                              if (widget.viewModel.ereaderMode) {
+                                widget.viewModel.mainPageController.jumpToPage(
+                                  index,
+                                );
+                              } else {
                                 widget.viewModel.mainPageController
-                                    .previousPage(
+                                    .animateToPage(
+                                      index,
                                       duration: widget.viewModel.duration,
                                       curve: widget.viewModel.curve,
                                     );
-                              } else {
-                                widget.viewModel.mainPageController.nextPage(
-                                  duration: widget.viewModel.duration,
-                                  curve: widget.viewModel.curve,
-                                );
                               }
                             },
                           ),

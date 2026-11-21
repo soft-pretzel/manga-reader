@@ -1,5 +1,5 @@
-import 'package:dynamic_system_colors/dynamic_system_colors.dart';
-import 'package:flutter/material.dart';
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import 'data/providers.dart';

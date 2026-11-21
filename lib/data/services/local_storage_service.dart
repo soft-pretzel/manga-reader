@@ -134,7 +134,7 @@ class LocalStorageService {
       );
       return safDocumentFile?.uri;
     } else {
-      return await FilePicker.getDirectoryPath();
+      return (await FilePicker.pickDirectory())?.path;
     }
   }
 

@@ -172,6 +172,7 @@ class LibraryRepository {
       final session = await _localStorageService.getBookSession(book.path);
       final metadata = session.book.metadata;
       book.aspectRatio = metadata.cover!.width! / metadata.cover!.height!;
+      // book.cover = metadata.cover?.bytes;
       book.cover = await _localStorageService.saveBookCover(
         metadata.cover,
         book.id,
@@ -211,9 +212,8 @@ class LibraryRepository {
         }
       }
     }
-    folder.itemCount = (await _localStorageService.getFiles(
-      folder.path,
-    )).length;
+    folder.itemCount = (await _localStorageService.getFiles(folder.path))
+        .length;
     folder.lastModified =
         lastModified ?? await _localStorageService.getLastModified(folder.path);
     folder.title = await _localStorageService.getFileName(folder.path);
