@@ -26,7 +26,6 @@ dependencies:
   screen_brightness: ^2.1.11
   url_launcher: ^6.3.3
   filesize: ^2.0.1
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

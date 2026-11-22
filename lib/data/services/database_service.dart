@@ -194,6 +194,12 @@ title TEXT,
 FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 ''');
+        await db.execute('''
+CREATE TABLE servers (
+id TEXT PRIMARY KEY,
+uri TEXT
+) WITHOUT ROWID;
+''');
       },
       version: 1,
     );
