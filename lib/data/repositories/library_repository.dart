@@ -3,12 +3,14 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:unseal/unseal.dart' as unseal;
 
 import '../models/book.dart';
 import '../models/folder.dart';
 import '../models/library.dart';
 import '../models/library_item.dart';
+import '../models/server.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../../utils/result.dart';
@@ -115,19 +117,35 @@ class LibraryRepository {
   }
 
   Future<Library> getLibrary(String? parentId) async {
-    return Library(
+    final library = Library(
       items: await getFolderItems(parentId),
       title: parentId != null
-          ? (await _databaseService.getFolderById(parentId)).title
+          ? (await _databaseService.getFolderById(parentId)).name
           : 'Library',
     );
+    if (parentId == null) {
+      final servers = await getServers();
+      if (servers.isNotEmpty) {
+        library.items.addAll(servers as List<LibraryItem>);
+      }
+    }
+    return library;
   }
 
-  Future<Folder> getParentFolder(LibraryItem item) async {
-    while (item.parentId != null) {
-      item = await _databaseService.getFolderById(item.parentId!);
+  // Future<Folder> getParentFolder(LibraryItem item) async {
+  //   while (item.parentId != null) {
+  //     item = await _databaseService.getFolderById(item.parentId!);
+  //   }
+  //   return item as Folder;
+  // }
+
+  Future<List<Server?>> getServers() async {
+    final servers = await _databaseService.getAllServers();
+    for (final server in servers) {
+      final response = await http.get(server!.uri);
+      server.feed = unseal.OpdsFeed.parse(response.body);
     }
-    return item as Folder;
+    return servers;
   }
 
   Future<Result<void>> markAsFinished(String id) async {
@@ -216,7 +234,7 @@ class LibraryRepository {
         .length;
     folder.lastModified =
         lastModified ?? await _localStorageService.getLastModified(folder.path);
-    folder.title = await _localStorageService.getFileName(folder.path);
+    folder.name = await _localStorageService.getFileName(folder.path);
     await _databaseService.updateFolder(folder);
     // final List<Library> existingItems = [];
     // existingItems.addAll(
@@ -240,20 +258,6 @@ class LibraryRepository {
     // }
   }
 
-  Future<Folder> saveNewFolder(String path, {String? parentId}) async {
-    final folder = Folder(
-      id: await _databaseService.generateId(),
-      covers: List.filled(3, null),
-      dateAdded: DateTime.now(),
-      itemCount: (await _localStorageService.getFiles(path)).length,
-      parentId: parentId,
-      path: path,
-      title: await _localStorageService.getFileName(path),
-    );
-    await _databaseService.insertFolder(folder);
-    return folder;
-  }
-
   Future<Book> saveNewBook(String path, Folder folder) async {
     final book = Book(
       id: await _databaseService.generateId(),
@@ -264,6 +268,29 @@ class LibraryRepository {
     );
     await _databaseService.insertBook(book);
     return book;
+  }
+
+  Future<Folder> saveNewFolder(String path, {String? parentId}) async {
+    final folder = Folder(
+      id: await _databaseService.generateId(),
+      covers: List.filled(3, null),
+      dateAdded: DateTime.now(),
+      itemCount: (await _localStorageService.getFiles(path)).length,
+      parentId: parentId,
+      path: path,
+      name: await _localStorageService.getFileName(path),
+    );
+    await _databaseService.insertFolder(folder);
+    return folder;
+  }
+
+  Future<void> saveNewServer(String uri) async {
+    final server = Server(
+      id: await _databaseService.generateId(),
+      dateAdded: DateTime.now(),
+      uri: Uri.parse(uri),
+    );
+    await _databaseService.insertServer(server);
   }
 
   Future<String?> selectLocalFolder() async {

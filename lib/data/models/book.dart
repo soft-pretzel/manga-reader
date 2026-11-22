@@ -15,16 +15,20 @@ class Book extends LibraryItem {
   String? goodreads;
   String? isbn;
   String? language;
+  DateTime? lastModified;
   DateTime? lastRead;
   String? libraryThing;
   String? openLibrary;
   int? pageCount;
+  final String? parentId;
+  final String path;
   int? publishYear;
   String? publisher;
   ReadingStatus readingStatus;
   String? series;
   double? seriesIndex;
   String? subtitle;
+  String title;
 
   Book({
     required super.id,
@@ -39,20 +43,20 @@ class Book extends LibraryItem {
     this.goodreads,
     this.isbn,
     this.language,
-    super.lastModified,
+    this.lastModified,
     this.lastRead,
     this.libraryThing,
     this.openLibrary,
     this.pageCount,
-    required super.parentId,
-    required super.path,
+    required this.parentId,
+    required this.path,
     this.publishYear,
     this.publisher,
     this.readingStatus = .unread,
     this.series,
     this.seriesIndex,
     this.subtitle,
-    required super.title,
+    required this.title,
   });
 
   @override
@@ -101,6 +105,11 @@ class Book extends LibraryItem {
       goodreads = map['goodreads']?.toString(),
       isbn = map['isbn']?.toString(),
       language = map['language']?.toString(),
+      lastModified = map['last_modified'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              int.parse(map['last_modified'].toString()),
+            )
+          : null,
       lastRead = map['last_read'] != null
           ? DateTime.fromMillisecondsSinceEpoch(
               int.parse(map['last_read'].toString()),
@@ -109,6 +118,8 @@ class Book extends LibraryItem {
       libraryThing = map['library_thing']?.toString(),
       openLibrary = map['open_library']?.toString(),
       pageCount = int.tryParse(map['page_count'].toString()),
+      parentId = map['parent_id']?.toString(),
+      path = map['path'].toString(),
       publishYear = int.tryParse(map['publish_year'].toString()),
       publisher = map['publisher']?.toString(),
       readingStatus =
@@ -116,5 +127,6 @@ class Book extends LibraryItem {
       series = map['series']?.toString(),
       seriesIndex = double.tryParse(map['series_index'].toString()),
       subtitle = map['subtitle']?.toString(),
+      title = map['title'].toString(),
       super.fromMap();
 }

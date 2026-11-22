@@ -1,7 +1,5 @@
-import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unseal/unseal.dart';
 
 import '../library_view_model.dart';
 
@@ -41,26 +39,36 @@ class AddLibrary extends StatelessWidget {
                   return Padding(
                     padding: const .fromLTRB(16, 0, 16, 16),
                     child: Column(
+                      crossAxisAlignment: .stretch,
                       mainAxisSize: .min,
                       spacing: 16,
                       children: [
                         TextField(
+                          autofocus: true,
+                          controller: viewModel.opdsUrlController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             label: Text('Server URL'),
                           ),
                         ),
                         TextField(
+                          controller: viewModel.opdsUsernameController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             label: Text('Username'),
                           ),
                         ),
                         TextField(
+                          controller: viewModel.opdsPasswordController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             label: Text('Password'),
                           ),
+                          obscureText: true,
+                        ),
+                        ElevatedButton(
+                          onPressed: () => viewModel.addOpdsServer.execute(),
+                          child: Text('Save'),
                         ),
                       ],
                     ),

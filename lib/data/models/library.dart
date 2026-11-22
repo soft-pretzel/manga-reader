@@ -1,5 +1,7 @@
 import 'book.dart';
+import 'folder.dart';
 import 'library_item.dart';
+import 'server.dart';
 import 'settings.dart';
 
 class Library {
@@ -38,11 +40,38 @@ class Library {
 }
 
 int _sortAlphabetically(LibraryItem a, LibraryItem b) {
-  if (a.title.replaceAll(RegExp(r'[^0-9]'), '') != '') {
-    return int.parse(
-      a.title.replaceAll(RegExp(r'[^0-9]'), ''),
-    ).compareTo(int.parse(b.title.replaceAll(RegExp(r'[^0-9]'), '')));
+  String aString;
+  switch (a.runtimeType) {
+    case Book:
+      a as Book;
+      aString = a.title;
+    case Folder:
+      a as Folder;
+      aString = a.name;
+    case Server:
+      a as Server;
+      aString = a.feed!.title;
+    default:
+      throw Exception;
+  }
+  String bString;
+  switch (b.runtimeType) {
+    case Book:
+      b as Book;
+      bString = b.title;
+    case Folder:
+      b as Folder;
+      bString = b.name;
+    case Server:
+      b as Server;
+      bString = b.feed!.title;
+    default:
+      throw Exception;
+  }
+  if (aString.replaceAll(RegExp(r'[^0-9]'), '') != '') {
+    return int.parse(aString.replaceAll(RegExp(r'[^0-9]'), ''))
+        .compareTo(int.parse(bString.replaceAll(RegExp(r'[^0-9]'), '')));
   } else {
-    return a.title.compareTo(b.title);
+    return aString.compareTo(bString);
   }
 }

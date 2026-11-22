@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../data/models/book.dart';
 import '../../../data/models/folder.dart';
@@ -16,6 +16,7 @@ class LibraryViewModel extends ChangeNotifier {
     required this._settingsRepository,
   }) {
     addLocalFolder = Command0(_addLocalFolder);
+    addOpdsServer = Command0(_addOpdsServer);
     clearSnackBar = Command0(_clearSnackBar);
     deleteLocalFolder = Command1(_deleteLocalFolder);
     disableSelectionMode = Command0(_disableSelectionMode);
@@ -36,6 +37,7 @@ class LibraryViewModel extends ChangeNotifier {
   final SettingsRepository _settingsRepository;
 
   late final Command0 addLocalFolder;
+  late final Command0 addOpdsServer;
   late final Command0 clearSnackBar;
   late final Command1<void, Folder> deleteLocalFolder;
   late final Command0 disableSelectionMode;
@@ -57,6 +59,9 @@ class LibraryViewModel extends ChangeNotifier {
   List<ReadingStatus> _libraryFilter = [];
   late LibrarySort _librarySort;
   late LibrarySpacing _librarySpacing;
+  final _opdsPasswordController = TextEditingController();
+  final _opdsUrlController = TextEditingController();
+  final _opdsUsernameController = TextEditingController();
   late ReadingDirection _readingDirection;
   List<bool> _selected = [];
   int _selectedBookCount = 0;
@@ -70,6 +75,9 @@ class LibraryViewModel extends ChangeNotifier {
   List<ReadingStatus> get libraryFilter => _libraryFilter;
   LibrarySort get librarySort => _librarySort;
   LibrarySpacing get librarySpacing => _librarySpacing;
+  TextEditingController get opdsPasswordController => _opdsPasswordController;
+  TextEditingController get opdsUrlController => _opdsUrlController;
+  TextEditingController get opdsUsernameController => _opdsUsernameController;
   ReadingDirection get readingDirection => _readingDirection;
   List<bool> get selected => _selected;
   int get selectedBookCount => _selectedBookCount;
@@ -86,16 +94,26 @@ class LibraryViewModel extends ChangeNotifier {
           newFolder,
         );
         if (existingFolder != null) {
-          _snackBar = 'Folder \'${existingFolder.title}\' already added';
+          _snackBar = 'Folder \'${existingFolder.name}\' already added';
         } else {
           final folder = await _libraryRepository.saveNewFolder(newFolder);
           _library.items.add(folder);
           await _disableSelectionMode();
-          _snackBar = 'Added new folder \'${folder.title}\'';
+          _snackBar = 'Added new folder \'${folder.name}\'';
           notifyListeners();
           _parseFolder(folder);
         }
       }
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _addOpdsServer() async {
+    try {
+      await _libraryRepository.saveNewServer(_opdsUrlController.value.text);
+      _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -251,20 +269,20 @@ class LibraryViewModel extends ChangeNotifier {
 
   Future<Result<void>> _parseFolder(Folder folder) async {
     try {
-      final parentFolder = await _libraryRepository.getParentFolder(folder);
-      if (await _libraryRepository.getFilePermission(parentFolder.path)) {
-        final lastModified = await _libraryRepository.getLastModified(
-          folder.path,
-        );
-        if (folder.lastModified != lastModified) {
-          await _libraryRepository.parseFolder(folder, lastModified);
-          _loadLibrary();
-        }
-        await _getFolderCovers(folder);
-      } else {
-        _snackBar = 'Can\'t access folder \'${parentFolder.title}\'';
-        notifyListeners();
+      // final parentFolder = await _libraryRepository.getParentFolder(folder);
+      // if (await _libraryRepository.getFilePermission(parentFolder.path)) {
+      final lastModified = await _libraryRepository.getLastModified(
+        folder.path,
+      );
+      if (folder.lastModified != lastModified) {
+        await _libraryRepository.parseFolder(folder, lastModified);
+        _loadLibrary();
       }
+      await _getFolderCovers(folder);
+      // } else {
+      //   _snackBar = 'Can\'t access folder \'${parentFolder.name}\'';
+      //   notifyListeners();
+      // }
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

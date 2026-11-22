@@ -139,16 +139,15 @@ class FolderGridTile extends StatelessWidget {
                   overflow: .ellipsis,
                   text: TextSpan(
                     style: DefaultTextStyle.of(context).style,
-                    text: folder.title,
+                    text: folder.name,
                   ),
                 ),
                 RichText(
                   maxLines: 1,
                   overflow: .ellipsis,
                   text: TextSpan(
-                    style: DefaultTextStyle.of(
-                      context,
-                    ).style.apply(color: ColorScheme.of(context).outline),
+                    style: DefaultTextStyle.of(context).style
+                        .apply(color: ColorScheme.of(context).outline),
                     text: folder.itemCount == 1
                         ? '${folder.itemCount} item'
                         : '${folder.itemCount} items',

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/book.dart';
 import '../models/folder.dart';
+import '../models/server.dart';
 
 final uuid = Uuid();
 
@@ -35,6 +36,12 @@ class DatabaseService {
     final db = await _database();
     final mapList = await db.query('folders');
     return [for (final map in mapList) Folder.fromMap(map)];
+  }
+
+  Future<List<Server?>> getAllServers() async {
+    final db = await _database();
+    final mapList = await db.query('servers');
+    return [for (final map in mapList) Server.fromMap(map)];
   }
 
   Future<Book> getBook(String id) async {
@@ -125,6 +132,11 @@ class DatabaseService {
     await db.insert('folders', folder.toMap());
   }
 
+  Future<void> insertServer(Server server) async {
+    final db = await _database();
+    await db.insert('servers', server.toMap());
+  }
+
   Future<void> updateBook(Book book) async {
     final db = await _database();
     await db.update(
@@ -197,6 +209,7 @@ FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
         await db.execute('''
 CREATE TABLE servers (
 id TEXT PRIMARY KEY,
+date_added INTEGER NOT NULL,
 uri TEXT
 ) WITHOUT ROWID;
 ''');

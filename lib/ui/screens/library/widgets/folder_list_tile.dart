@@ -79,9 +79,8 @@ class FolderListTile extends StatelessWidget {
                                   child: Image.file(
                                     File(folder.covers.first!),
                                     color: viewModel.selected[index]
-                                        ? ColorScheme.of(
-                                            context,
-                                          ).surfaceBright.withAlpha(128)
+                                        ? ColorScheme.of(context).surfaceBright
+                                              .withAlpha(128)
                                         : null,
                                     colorBlendMode: .srcOver,
                                   ),
@@ -109,7 +108,7 @@ class FolderListTile extends StatelessWidget {
                             overflow: .ellipsis,
                             text: TextSpan(
                               style: TextTheme.of(context).bodyLarge,
-                              text: folder.title,
+                              text: folder.name,
                             ),
                           ),
                           RichText(
