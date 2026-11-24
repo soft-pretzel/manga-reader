@@ -71,12 +71,39 @@ final router = GoRouter(
                   path: RoutePaths.folder,
                   builder: (context, state) {
                     final viewModel = LibraryViewModel(
-                      folderId: state.pathParameters['folderId'],
+                      id: state.pathParameters['folderId'],
                       libraryRepository: context.read(),
                       settingsRepository: context.read(),
                     );
                     return LibraryView(viewModel: viewModel);
                   },
+                ),
+                GoRoute(
+                  name: RouteNames.opds,
+                  path: RoutePaths.opds,
+                  builder: (context, state) {
+                    final viewModel = LibraryViewModel(
+                      id: state.pathParameters['opdsId'],
+                      libraryRepository: context.read(),
+                      settingsRepository: context.read(),
+                    );
+                    return LibraryView(viewModel: viewModel);
+                  },
+                  routes: [
+                    GoRoute(
+                      name: RouteNames.opdsEntry,
+                      path: RoutePaths.opdsEntry,
+                      builder: (context, state) {
+                        final viewModel = LibraryViewModel(
+                          id: state.pathParameters['opdsId'],
+                          path: state.pathParameters['path'],
+                          libraryRepository: context.read(),
+                          settingsRepository: context.read(),
+                        );
+                        return LibraryView(viewModel: viewModel);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

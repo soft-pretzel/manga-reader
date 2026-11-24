@@ -10,14 +10,16 @@ import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
 class ReaderViewModel extends ChangeNotifier {
-  final String _bookId;
+  final String? _bookId;
   final LibraryRepository _libraryRepository;
   final SettingsRepository _settingsRepository;
+  final String? _streamPath;
 
   ReaderViewModel({
-    required this._bookId,
+    this._bookId,
     required this._libraryRepository,
     required this._settingsRepository,
+    this._streamPath,
   }) {
     goToFirstPage = Command0(_goToFirstPage);
     goToLastPage = Command0(_goToLastPage);
@@ -95,18 +97,20 @@ class ReaderViewModel extends ChangeNotifier {
   Future<Result<void>> _load() async {
     try {
       SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
-      _book = await _libraryRepository.getBook(_bookId);
-      _ereaderMode = await _settingsRepository.getEreaderMode();
-      _mainPageController = PageController(
-        initialPage: _book.currentPage - 1,
-        keepPage: false,
-      );
-      _pages = List.filled(_book.pageCount!, null);
-      _readingDirection = await _settingsRepository.getReadingDirection();
-      _readingMode = await _settingsRepository.getReadingMode();
-      _zoom = await _settingsRepository.getZoom();
-      notifyListeners();
-      _loadPages();
+      if (_bookId != null) {
+        _book = await _libraryRepository.getBook(_bookId);
+        _ereaderMode = await _settingsRepository.getEreaderMode();
+        _mainPageController = PageController(
+          initialPage: _book.currentPage - 1,
+          keepPage: false,
+        );
+        _pages = List.filled(_book.pageCount!, null);
+        _readingDirection = await _settingsRepository.getReadingDirection();
+        _readingMode = await _settingsRepository.getReadingMode();
+        _zoom = await _settingsRepository.getZoom();
+        notifyListeners();
+        _loadPages();
+      }
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

@@ -115,8 +115,6 @@ class DisplaySettings extends StatelessWidget {
                           viewModel.librarySort == .alphabeticalReverse,
                       viewModel.librarySort == .dateAdded ||
                           viewModel.librarySort == .dateAddedReverse,
-                      viewModel.librarySort == .lastRead ||
-                          viewModel.librarySort == .lastReadReverse,
                     ],
                     onPressed: (index) {
                       switch (index) {
@@ -133,12 +131,6 @@ class DisplaySettings extends StatelessWidget {
                             viewModel.setLibrarySort.execute(.dateAddedReverse);
                           } else {
                             viewModel.setLibrarySort.execute(.dateAdded);
-                          }
-                        case 2:
-                          if (viewModel.librarySort == .lastRead) {
-                            viewModel.setLibrarySort.execute(.lastReadReverse);
-                          } else {
-                            viewModel.setLibrarySort.execute(.lastRead);
                           }
                       }
                     },
@@ -160,16 +152,6 @@ class DisplaySettings extends StatelessWidget {
                           if (viewModel.librarySort == .dateAdded)
                             Icon(Icons.keyboard_arrow_down_rounded),
                           if (viewModel.librarySort == .dateAddedReverse)
-                            Icon(Icons.keyboard_arrow_up_rounded),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: .center,
-                        children: [
-                          Text('Last read'),
-                          if (viewModel.librarySort == .lastRead)
-                            Icon(Icons.keyboard_arrow_down_rounded),
-                          if (viewModel.librarySort == .lastReadReverse)
                             Icon(Icons.keyboard_arrow_up_rounded),
                         ],
                       ),

@@ -1,18 +1,20 @@
-import 'library_item.dart';
+import 'library.dart';
 
 class Folder extends LibraryItem {
+  final String id;
   List<String?> covers;
   int itemCount;
   DateTime? lastModified;
+  final DateTime dateAdded;
   final String? parentId;
   bool parsing;
   final String path;
   String name;
 
   Folder({
-    required super.id,
+    required this.id,
     this.covers = const [],
-    required super.dateAdded,
+    required this.dateAdded,
     required this.itemCount,
     this.lastModified,
     this.parentId,
@@ -21,7 +23,6 @@ class Folder extends LibraryItem {
     required this.name,
   });
 
-  @override
   Map<String, Object?> toMap() {
     return {
       'id': id,
@@ -35,8 +36,12 @@ class Folder extends LibraryItem {
     };
   }
 
-  Folder.fromMap(super.map)
-    : covers = List.filled(3, null),
+  Folder.fromMap(Map<String, Object?> map)
+    : id = map['id'].toString(),
+      covers = List.filled(3, null),
+      dateAdded = DateTime.fromMillisecondsSinceEpoch(
+        int.parse(map['date_added'].toString()),
+      ),
       itemCount = int.parse(map['item_count'].toString()),
       lastModified = map['last_modified'] != null
           ? DateTime.fromMillisecondsSinceEpoch(
@@ -46,6 +51,5 @@ class Folder extends LibraryItem {
       parentId = map['parent_id']?.toString(),
       parsing = false,
       path = map['path'].toString(),
-      name = map['title'].toString(),
-      super.fromMap();
+      name = map['title'].toString();
 }

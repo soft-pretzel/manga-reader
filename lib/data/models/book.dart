@@ -1,14 +1,16 @@
 import 'package:unseal/unseal.dart';
 
-import 'library_item.dart';
+import 'library.dart';
 
 enum ReadingStatus { unread, inProgress, finished }
 
 class Book extends LibraryItem {
+  final String id;
   double? aspectRatio;
   String? author;
   String? cover;
   int currentPage;
+  final DateTime dateAdded;
   String? description;
   BookFormat? format;
   List<String> genres;
@@ -31,12 +33,12 @@ class Book extends LibraryItem {
   String title;
 
   Book({
-    required super.id,
+    required this.id,
     this.aspectRatio,
     this.author,
     this.cover,
     this.currentPage = 1,
-    required super.dateAdded,
+    required this.dateAdded,
     this.description,
     this.format,
     this.genres = const [],
@@ -59,7 +61,6 @@ class Book extends LibraryItem {
     required this.title,
   });
 
-  @override
   Map<String, Object?> toMap() {
     return {
       'id': id,
@@ -92,11 +93,15 @@ class Book extends LibraryItem {
     };
   }
 
-  Book.fromMap(super.map)
-    : aspectRatio = double.tryParse(map['aspect_ratio'].toString()),
+  Book.fromMap(Map<String, Object?> map)
+    : id = map['id'].toString(),
+      aspectRatio = double.tryParse(map['aspect_ratio'].toString()),
       author = map['author']?.toString(),
       cover = map['cover']?.toString(),
       currentPage = int.parse(map['current_page'].toString()),
+      dateAdded = DateTime.fromMillisecondsSinceEpoch(
+        int.parse(map['date_added'].toString()),
+      ),
       description = map['description']?.toString(),
       format = map['format'] != null
           ? BookFormat.values[int.parse(map['format'].toString())]
@@ -127,6 +132,5 @@ class Book extends LibraryItem {
       series = map['series']?.toString(),
       seriesIndex = double.tryParse(map['series_index'].toString()),
       subtitle = map['subtitle']?.toString(),
-      title = map['title'].toString(),
-      super.fromMap();
+      title = map['title'].toString();
 }

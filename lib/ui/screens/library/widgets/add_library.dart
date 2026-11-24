@@ -30,7 +30,7 @@ class AddLibrary extends StatelessWidget {
           ),
           ElevatedButton.icon(
             icon: Icon(Icons.dns_rounded),
-            label: Align(alignment: .centerStart, child: Text('OPDS server')),
+            label: Align(alignment: .centerStart, child: Text('Kavita server')),
             onPressed: () {
               context.pop();
               showModalBottomSheet(
@@ -45,29 +45,34 @@ class AddLibrary extends StatelessWidget {
                       children: [
                         TextField(
                           autofocus: true,
-                          controller: viewModel.opdsUrlController,
+                          controller: viewModel.kavitaNameController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            label: Text('Name'),
+                          ),
+                        ),
+                        TextField(
+                          autofocus: true,
+                          controller: viewModel.kavitaUrlController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             label: Text('Server URL'),
                           ),
                         ),
                         TextField(
-                          controller: viewModel.opdsUsernameController,
+                          controller: viewModel.kavitaApiKeyController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
-                            label: Text('Username'),
-                          ),
-                        ),
-                        TextField(
-                          controller: viewModel.opdsPasswordController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            label: Text('Password'),
+                            label: Text('API key'),
                           ),
                           obscureText: true,
                         ),
                         ElevatedButton(
-                          onPressed: () => viewModel.addOpdsServer.execute(),
+                          onPressed: () {
+                            viewModel.saveKavitaServer.execute();
+                            context.pop();
+                          },
+
                           child: Text('Save'),
                         ),
                       ],

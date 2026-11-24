@@ -5,7 +5,8 @@ import 'package:uuid/uuid.dart';
 
 import '../models/book.dart';
 import '../models/folder.dart';
-import '../models/server.dart';
+import '../models/kavita.dart';
+import '../models/opds_feed.dart';
 
 final uuid = Uuid();
 
@@ -38,10 +39,10 @@ class DatabaseService {
     return [for (final map in mapList) Folder.fromMap(map)];
   }
 
-  Future<List<Server?>> getAllServers() async {
+  Future<List<OpdsFeed>> getAllServers() async {
     final db = await _database();
     final mapList = await db.query('servers');
-    return [for (final map in mapList) Server.fromMap(map)];
+    return [for (final map in mapList) OpdsFeed.fromMap(map)];
   }
 
   Future<Book> getBook(String id) async {
@@ -82,10 +83,10 @@ class DatabaseService {
     return books.map((book) => Book.fromMap(book)).toList();
   }
 
-  Future<Folder> getFolderById(String id) async {
+  Future<Folder?> getFolderById(String id) async {
     final db = await _database();
     final folder = await db.query('folders', where: 'id = ?', whereArgs: [id]);
-    return Folder.fromMap(folder.single);
+    return folder.singleOrNull != null ? Folder.fromMap(folder.single) : null;
   }
 
   Future<Folder?> getFolderByTitle(String title) async {
@@ -122,6 +123,12 @@ class DatabaseService {
     return folders.map((folder) => Folder.fromMap(folder)).toList();
   }
 
+  Future<OpdsFeed?> getServer(String id) async {
+    final db = await _database();
+    final server = await db.query('servers', where: 'id = ?', whereArgs: [id]);
+    return server.singleOrNull != null ? OpdsFeed.fromMap(server.single) : null;
+  }
+
   Future<void> insertBook(Book book) async {
     final db = await _database();
     await db.insert('books', book.toMap());
@@ -132,9 +139,9 @@ class DatabaseService {
     await db.insert('folders', folder.toMap());
   }
 
-  Future<void> insertServer(Server server) async {
+  Future<void> insertKavitaServer(Kavita server) async {
     final db = await _database();
-    await db.insert('servers', server.toMap());
+    await db.insert('kavita_servers', server.toMap());
   }
 
   Future<void> updateBook(Book book) async {
@@ -207,10 +214,12 @@ FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 ''');
         await db.execute('''
-CREATE TABLE servers (
+CREATE TABLE kavita_servers (
 id TEXT PRIMARY KEY,
+api_key TEXT NOT NULL,
 date_added INTEGER NOT NULL,
-uri TEXT
+name TEXT NOT NULL,
+url TEXT NOT NULL
 ) WITHOUT ROWID;
 ''');
       },

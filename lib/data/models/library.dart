@@ -1,10 +1,9 @@
 import 'book.dart';
 import 'folder.dart';
-import 'library_item.dart';
-import 'server.dart';
+import 'opds_feed.dart';
 import 'settings.dart';
 
-class Library {
+final class Library {
   final List<LibraryItem> items;
   final String title;
 
@@ -30,48 +29,52 @@ class Library {
       case .alphabeticalReverse:
         items.sort((b, a) => _sortAlphabetically(a, b));
       case .dateAdded:
-        items.sort((a, b) => a.dateAdded.compareTo(b.dateAdded));
+        items.sort((a, b) => a.getDate().compareTo(b.getDate()));
       case .dateAddedReverse:
-        items.sort((b, a) => a.dateAdded.compareTo(b.dateAdded));
-      case .lastRead:
-      case .lastReadReverse:
+        items.sort((b, a) => a.getDate().compareTo(b.getDate()));
+    }
+  }
+
+  static int _sortAlphabetically(LibraryItem a, LibraryItem b) {
+    if (a.getName().replaceAll(RegExp(r'[^0-9]'), '') != '') {
+      return int.parse(a.getName().replaceAll(RegExp(r'[^0-9]'), ''))
+          .compareTo(int.parse(b.getName().replaceAll(RegExp(r'[^0-9]'), '')));
+    } else {
+      return a.getName().compareTo(b.getName());
     }
   }
 }
 
-int _sortAlphabetically(LibraryItem a, LibraryItem b) {
-  String aString;
-  switch (a.runtimeType) {
-    case Book:
-      a as Book;
-      aString = a.title;
-    case Folder:
-      a as Folder;
-      aString = a.name;
-    case Server:
-      a as Server;
-      aString = a.feed!.title;
-    default:
-      throw Exception;
+abstract class LibraryItem {
+  DateTime getDate() {
+    switch (runtimeType) {
+      case Book:
+        final book = this as Book;
+        return book.dateAdded;
+      case Folder:
+        final folder = this as Folder;
+        return folder.dateAdded;
+      case OpdsFeed:
+        final server = this as OpdsFeed;
+        return server.feed!.updated!;
+      default:
+        throw Exception('Library Error: Invalid library item type');
+    }
   }
-  String bString;
-  switch (b.runtimeType) {
-    case Book:
-      b as Book;
-      bString = b.title;
-    case Folder:
-      b as Folder;
-      bString = b.name;
-    case Server:
-      b as Server;
-      bString = b.feed!.title;
-    default:
-      throw Exception;
-  }
-  if (aString.replaceAll(RegExp(r'[^0-9]'), '') != '') {
-    return int.parse(aString.replaceAll(RegExp(r'[^0-9]'), ''))
-        .compareTo(int.parse(bString.replaceAll(RegExp(r'[^0-9]'), '')));
-  } else {
-    return aString.compareTo(bString);
+
+  String getName() {
+    switch (runtimeType) {
+      case Book:
+        final book = this as Book;
+        return book.title;
+      case Folder:
+        final folder = this as Folder;
+        return folder.name;
+      case OpdsFeed:
+        final server = this as OpdsFeed;
+        return server.feed?.title ?? '';
+      default:
+        throw Exception('Library Error: Invalid library item type');
+    }
   }
 }

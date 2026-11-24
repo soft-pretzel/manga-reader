@@ -10,13 +10,18 @@ import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
 class LibraryViewModel extends ChangeNotifier {
+  final LibraryRepository _libraryRepository;
+  final String? _id;
+  final String? _path;
+  final SettingsRepository _settingsRepository;
+
   LibraryViewModel({
     required this._libraryRepository,
-    this._folderId,
+    this._id,
+    this._path,
     required this._settingsRepository,
   }) {
     addLocalFolder = Command0(_addLocalFolder);
-    addOpdsServer = Command0(_addOpdsServer);
     clearSnackBar = Command0(_clearSnackBar);
     deleteLocalFolder = Command1(_deleteLocalFolder);
     disableSelectionMode = Command0(_disableSelectionMode);
@@ -25,6 +30,7 @@ class LibraryViewModel extends ChangeNotifier {
     markAsUnread = Command1(_markAsUnread);
     parseFolder = Command1(_parseFolder);
     toggleSelect = Command1(_toggleSelect);
+    saveKavitaServer = Command0(_saveKavitaServer);
     selectAll = Command0(_selectAll);
     setLibraryDisplayMode = Command1(_setLibraryDisplayMode);
     setLibraryFilter = Command1(_setLibraryFilter);
@@ -32,12 +38,7 @@ class LibraryViewModel extends ChangeNotifier {
     setLibrarySpacing = Command1(_setLibrarySpacing);
   }
 
-  final LibraryRepository _libraryRepository;
-  final String? _folderId;
-  final SettingsRepository _settingsRepository;
-
   late final Command0 addLocalFolder;
-  late final Command0 addOpdsServer;
   late final Command0 clearSnackBar;
   late final Command1<void, Folder> deleteLocalFolder;
   late final Command0 disableSelectionMode;
@@ -46,6 +47,7 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command1<void, Book> markAsUnread;
   late final Command1<void, Folder> parseFolder;
   late final Command1<void, int> toggleSelect;
+  late final Command0 saveKavitaServer;
   late final Command0 selectAll;
   late final Command1<void, ReadingStatus> setLibraryFilter;
   late final Command1<void, LibraryDisplayMode> setLibraryDisplayMode;
@@ -59,9 +61,9 @@ class LibraryViewModel extends ChangeNotifier {
   List<ReadingStatus> _libraryFilter = [];
   late LibrarySort _librarySort;
   late LibrarySpacing _librarySpacing;
-  final _opdsPasswordController = TextEditingController();
-  final _opdsUrlController = TextEditingController();
-  final _opdsUsernameController = TextEditingController();
+  final _kavitaApiKeyController = TextEditingController();
+  final _kavitaUrlController = TextEditingController();
+  final _kavitaNameController = TextEditingController();
   late ReadingDirection _readingDirection;
   List<bool> _selected = [];
   int _selectedBookCount = 0;
@@ -75,9 +77,9 @@ class LibraryViewModel extends ChangeNotifier {
   List<ReadingStatus> get libraryFilter => _libraryFilter;
   LibrarySort get librarySort => _librarySort;
   LibrarySpacing get librarySpacing => _librarySpacing;
-  TextEditingController get opdsPasswordController => _opdsPasswordController;
-  TextEditingController get opdsUrlController => _opdsUrlController;
-  TextEditingController get opdsUsernameController => _opdsUsernameController;
+  TextEditingController get kavitaApiKeyController => _kavitaApiKeyController;
+  TextEditingController get kavitaUrlController => _kavitaUrlController;
+  TextEditingController get kavitaNameController => _kavitaNameController;
   ReadingDirection get readingDirection => _readingDirection;
   List<bool> get selected => _selected;
   int get selectedBookCount => _selectedBookCount;
@@ -104,16 +106,6 @@ class LibraryViewModel extends ChangeNotifier {
           _parseFolder(folder);
         }
       }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _addOpdsServer() async {
-    try {
-      await _libraryRepository.saveNewServer(_opdsUrlController.value.text);
-      _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -152,7 +144,7 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<void> _getFolderCovers(Folder folder) async {
-    final library = await _libraryRepository.getLibrary(folder.id);
+    final library = await _libraryRepository.getLibrary(folder);
     library.sort(_librarySort);
     final items = library.items;
     for (int i = 0; i < folder.covers.length; i++) {
@@ -205,18 +197,20 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<void> _loadLibrary() async {
-    _library = await _libraryRepository.getLibrary(_folderId);
+    final parent = await _libraryRepository.getParent(_id, _path);
+    _library = await _libraryRepository.getLibrary(parent);
     if (_library.items.isNotEmpty) {
-      _library.filter(_libraryFilter);
-      _library.sort(_librarySort);
+      // _library.filter(_libraryFilter);
+      // _library.sort(_librarySort);
       if (_isSelectionMode) _isSelectionMode = false;
       _selected = List.filled(_library.items.length, false);
       notifyListeners();
       for (final (index, item) in _library.items.indexed) {
-        if (item.runtimeType == Folder) {
-          await _parseFolder(item as Folder);
-        } else {
-          await _parseBook(index);
+        switch (item.runtimeType) {
+          case Book:
+            await _parseBook(index);
+          case Folder:
+            await _parseFolder(item as Folder);
         }
       }
     } else {
@@ -283,6 +277,21 @@ class LibraryViewModel extends ChangeNotifier {
       //   _snackBar = 'Can\'t access folder \'${parentFolder.name}\'';
       //   notifyListeners();
       // }
+      return Result.ok(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<void>> _saveKavitaServer() async {
+    try {
+      final url = Uri.parse(_kavitaUrlController.value.text);
+      await _libraryRepository.saveKavitaServer(
+        _kavitaNameController.value.text,
+        url,
+        _kavitaApiKeyController.value.text,
+      );
+      _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);

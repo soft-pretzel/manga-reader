@@ -7,6 +7,8 @@ abstract final class RoutePaths {
   static const library = '/library';
   static const reader = '/reader/:bookId';
   static const readerSettings = 'reader';
+  static const opds = ':opdsId';
+  static const opdsEntry = ':path';
   static const settings = '/settings';
   static const storageSettings = 'storage';
 }
@@ -20,6 +22,8 @@ abstract final class RouteNames {
   static const library = 'library';
   static const reader = 'reader';
   static const readerSettings = 'readerSettings';
+  static const opds = 'opds';
+  static const opdsEntry = 'opdsEntry';
   static const settings = 'settings';
   static const storageSettings = 'storageSettings';
 }

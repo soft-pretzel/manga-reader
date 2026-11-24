@@ -2,6 +2,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../data/models/book.dart';
 import '../../../data/models/folder.dart';
+import '../../../data/models/opds_feed.dart';
+import '../../../data/models/opds_entry.dart';
 import 'library_view_model.dart';
 import '../../widgets/error_screen.dart';
 import 'widgets/book_grid_tile.dart';
@@ -10,6 +12,8 @@ import 'widgets/empty_library_screen.dart';
 import 'widgets/folder_grid_tile.dart';
 import 'widgets/folder_list_tile.dart';
 import 'widgets/library_app_bar.dart';
+import 'widgets/opds_entry_grid_tile.dart';
+import 'widgets/opds_grid_tile.dart';
 
 class LibraryView extends StatelessWidget {
   final LibraryViewModel viewModel;
@@ -85,19 +89,34 @@ class LibraryView extends StatelessWidget {
                             : 16,
                       ),
                       itemBuilder: (context, index) {
-                        if (viewModel.library.items[index].runtimeType ==
-                            Folder) {
-                          return FolderGridTile(
-                            folder: viewModel.library.items[index] as Folder,
-                            index: index,
-                            viewModel: viewModel,
-                          );
-                        } else {
-                          return BookGridTile(
-                            book: viewModel.library.items[index] as Book,
-                            index: index,
-                            viewModel: viewModel,
-                          );
+                        switch (viewModel.library.items[index].runtimeType) {
+                          case Book:
+                            return BookGridTile(
+                              book: viewModel.library.items[index] as Book,
+                              index: index,
+                              viewModel: viewModel,
+                            );
+                          case Folder:
+                            return FolderGridTile(
+                              folder: viewModel.library.items[index] as Folder,
+                              index: index,
+                              viewModel: viewModel,
+                            );
+                          case OpdsFeed:
+                            return OpdsGridTile(
+                              opds: viewModel.library.items[index] as OpdsFeed,
+                              index: index,
+                              viewModel: viewModel,
+                            );
+                          case OpdsEntry:
+                            return OpdsEntryGridTile(
+                              entry:
+                                  viewModel.library.items[index] as OpdsEntry,
+                              index: index,
+                              viewModel: viewModel,
+                            );
+                          default:
+                            return Center(child: Text('Error'));
                         }
                       },
                       itemCount: viewModel.library.items.length,

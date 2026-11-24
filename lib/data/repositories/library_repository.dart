@@ -8,9 +8,10 @@ import 'package:unseal/unseal.dart' as unseal;
 
 import '../models/book.dart';
 import '../models/folder.dart';
+import '../models/kavita.dart';
 import '../models/library.dart';
-import '../models/library_item.dart';
-import '../models/server.dart';
+import '../models/opds_feed.dart';
+import '../models/opds_entry.dart';
 import '../services/database_service.dart';
 import '../services/local_storage_service.dart';
 import '../../utils/result.dart';
@@ -116,20 +117,20 @@ class LibraryRepository {
     return await _localStorageService.getLastModified(path);
   }
 
-  Future<Library> getLibrary(String? parentId) async {
-    final library = Library(
-      items: await getFolderItems(parentId),
-      title: parentId != null
-          ? (await _databaseService.getFolderById(parentId)).name
-          : 'Library',
-    );
-    if (parentId == null) {
-      final servers = await getServers();
-      if (servers.isNotEmpty) {
-        library.items.addAll(servers as List<LibraryItem>);
+  Future<Library> getLibrary() async {}
+
+  Future<LibraryItem?> getParent(String? id, String? path) async {
+    if (id != null) {
+      final folder = await _databaseService.getFolderById(id);
+      final opds = await _databaseService.getServer(id);
+      if (opds != null && path != null) {
+        opds.uri = Uri.parse(
+          '${opds.uri.scheme}://${opds.uri.host}:${opds.uri.port}$path',
+        );
       }
+      return folder ?? opds;
     }
-    return library;
+    return null;
   }
 
   // Future<Folder> getParentFolder(LibraryItem item) async {
@@ -139,10 +140,37 @@ class LibraryRepository {
   //   return item as Folder;
   // }
 
-  Future<List<Server?>> getServers() async {
+  Future<OpdsFeed> getServer(String id, String? path) async {
+    final server = await _databaseService.getServer(id);
+    if (path != null) {
+      server!.uri = Uri.parse('${server.uri}/$path');
+    }
+    final response = await http.get(server!.uri);
+    server.feed = unseal.OpdsFeed.parse(response.body);
+    return server;
+  }
+
+  // Future<List<LibraryItem>> getServerItems(Opds server) async {
+  //   server.feed = unseal.OpdsFeed.parse((await http.get(server.uri)).body);
+  //   final List<LibraryItem> items = [];
+  //   for (final entry in server.feed!.entries) {
+  //     final uri = Uri.parse(
+  //       '${server.uri.scheme}://${server.uri.host}:${server.uri.port}${entry.links.first.href}',
+  //     );
+  //     final opds = Opds(
+  //       id: server.id,
+  //       feed: unseal.OpdsFeed.parse((await http.get(uri)).body),
+  //       uri: uri,
+  //     );
+  //     items.add(opds);
+  //   }
+  //   return items;
+  // }
+
+  Future<List<OpdsFeed>> getAllServers() async {
     final servers = await _databaseService.getAllServers();
     for (final server in servers) {
-      final response = await http.get(server!.uri);
+      final response = await http.get(server.uri);
       server.feed = unseal.OpdsFeed.parse(response.body);
     }
     return servers;
@@ -284,13 +312,15 @@ class LibraryRepository {
     return folder;
   }
 
-  Future<void> saveNewServer(String uri) async {
-    final server = Server(
+  Future<void> saveKavitaServer(String? name, Uri url, String apiKey) async {
+    final server = Kavita(
       id: await _databaseService.generateId(),
+      apiKey: apiKey,
       dateAdded: DateTime.now(),
-      uri: Uri.parse(uri),
+      name: name ?? 'Kavita',
+      url: url,
     );
-    await _databaseService.insertServer(server);
+    await _databaseService.insertKavitaServer(server);
   }
 
   Future<String?> selectLocalFolder() async {

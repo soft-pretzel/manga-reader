@@ -7,8 +7,6 @@ enum LibrarySort {
   alphabeticalReverse,
   dateAdded,
   dateAddedReverse,
-  lastRead,
-  lastReadReverse,
 }
 
 enum ReadingDirection { leftToRight, rightToLeft, vertical }
