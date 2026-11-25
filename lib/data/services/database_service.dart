@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../utils/result.dart';
 import '../models/book.dart';
 import '../models/folder.dart';
-import '../models/kavita.dart';
 import '../models/opds_feed.dart';
+import '../models/server.dart';
 
 final uuid = Uuid();
 
@@ -37,12 +38,6 @@ class DatabaseService {
     final db = await _database();
     final mapList = await db.query('folders');
     return [for (final map in mapList) Folder.fromMap(map)];
-  }
-
-  Future<List<OpdsFeed>> getAllServers() async {
-    final db = await _database();
-    final mapList = await db.query('servers');
-    return [for (final map in mapList) OpdsFeed.fromMap(map)];
   }
 
   Future<Book> getBook(String id) async {
@@ -129,6 +124,16 @@ class DatabaseService {
     return server.singleOrNull != null ? OpdsFeed.fromMap(server.single) : null;
   }
 
+  Future<Result<List<Server>>> getServers() async {
+    final db = await _database();
+    try {
+      final mapList = await db.query('servers');
+      return Result.ok([for (final map in mapList) Server.fromMap(map)]);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
   Future<void> insertBook(Book book) async {
     final db = await _database();
     await db.insert('books', book.toMap());
@@ -139,9 +144,23 @@ class DatabaseService {
     await db.insert('folders', folder.toMap());
   }
 
-  Future<void> insertKavitaServer(Kavita server) async {
+  Future<Result<Server>> insertServer(Server server) async {
     final db = await _database();
-    await db.insert('kavita_servers', server.toMap());
+    try {
+      final id = await db.insert('servers', server.toMap());
+      if (id != 0) {
+        final server = await db.query(
+          'servers',
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+        return Result.ok(Server.fromMap(server.first));
+      } else {
+        return Result.error(Exception('Invalid server'));
+      }
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
   }
 
   Future<void> updateBook(Book book) async {
@@ -214,11 +233,12 @@ FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 ''');
         await db.execute('''
-CREATE TABLE kavita_servers (
+CREATE TABLE servers (
 id TEXT PRIMARY KEY,
 api_key TEXT NOT NULL,
 date_added INTEGER NOT NULL,
 name TEXT NOT NULL,
+type INTEGER NOT NULL,
 url TEXT NOT NULL
 ) WITHOUT ROWID;
 ''');

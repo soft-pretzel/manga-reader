@@ -2,7 +2,10 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import 'repositories/library_repository.dart';
+import 'repositories/library_repository_old.dart' as old;
+import 'repositories/server_repository.dart';
 import 'repositories/settings_repository.dart';
+import 'services/api_client.dart';
 import 'services/database_service.dart';
 import 'services/local_storage_service.dart';
 import 'services/shared_preferences_service.dart';
@@ -10,12 +13,14 @@ import 'services/utils_service.dart';
 
 List<SingleChildWidget> get providers {
   return [
+    Provider(create: (context) => ApiClient()),
     Provider(create: (context) => DatabaseService()),
     Provider(create: (context) => LocalStorageService()),
     Provider(create: (context) => SharedPreferencesService()),
     Provider(create: (context) => UtilsService()),
+    Provider(create: (context) => LibraryRepository(apiClient: context.read())),
     Provider(
-      create: (context) => LibraryRepository(
+      create: (context) => old.LibraryRepository(
         databaseService: context.read(),
         localStorageService: context.read(),
         utilsService: context.read(),
@@ -28,6 +33,9 @@ List<SingleChildWidget> get providers {
         sharedPreferencesService: context.read(),
         utilsService: context.read(),
       ),
+    ),
+    Provider(
+      create: (context) => ServerRepository(databaseService: context.read()),
     ),
   ];
 }

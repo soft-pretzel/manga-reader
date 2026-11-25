@@ -2,26 +2,25 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../data/models/book.dart';
 import '../../../data/models/folder.dart';
-import '../../../data/models/library.dart';
+import '../../../data/models/library_old.dart';
+import '../../../data/models/server.dart';
 import '../../../data/models/settings.dart';
-import '../../../data/repositories/library_repository.dart';
+import '../../../data/repositories/library_repository_old.dart';
+import '../../../data/repositories/server_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
 class LibraryViewModel extends ChangeNotifier {
-  final LibraryRepository _libraryRepository;
-  final String? _id;
-  final String? _path;
-  final SettingsRepository _settingsRepository;
-
   LibraryViewModel({
     required this._libraryRepository,
     this._id,
     this._path,
     required this._settingsRepository,
+    required this._serverRepository,
   }) {
     addLocalFolder = Command0(_addLocalFolder);
+    addServer = Command0(_addServer);
     clearSnackBar = Command0(_clearSnackBar);
     deleteLocalFolder = Command1(_deleteLocalFolder);
     disableSelectionMode = Command0(_disableSelectionMode);
@@ -30,7 +29,6 @@ class LibraryViewModel extends ChangeNotifier {
     markAsUnread = Command1(_markAsUnread);
     parseFolder = Command1(_parseFolder);
     toggleSelect = Command1(_toggleSelect);
-    saveKavitaServer = Command0(_saveKavitaServer);
     selectAll = Command0(_selectAll);
     setLibraryDisplayMode = Command1(_setLibraryDisplayMode);
     setLibraryFilter = Command1(_setLibraryFilter);
@@ -38,7 +36,14 @@ class LibraryViewModel extends ChangeNotifier {
     setLibrarySpacing = Command1(_setLibrarySpacing);
   }
 
+  final LibraryRepository _libraryRepository;
+  final String? _id;
+  final String? _path;
+  final SettingsRepository _settingsRepository;
+  final ServerRepository _serverRepository;
+
   late final Command0 addLocalFolder;
+  late final Command0 addServer;
   late final Command0 clearSnackBar;
   late final Command1<void, Folder> deleteLocalFolder;
   late final Command0 disableSelectionMode;
@@ -47,7 +52,6 @@ class LibraryViewModel extends ChangeNotifier {
   late final Command1<void, Book> markAsUnread;
   late final Command1<void, Folder> parseFolder;
   late final Command1<void, int> toggleSelect;
-  late final Command0 saveKavitaServer;
   late final Command0 selectAll;
   late final Command1<void, ReadingStatus> setLibraryFilter;
   late final Command1<void, LibraryDisplayMode> setLibraryDisplayMode;
@@ -61,13 +65,13 @@ class LibraryViewModel extends ChangeNotifier {
   List<ReadingStatus> _libraryFilter = [];
   late LibrarySort _librarySort;
   late LibrarySpacing _librarySpacing;
-  final _kavitaApiKeyController = TextEditingController();
-  final _kavitaUrlController = TextEditingController();
-  final _kavitaNameController = TextEditingController();
   late ReadingDirection _readingDirection;
   List<bool> _selected = [];
   int _selectedBookCount = 0;
   int _selectedFolderCount = 0;
+  final _serverApiKeyController = TextEditingController();
+  final _serverUrlController = TextEditingController();
+  final _serverNameController = TextEditingController();
   String? _snackBar;
 
   double? get coverAspectRatio => _coverAspectRatio;
@@ -77,13 +81,13 @@ class LibraryViewModel extends ChangeNotifier {
   List<ReadingStatus> get libraryFilter => _libraryFilter;
   LibrarySort get librarySort => _librarySort;
   LibrarySpacing get librarySpacing => _librarySpacing;
-  TextEditingController get kavitaApiKeyController => _kavitaApiKeyController;
-  TextEditingController get kavitaUrlController => _kavitaUrlController;
-  TextEditingController get kavitaNameController => _kavitaNameController;
   ReadingDirection get readingDirection => _readingDirection;
   List<bool> get selected => _selected;
   int get selectedBookCount => _selectedBookCount;
   int get selectedFolderCount => _selectedFolderCount;
+  TextEditingController get serverApiKeyController => _serverApiKeyController;
+  TextEditingController get serverUrlController => _serverUrlController;
+  TextEditingController get serverNameController => _serverNameController;
   String? get snackBar => _snackBar;
 
   Future<Result<void>> _addLocalFolder() async {
@@ -112,6 +116,24 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
+  Future<Result<void>> _addServer() async {
+    final server = Server(
+      apiKey: _serverApiKeyController.value.text,
+      dateAdded: DateTime.now(),
+      name: _serverNameController.value.text,
+      type: .kavita,
+      url: Uri.parse(_serverUrlController.value.text),
+    );
+    final result = await _serverRepository.addServer(server);
+    switch (result) {
+      case Ok():
+        // TODO Reload the UI to display the new server
+        return result;
+      case Error():
+        return result;
+    }
+  }
+
   Future<Result<void>> _clearSnackBar() async {
     try {
       _snackBar = null;
@@ -125,7 +147,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _deleteLocalFolder(Folder folder) async {
     try {
       await _libraryRepository.deleteLocalFolder(folder);
-      _loadLibrary();
+      // _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -143,30 +165,30 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _getFolderCovers(Folder folder) async {
-    final library = await _libraryRepository.getLibrary(folder);
-    library.sort(_librarySort);
-    final items = library.items;
-    for (int i = 0; i < folder.covers.length; i++) {
-      if (items.elementAtOrNull(i) == null) {
-        folder.covers[i] = '';
-      } else {
-        if (items[i].runtimeType == Book) {
-          var item = items[i] as Book;
-          if (item.cover == null) {
-            item = await _libraryRepository.parseBook(item, null);
-          }
-          folder.covers[i] = item.cover;
-          notifyListeners();
-        } else {
-          final item = items[i] as Folder;
-          await _getFolderCovers(item);
-          folder.covers[i] = item.covers.first;
-          notifyListeners();
-        }
-      }
-    }
-  }
+  // Future<void> _getFolderCovers(Folder folder) async {
+  //   final library = await _libraryRepository.getLibrary(folder);
+  //   library.sort(_librarySort);
+  //   final items = library.items;
+  //   for (int i = 0; i < folder.covers.length; i++) {
+  //     if (items.elementAtOrNull(i) == null) {
+  //       folder.covers[i] = '';
+  //     } else {
+  //       if (items[i].runtimeType == Book) {
+  //         var item = items[i] as Book;
+  //         if (item.cover == null) {
+  //           item = await _libraryRepository.parseBook(item, null);
+  //         }
+  //         folder.covers[i] = item.cover;
+  //         notifyListeners();
+  //       } else {
+  //         final item = items[i] as Folder;
+  //         await _getFolderCovers(item);
+  //         folder.covers[i] = item.covers.first;
+  //         notifyListeners();
+  //       }
+  //     }
+  //   }
+  // }
 
   void _getSelectedCount() {
     _selectedBookCount = 0;
@@ -189,40 +211,40 @@ class LibraryViewModel extends ChangeNotifier {
       _librarySort = await _settingsRepository.getLibrarySort();
       _librarySpacing = await _settingsRepository.getLibrarySpacing();
       _readingDirection = await _settingsRepository.getReadingDirection();
-      _loadLibrary();
+      // _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<void> _loadLibrary() async {
-    final parent = await _libraryRepository.getParent(_id, _path);
-    _library = await _libraryRepository.getLibrary(parent);
-    if (_library.items.isNotEmpty) {
-      // _library.filter(_libraryFilter);
-      // _library.sort(_librarySort);
-      if (_isSelectionMode) _isSelectionMode = false;
-      _selected = List.filled(_library.items.length, false);
-      notifyListeners();
-      for (final (index, item) in _library.items.indexed) {
-        switch (item.runtimeType) {
-          case Book:
-            await _parseBook(index);
-          case Folder:
-            await _parseFolder(item as Folder);
-        }
-      }
-    } else {
-      notifyListeners();
-    }
-  }
+  // Future<void> _loadLibrary() async {
+  //   final parent = await _libraryRepository.getParent(_id, _path);
+  //   _library = await _libraryRepository.getLibrary(parent);
+  //   if (_library.items.isNotEmpty) {
+  //     // _library.filter(_libraryFilter);
+  //     // _library.sort(_librarySort);
+  //     if (_isSelectionMode) _isSelectionMode = false;
+  //     _selected = List.filled(_library.items.length, false);
+  //     notifyListeners();
+  //     for (final (index, item) in _library.items.indexed) {
+  //       switch (item.runtimeType) {
+  //         case Book:
+  //           await _parseBook(index);
+  //         case Folder:
+  //           await _parseFolder(item as Folder);
+  //       }
+  //     }
+  //   } else {
+  //     notifyListeners();
+  //   }
+  // }
 
   Future<Result<void>> _markAsFinished(Book book) async {
     try {
       if (book.readingStatus != .finished) {
         book.readingStatus = .finished;
-        _loadLibrary();
+        // _loadLibrary();
         _libraryRepository.updateBook(book);
       }
       return Result.ok(null);
@@ -235,7 +257,7 @@ class LibraryViewModel extends ChangeNotifier {
     try {
       if (book.readingStatus != .unread) {
         book.readingStatus = .unread;
-        _loadLibrary();
+        // _loadLibrary();
         _libraryRepository.updateBook(book);
       }
       return Result.ok(null);
@@ -270,28 +292,13 @@ class LibraryViewModel extends ChangeNotifier {
       );
       if (folder.lastModified != lastModified) {
         await _libraryRepository.parseFolder(folder, lastModified);
-        _loadLibrary();
+        // _loadLibrary();
       }
-      await _getFolderCovers(folder);
+      // await _getFolderCovers(folder);
       // } else {
       //   _snackBar = 'Can\'t access folder \'${parentFolder.name}\'';
       //   notifyListeners();
       // }
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
-  }
-
-  Future<Result<void>> _saveKavitaServer() async {
-    try {
-      final url = Uri.parse(_kavitaUrlController.value.text);
-      await _libraryRepository.saveKavitaServer(
-        _kavitaNameController.value.text,
-        url,
-        _kavitaApiKeyController.value.text,
-      );
-      _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -341,7 +348,7 @@ class LibraryViewModel extends ChangeNotifier {
       } else {
         _libraryFilter.add(readingStatus);
       }
-      _loadLibrary();
+      // _loadLibrary();
       await _settingsRepository.setLibraryFilter(_libraryFilter);
       return Result.ok(null);
     } on Exception catch (e) {
@@ -352,7 +359,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _setLibarySort(LibrarySort librarySort) async {
     try {
       _librarySort = librarySort;
-      _loadLibrary();
+      // _loadLibrary();
       await _settingsRepository.setLibrarySort(librarySort);
       return Result.ok(null);
     } on Exception catch (e) {

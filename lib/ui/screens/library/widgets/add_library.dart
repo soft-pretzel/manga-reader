@@ -45,7 +45,7 @@ class AddLibrary extends StatelessWidget {
                       children: [
                         TextField(
                           autofocus: true,
-                          controller: viewModel.kavitaNameController,
+                          controller: viewModel.serverNameController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             label: Text('Name'),
@@ -53,14 +53,14 @@ class AddLibrary extends StatelessWidget {
                         ),
                         TextField(
                           autofocus: true,
-                          controller: viewModel.kavitaUrlController,
+                          controller: viewModel.serverUrlController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             label: Text('Server URL'),
                           ),
                         ),
                         TextField(
-                          controller: viewModel.kavitaApiKeyController,
+                          controller: viewModel.serverApiKeyController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             label: Text('API key'),
@@ -69,7 +69,7 @@ class AddLibrary extends StatelessWidget {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            viewModel.saveKavitaServer.execute();
+                            viewModel.addServer.execute();
                             context.pop();
                           },
 

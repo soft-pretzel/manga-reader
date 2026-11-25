@@ -1,6 +1,6 @@
 import 'package:unseal/unseal.dart' as unseal;
 
-import 'library.dart';
+import 'library_old.dart';
 
 class OpdsEntry extends LibraryItem {
   unseal.OpdsEntry entry;

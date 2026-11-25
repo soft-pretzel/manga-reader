@@ -1,6 +1,6 @@
 import 'package:unseal/unseal.dart';
 
-import 'library.dart';
+import 'library_old.dart';
 
 enum ReadingStatus { unread, inProgress, finished }
 
