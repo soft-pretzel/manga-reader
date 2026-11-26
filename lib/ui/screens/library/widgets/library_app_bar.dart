@@ -51,9 +51,9 @@ class LibraryAppBar extends StatelessWidget {
                         for (final (index, selected)
                             in viewModel.selected.indexed) {
                           if (selected) {
-                            await viewModel.markAsFinished.execute(
-                              viewModel.library.items[index] as Book,
-                            );
+                            // await viewModel.markAsFinished.execute(
+                            //   viewModel.library.items[index] as Book,
+                            // );
                           }
                         }
                         viewModel.disableSelectionMode.execute();
@@ -68,9 +68,9 @@ class LibraryAppBar extends StatelessWidget {
                         for (final (index, selected)
                             in viewModel.selected.indexed) {
                           if (selected) {
-                            await viewModel.markAsUnread.execute(
-                              viewModel.library.items[index] as Book,
-                            );
+                            // await viewModel.markAsUnread.execute(
+                            // viewModel.library.items[index] as Book,
+                            // );
                           }
                         }
                         viewModel.disableSelectionMode.execute();
@@ -78,49 +78,49 @@ class LibraryAppBar extends StatelessWidget {
                       trailingIcon: Icon(Icons.replay_rounded),
                       child: Text('Mark as unread'),
                     ),
-                  if (!viewModel.isSelectionMode &&
-                      viewModel.library.title == 'Library')
-                    MenuItemButton(
-                      onPressed: () async {
-                        await showModalBottomSheet(
-                          backgroundColor: ColorScheme.of(context).surfaceDim,
-                          builder: (context) {
-                            return AddLibrary(
-                              context: context,
-                              viewModel: viewModel,
-                            );
-                          },
-                          context: context,
-                          showDragHandle: true,
-                        );
-                        if (context.mounted && viewModel.snackBar != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              action: SnackBarAction(
-                                label: 'Dismiss',
-                                onPressed: () => ScaffoldMessenger.of(
-                                  context,
-                                ).hideCurrentSnackBar(),
-                              ),
-                              content: Text(viewModel.snackBar!),
-                              persist: false,
-                            ),
+                  // if (!viewModel.isSelectionMode &&
+                  //     viewModel.library.title == 'Library')
+                  MenuItemButton(
+                    onPressed: () async {
+                      await showModalBottomSheet(
+                        backgroundColor: ColorScheme.of(context).surfaceDim,
+                        builder: (context) {
+                          return AddLibrary(
+                            context: context,
+                            viewModel: viewModel,
                           );
-                          viewModel.clearSnackBar.execute();
-                        }
-                      },
-                      trailingIcon: Icon(Icons.my_library_add_outlined),
-                      child: Text('Add new library'),
-                    ),
-                  if (viewModel.library.items.isNotEmpty &&
-                      viewModel.selected.any((item) => item == false))
-                    MenuItemButton(
-                      onPressed: () {
-                        viewModel.selectAll.execute();
-                      },
-                      trailingIcon: Icon(Icons.select_all_rounded),
-                      child: Text('Select all'),
-                    ),
+                        },
+                        context: context,
+                        showDragHandle: true,
+                      );
+                      if (context.mounted && viewModel.snackBar != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            action: SnackBarAction(
+                              label: 'Dismiss',
+                              onPressed: () =>
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar(),
+                            ),
+                            content: Text(viewModel.snackBar!),
+                            persist: false,
+                          ),
+                        );
+                        viewModel.clearSnackBar.execute();
+                      }
+                    },
+                    trailingIcon: Icon(Icons.my_library_add_outlined),
+                    child: Text('Add new library'),
+                  ),
+                  // if (viewModel.library.items.isNotEmpty &&
+                  //     viewModel.selected.any((item) => item == false))
+                  MenuItemButton(
+                    onPressed: () {
+                      viewModel.selectAll.execute();
+                    },
+                    trailingIcon: Icon(Icons.select_all_rounded),
+                    child: Text('Select all'),
+                  ),
                 ],
                 child: IconButton(
                   onPressed: _menuController.open,
@@ -129,7 +129,7 @@ class LibraryAppBar extends StatelessWidget {
               ),
             ],
             actionsPadding: .all(0),
-            title: Text(viewModel.library.title),
+            title: Text(viewModel.title),
           );
         }
       },

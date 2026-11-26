@@ -3,11 +3,13 @@ import 'package:material_ui/material_ui.dart';
 import '../../../data/models/book.dart';
 import '../../../data/models/folder.dart';
 import '../../../data/models/library_old.dart';
-import '../../../data/models/server.dart';
+// import '../../../data/models/server/server.dart';
 import '../../../data/models/settings.dart';
 import '../../../data/repositories/library_repository_old.dart';
 import '../../../data/repositories/server_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
+import '../../../data/services/database/database.dart';
+import '../../../data/services/database/tables.dart';
 import '../../../utils/command.dart';
 import '../../../utils/result.dart';
 
@@ -20,7 +22,7 @@ class LibraryViewModel extends ChangeNotifier {
     required this._serverRepository,
   }) {
     addLocalFolder = Command0(_addLocalFolder);
-    addServer = Command0(_addServer);
+    addServer = Command1(_addServer);
     clearSnackBar = Command0(_clearSnackBar);
     deleteLocalFolder = Command1(_deleteLocalFolder);
     disableSelectionMode = Command0(_disableSelectionMode);
@@ -43,7 +45,11 @@ class LibraryViewModel extends ChangeNotifier {
   final ServerRepository _serverRepository;
 
   late final Command0 addLocalFolder;
-  late final Command0 addServer;
+  late final Command1<
+    void,
+    (String apiKey, String name, ServerType type, String url)
+  >
+  addServer;
   late final Command0 clearSnackBar;
   late final Command1<void, Folder> deleteLocalFolder;
   late final Command0 disableSelectionMode;
@@ -60,7 +66,7 @@ class LibraryViewModel extends ChangeNotifier {
 
   double? _coverAspectRatio;
   bool _isSelectionMode = false;
-  late Library _library;
+  // late Library _library;
   late LibraryDisplayMode _libraryDisplayMode;
   List<ReadingStatus> _libraryFilter = [];
   late LibrarySort _librarySort;
@@ -69,14 +75,13 @@ class LibraryViewModel extends ChangeNotifier {
   List<bool> _selected = [];
   int _selectedBookCount = 0;
   int _selectedFolderCount = 0;
-  final _serverApiKeyController = TextEditingController();
-  final _serverUrlController = TextEditingController();
-  final _serverNameController = TextEditingController();
+  final List<Server> _servers = [];
   String? _snackBar;
+  String _title = 'Library';
 
   double? get coverAspectRatio => _coverAspectRatio;
   bool get isSelectionMode => _isSelectionMode;
-  Library get library => _library;
+  // Library get library => _library;
   LibraryDisplayMode get libraryDisplayMode => _libraryDisplayMode;
   List<ReadingStatus> get libraryFilter => _libraryFilter;
   LibrarySort get librarySort => _librarySort;
@@ -85,10 +90,9 @@ class LibraryViewModel extends ChangeNotifier {
   List<bool> get selected => _selected;
   int get selectedBookCount => _selectedBookCount;
   int get selectedFolderCount => _selectedFolderCount;
-  TextEditingController get serverApiKeyController => _serverApiKeyController;
-  TextEditingController get serverUrlController => _serverUrlController;
-  TextEditingController get serverNameController => _serverNameController;
+  List<Server> get servers => _servers;
   String? get snackBar => _snackBar;
+  String get title => _title;
 
   Future<Result<void>> _addLocalFolder() async {
     try {
@@ -103,7 +107,7 @@ class LibraryViewModel extends ChangeNotifier {
           _snackBar = 'Folder \'${existingFolder.name}\' already added';
         } else {
           final folder = await _libraryRepository.saveNewFolder(newFolder);
-          _library.items.add(folder);
+          // _library.items.add(folder);
           await _disableSelectionMode();
           _snackBar = 'Added new folder \'${folder.name}\'';
           notifyListeners();
@@ -116,22 +120,18 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<void>> _addServer() async {
+  Future<Result<void>> _addServer(
+    (String, String, ServerType, String) input,
+  ) async {
+    final (apiKey, name, type, url) = input;
     final server = Server(
-      apiKey: _serverApiKeyController.value.text,
+      apiKey: apiKey,
       dateAdded: DateTime.now(),
-      name: _serverNameController.value.text,
-      type: .kavita,
-      url: Uri.parse(_serverUrlController.value.text),
+      name: name,
+      type: type,
+      url: url,
     );
-    final result = await _serverRepository.addServer(server);
-    switch (result) {
-      case Ok():
-        // TODO Reload the UI to display the new server
-        return result;
-      case Error():
-        return result;
-    }
+    return await _serverRepository.addServer(server);
   }
 
   Future<Result<void>> _clearSnackBar() async {
@@ -157,7 +157,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _disableSelectionMode() async {
     try {
       _isSelectionMode = false;
-      _selected = List.filled(_library.items.length, false);
+      // _selected = List.filled(_library.items.length, false);
       notifyListeners();
       return Result.ok(null);
     } on Exception catch (e) {
@@ -195,11 +195,11 @@ class LibraryViewModel extends ChangeNotifier {
     _selectedFolderCount = 0;
     for (final (index, selected) in _selected.indexed) {
       if (selected) {
-        if (_library.items[index].runtimeType == Book) {
-          _selectedBookCount++;
-        } else {
-          _selectedFolderCount++;
-        }
+        // if (_library.items[index].runtimeType == Book) {
+        //   _selectedBookCount++;
+        // } else {
+        //   _selectedFolderCount++;
+        // }
       }
     }
   }
@@ -211,6 +211,7 @@ class LibraryViewModel extends ChangeNotifier {
       _librarySort = await _settingsRepository.getLibrarySort();
       _librarySpacing = await _settingsRepository.getLibrarySpacing();
       _readingDirection = await _settingsRepository.getReadingDirection();
+      notifyListeners();
       // _loadLibrary();
       return Result.ok(null);
     } on Exception catch (e) {
@@ -268,15 +269,15 @@ class LibraryViewModel extends ChangeNotifier {
 
   Future<Result<void>> _parseBook(int index) async {
     try {
-      final book = _library.items[index] as Book;
-      final lastModified = await _libraryRepository.getLastModified(book.path);
-      if (book.lastModified != lastModified) {
-        _library.items[index] = await _libraryRepository.parseBook(
-          book,
-          lastModified,
-        );
-        notifyListeners();
-      }
+      // final book = _library.items[index] as Book;
+      // final lastModified = await _libraryRepository.getLastModified(book.path);
+      // if (book.lastModified != lastModified) {
+      //   _library.items[index] = await _libraryRepository.parseBook(
+      //     book,
+      //     lastModified,
+      //   );
+      //   notifyListeners();
+      // }
       return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
@@ -308,7 +309,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<Result<void>> _selectAll() async {
     try {
       _isSelectionMode = true;
-      _selected = List.filled(_library.items.length, true);
+      // _selected = List.filled(_library.items.length, true);
       _getSelectedCount();
       notifyListeners();
       return Result.ok(null);

@@ -8,8 +8,7 @@ import 'package:unseal/unseal.dart' as unseal;
 
 import '../models/book.dart';
 import '../models/folder.dart';
-import '../models/kavita_server.dart';
-import '../models/library.dart';
+import '../models/library/library.dart';
 import '../models/opds_feed.dart';
 import '../models/opds_entry.dart';
 import '../services/database_service.dart';
@@ -117,9 +116,8 @@ class LibraryRepository {
     return await _localStorageService.getLastModified(path);
   }
 
-  Future<List<Library>> getLibrary() async {
-    return await 
-  }
+  // Future<List<Library>> getLibrary() async {
+  // }
 
   // Future<LibraryItem?> getParent(String? id, String? path) async {
   //   if (id != null) {
@@ -169,14 +167,14 @@ class LibraryRepository {
   //   return items;
   // }
 
-  Future<List<OpdsFeed>> getAllServers() async {
-    final servers = await _databaseService.getServers();
-    for (final server in servers) {
-      final response = await http.get(server.uri);
-      server.feed = unseal.OpdsFeed.parse(response.body);
-    }
-    return servers;
-  }
+  // Future<List<OpdsFeed>> getAllServers() async {
+  //   final servers = await _databaseService.getServers();
+  //   for (final server in servers) {
+  //     final response = await http.get(server.uri);
+  //     server.feed = unseal.OpdsFeed.parse(response.body);
+  //   }
+  //   return servers;
+  // }
 
   Future<Result<void>> markAsFinished(String id) async {
     try {
@@ -312,18 +310,6 @@ class LibraryRepository {
     );
     await _databaseService.insertFolder(folder);
     return folder;
-  }
-
-  Future<void> saveKavitaServer(String? name, Uri url, String apiKey) async {
-    final server = KavitaServer(
-      id: await _databaseService.generateId(),
-      apiKey: apiKey,
-      dateAdded: DateTime.now(),
-      name: name ?? 'Kavita',
-      type: .kavita,
-      url: url,
-    );
-    await _databaseService.insertKavitaServer(server);
   }
 
   Future<String?> selectLocalFolder() async {

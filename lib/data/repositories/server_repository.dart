@@ -1,21 +1,23 @@
+import 'package:drift/drift.dart';
+
 import '../../utils/result.dart';
-import '../models/server.dart';
-import '../services/database_service.dart';
+import '../services/database/database.dart';
 
 class ServerRepository {
-  ServerRepository({required this._databaseService});
+  ServerRepository({required this._database});
 
-  final DatabaseService _databaseService;
+  final Database _database;
 
   Future<Result<void>> addServer(Server server) async {
     try {
-      return await _databaseService.insertServer(server);
+      await _database.servers.insertOne(server);
+      return Result.ok(null);
     } on Exception catch (e) {
       return Result.error(e);
     }
   }
 
-  Future<Result<List<Server>>> getServers() async {
-    return await _databaseService.getServers();
+  Stream<List<Server>> getServers() {
+    return _database.allServers;
   }
 }

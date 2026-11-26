@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import '../../utils/result.dart';
-import '../models/library.dart';
-import '../models/server.dart';
+import '../models/library/library.dart';
+import '../models/server/server.dart';
 
 class ApiClient {
   Future<Result<List<Library>>> getLibraries(Server server) async {

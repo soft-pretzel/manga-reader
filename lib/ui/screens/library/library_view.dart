@@ -12,6 +12,7 @@ import 'widgets/empty_library_screen.dart';
 import 'widgets/folder_grid_tile.dart';
 import 'widgets/folder_list_tile.dart';
 import 'widgets/library_app_bar.dart';
+import 'widgets/library_grid_tile.dart';
 import 'widgets/opds_entry_grid_tile.dart';
 import 'widgets/opds_grid_tile.dart';
 
@@ -56,104 +57,106 @@ class LibraryView extends StatelessWidget {
                     text: 'Error loading Library',
                   );
                 }
-                if (viewModel.library.items.isEmpty) {
-                  return EmptyLibraryScreen();
-                }
-                switch (viewModel.libraryDisplayMode) {
-                  case .grid:
-                    return GridView.builder(
-                      clipBehavior: .antiAlias,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        childAspectRatio:
-                            viewModel.librarySpacing == .comfortable
-                            ? 0.537
-                            : viewModel.librarySpacing == .normal
-                            ? 0.501
-                            : 0.474,
-                        crossAxisCount: viewModel.librarySpacing == .comfortable
-                            ? 2
-                            : viewModel.librarySpacing == .normal
-                            ? 3
-                            : 4,
-                        crossAxisSpacing:
-                            viewModel.librarySpacing == .comfortable
-                            ? 24
-                            : viewModel.librarySpacing == .normal
-                            ? 20
-                            : 16,
-                        mainAxisSpacing:
-                            viewModel.librarySpacing == .comfortable
-                            ? 24
-                            : viewModel.librarySpacing == .normal
-                            ? 20
-                            : 16,
-                      ),
-                      itemBuilder: (context, index) {
-                        switch (viewModel.library.items[index].runtimeType) {
-                          case Book:
-                            return BookGridTile(
-                              book: viewModel.library.items[index] as Book,
-                              index: index,
-                              viewModel: viewModel,
-                            );
-                          case Folder:
-                            return FolderGridTile(
-                              folder: viewModel.library.items[index] as Folder,
-                              index: index,
-                              viewModel: viewModel,
-                            );
-                          case OpdsFeed:
-                            return OpdsGridTile(
-                              opds: viewModel.library.items[index] as OpdsFeed,
-                              index: index,
-                              viewModel: viewModel,
-                            );
-                          case OpdsEntry:
-                            return OpdsEntryGridTile(
-                              entry:
-                                  viewModel.library.items[index] as OpdsEntry,
-                              index: index,
-                              viewModel: viewModel,
-                            );
-                          default:
-                            return Center(child: Text('Error'));
-                        }
-                      },
-                      itemCount: viewModel.library.items.length,
-                      padding: .all(
-                        viewModel.librarySpacing == .comfortable
-                            ? 24
-                            : viewModel.librarySpacing == .normal
-                            ? 20
-                            : 16,
-                      ),
+                // if (viewModel.library.items.isEmpty) {
+                //   return EmptyLibraryScreen();
+                // }
+                // switch (viewModel.libraryDisplayMode) {
+                //   case .grid:
+                return GridView.builder(
+                  clipBehavior: .antiAlias,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    childAspectRatio: viewModel.librarySpacing == .comfortable
+                        ? 0.537
+                        : viewModel.librarySpacing == .normal
+                        ? 0.501
+                        : 0.474,
+                    crossAxisCount: viewModel.librarySpacing == .comfortable
+                        ? 2
+                        : viewModel.librarySpacing == .normal
+                        ? 3
+                        : 4,
+                    crossAxisSpacing: viewModel.librarySpacing == .comfortable
+                        ? 24
+                        : viewModel.librarySpacing == .normal
+                        ? 20
+                        : 16,
+                    mainAxisSpacing: viewModel.librarySpacing == .comfortable
+                        ? 24
+                        : viewModel.librarySpacing == .normal
+                        ? 20
+                        : 16,
+                  ),
+                  itemBuilder: (context, index) {
+                    return LibraryGridTile(
+                      name: viewModel.servers[index].name,
+                      viewModel: viewModel,
                     );
-                  case .list:
-                    return ListView.separated(
-                      clipBehavior: .antiAlias,
-                      itemBuilder: (context, index) {
-                        if (viewModel.library.items[index].runtimeType ==
-                            Folder) {
-                          return FolderListTile(
-                            folder: viewModel.library.items[index] as Folder,
-                            index: index,
-                            viewModel: viewModel,
-                          );
-                        } else {
-                          return BookListTile(
-                            book: viewModel.library.items[index] as Book,
-                            index: index,
-                            viewModel: viewModel,
-                          );
-                        }
-                      },
-                      itemCount: viewModel.library.items.length,
-                      padding: .all(0),
-                      separatorBuilder: (context, index) {
-                        return Divider(height: 0);
-                      },
-                    );
-                }
+                    // switch (viewModel.library.items[index].runtimeType) {
+                    //   case Book:
+                    //     return BookGridTile(
+                    //       book: viewModel.library.items[index] as Book,
+                    //       index: index,
+                    //       viewModel: viewModel,
+                    //     );
+                    //   case Folder:
+                    //     return FolderGridTile(
+                    //       folder: viewModel.library.items[index] as Folder,
+                    //       index: index,
+                    //       viewModel: viewModel,
+                    //     );
+                    //   case OpdsFeed:
+                    //     return OpdsGridTile(
+                    //       opds: viewModel.library.items[index] as OpdsFeed,
+                    //       index: index,
+                    //       viewModel: viewModel,
+                    //     );
+                    //   case OpdsEntry:
+                    //     return OpdsEntryGridTile(
+                    //       entry:
+                    //           viewModel.library.items[index] as OpdsEntry,
+                    //       index: index,
+                    //       viewModel: viewModel,
+                    //     );
+                    //   default:
+                    //     return Center(child: Text('Error'));
+                    // }
+                  },
+                  itemCount: viewModel.servers.length,
+                  // itemCount: viewModel.library.items.length,
+                  padding: .all(
+                    viewModel.librarySpacing == .comfortable
+                        ? 24
+                        : viewModel.librarySpacing == .normal
+                        ? 20
+                        : 16,
+                  ),
+                );
+                // case .list:
+                //   return ListView.separated(
+                //     clipBehavior: .antiAlias,
+                //     itemBuilder: (context, index) {
+                //       if (viewModel.library.items[index].runtimeType ==
+                //           Folder) {
+                //         return FolderListTile(
+                //           folder: viewModel.library.items[index] as Folder,
+                //           index: index,
+                //           viewModel: viewModel,
+                //         );
+                //       } else {
+                //         return BookListTile(
+                //           book: viewModel.library.items[index] as Book,
+                //           index: index,
+                //           viewModel: viewModel,
+                //         );
+                //       }
+                //     },
+                //     itemCount: viewModel.library.items.length,
+                //     padding: .all(0),
+                //     separatorBuilder: (context, index) {
+                //       return Divider(height: 0);
+                //     },
+                //   );
+                // }
               },
             ),
           ),

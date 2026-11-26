@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../library_view_model.dart';
+import 'add_server.dart';
 
 class AddLibrary extends StatelessWidget {
   final BuildContext context;
@@ -30,54 +31,13 @@ class AddLibrary extends StatelessWidget {
           ),
           ElevatedButton.icon(
             icon: Icon(Icons.dns_rounded),
-            label: Align(alignment: .centerStart, child: Text('Kavita server')),
+            label: Align(alignment: .centerStart, child: Text('Remote server')),
             onPressed: () {
               context.pop();
               showModalBottomSheet(
                 backgroundColor: ColorScheme.of(context).surfaceDim,
                 builder: (context) {
-                  return Padding(
-                    padding: const .fromLTRB(16, 0, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: .stretch,
-                      mainAxisSize: .min,
-                      spacing: 16,
-                      children: [
-                        TextField(
-                          autofocus: true,
-                          controller: viewModel.serverNameController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            label: Text('Name'),
-                          ),
-                        ),
-                        TextField(
-                          autofocus: true,
-                          controller: viewModel.serverUrlController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            label: Text('Server URL'),
-                          ),
-                        ),
-                        TextField(
-                          controller: viewModel.serverApiKeyController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            label: Text('API key'),
-                          ),
-                          obscureText: true,
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            viewModel.addServer.execute();
-                            context.pop();
-                          },
-
-                          child: Text('Save'),
-                        ),
-                      ],
-                    ),
-                  );
+                  return AddServer(context: context, viewModel: viewModel);
                 },
                 context: context,
                 showDragHandle: true,

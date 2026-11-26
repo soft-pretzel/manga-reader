@@ -1,7 +1,7 @@
 import '../../utils/result.dart';
-import '../models/library.dart';
-import '../models/server.dart';
+import '../models/library/library.dart';
 import '../services/api_client.dart';
+import '../services/database/database.dart';
 
 class LibraryRepository {
   LibraryRepository({required this._apiClient});

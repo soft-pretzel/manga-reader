@@ -7,7 +7,7 @@ import '../../utils/result.dart';
 import '../models/book.dart';
 import '../models/folder.dart';
 import '../models/opds_feed.dart';
-import '../models/server.dart';
+import '../models/server/server.dart';
 
 final uuid = Uuid();
 
@@ -128,7 +128,7 @@ class DatabaseService {
     final db = await _database();
     try {
       final mapList = await db.query('servers');
-      return Result.ok([for (final map in mapList) Server.fromMap(map)]);
+      return Result.ok([for (final map in mapList) Server.fromJson(map)]);
     } on Exception catch (e) {
       return Result.error(e);
     }
@@ -147,14 +147,14 @@ class DatabaseService {
   Future<Result<Server>> insertServer(Server server) async {
     final db = await _database();
     try {
-      final id = await db.insert('servers', server.toMap());
+      final id = await db.insert('servers', server.toJson());
       if (id != 0) {
         final server = await db.query(
           'servers',
           where: 'id = ?',
           whereArgs: [id],
         );
-        return Result.ok(Server.fromMap(server.first));
+        return Result.ok(Server.fromJson(server.single));
       } else {
         return Result.error(Exception('Invalid server'));
       }
